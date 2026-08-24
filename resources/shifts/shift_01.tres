@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ShiftDef" load_steps=5 format=3 uid="uid://shift_01"]
+
+[ext_resource type="Script" path="res://resources/shift_def.gd" id="1"]
+[ext_resource type="Resource" uid="uid://subject_human_01" path="res://resources/subjects/human_01.tres" id="2"]
+[ext_resource type="Resource" uid="uid://subject_horse_01" path="res://resources/subjects/horse_01.tres" id="3"]
+[ext_resource type="Resource" uid="uid://subject_centaur_01" path="res://resources/subjects/centaur_01.tres" id="4"]
+
+[resource]
+script = ExtResource("1")
+subjects = [ExtResource("2"), ExtResource("3"), ExtResource("4")]
+strikes_allowed = 3
+shift_timer_seconds = 90.0

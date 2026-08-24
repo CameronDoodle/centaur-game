@@ -1,0 +1,159 @@
+[gd_scene format=3 uid="uid://bw56mt110053"]
+
+[ext_resource type="Script" path="res://code/hud.gd" id="1_hud"]
+[ext_resource type="Shader" path="res://art/shaders/fisheye.gdshader" id="2_fisheye"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fisheye"]
+shader = ExtResource("2_fisheye")
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_hud")
+
+[node name="FisheyeOverlay" type="ColorRect" parent="."]
+unique_name_in_owner = true
+visible = false
+material = SubResource("ShaderMaterial_fisheye")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Margin" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="Layout" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TopBar" type="HBoxContainer" parent="Margin/Layout"]
+layout_mode = 2
+
+[node name="TimerLabel" type="Label" parent="Margin/Layout/TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "00:00"
+
+[node name="ScoreLabel" type="Label" parent="Margin/Layout/TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Score: 0"
+
+[node name="StrikesLabel" type="Label" parent="Margin/Layout/TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Strikes: 0 / 3"
+
+[node name="SubtitleLabel" type="Label" parent="Margin/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 3
+text = ""
+
+[node name="Spacer" type="Control" parent="Margin/Layout"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="GateActions" type="VBoxContainer" parent="Margin/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="PeepholeButton" type="Button" parent="Margin/Layout/GateActions"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Peephole"
+
+[node name="QuestionButtons" type="VBoxContainer" parent="Margin/Layout/GateActions"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="DecisionRow" type="HBoxContainer" parent="Margin/Layout/GateActions"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="AcceptButton" type="Button" parent="Margin/Layout/GateActions/DecisionRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Accept"
+
+[node name="RejectButton" type="Button" parent="Margin/Layout/GateActions/DecisionRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Reject"
+
+[node name="PeepholeActions" type="VBoxContainer" parent="Margin/Layout"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="BackButton" type="Button" parent="Margin/Layout/PeepholeActions"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Back"
+
+[node name="RevealPanel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -180.0
+offset_top = -40.0
+offset_right = 180.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="RevealLabel" type="Label" parent="RevealPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "Reveal"
+
+[node name="SummaryPanel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -80.0
+offset_right = 200.0
+offset_bottom = 80.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SummaryVBox" type="VBoxContainer" parent="SummaryPanel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SummaryLabel" type="Label" parent="SummaryPanel/SummaryVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 3
+text = "Summary"
+
+[node name="ReplayButton" type="Button" parent="SummaryPanel/SummaryVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Replay Shift"

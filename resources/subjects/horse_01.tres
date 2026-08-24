@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="SubjectDef" load_steps=3 format=3 uid="uid://subject_horse_01"]
+
+[ext_resource type="Script" path="res://resources/subject_def.gd" id="1"]
+[ext_resource type="Resource" uid="uid://question_horse_name" path="res://resources/subjects/horse_01_q1.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+true_type = 1
+questions = [ExtResource("2")]
+reveal_text = "Horse."
