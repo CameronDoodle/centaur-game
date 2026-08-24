@@ -1,11 +1,17 @@
-[gd_resource type="Resource" script_class="SubjectDef" load_steps=4 format=3 uid="uid://subject_centaur_01"]
+[gd_resource type="Resource" script_class="SubjectDef" load_steps=7 format=3 uid="uid://subject_centaur_01"]
 
 [ext_resource type="Script" path="res://resources/subject_def.gd" id="1"]
 [ext_resource type="Resource" uid="uid://question_centaur_horse" path="res://resources/subjects/centaur_01_q1.tres" id="2"]
 [ext_resource type="Resource" uid="uid://question_centaur_name" path="res://resources/subjects/centaur_01_q2.tres" id="3"]
+[ext_resource type="PackedScene" uid="uid://c3x5vtuajwv6t" path="res://scenes/subjects/centaur.tscn" id="4"]
+[ext_resource type="AudioStream" uid="uid://d4kng6kbw2isj" path="res://sfx/human_approach.mp3" id="5"]
+[ext_resource type="AudioStream" uid="uid://chrt52usavikf" path="res://sfx/horse_knocking.mp3" id="6"]
 
 [resource]
 script = ExtResource("1")
 true_type = 2
+approach_stream = ExtResource("5")
+knock_stream = ExtResource("6")
+subject_scene = ExtResource("4")
 questions = [ExtResource("2"), ExtResource("3")]
 reveal_text = "Centaur. Wearing a horse mask and sneakers."

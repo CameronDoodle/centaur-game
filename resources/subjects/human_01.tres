@@ -1,10 +1,16 @@
-[gd_resource type="Resource" script_class="SubjectDef" load_steps=3 format=3 uid="uid://subject_human_01"]
+[gd_resource type="Resource" script_class="SubjectDef" load_steps=6 format=3 uid="uid://subject_human_01"]
 
 [ext_resource type="Script" path="res://resources/subject_def.gd" id="1"]
 [ext_resource type="Resource" uid="uid://question_human_name" path="res://resources/subjects/human_01_q1.tres" id="2"]
+[ext_resource type="PackedScene" uid="uid://scene_human_01" path="res://scenes/subjects/human.tscn" id="3"]
+[ext_resource type="AudioStream" uid="uid://d4kng6kbw2isj" path="res://sfx/human_approach.mp3" id="4"]
+[ext_resource type="AudioStream" uid="uid://ckpgg4ldcleyp" path="res://sfx/human_knocking.mp3" id="5"]
 
 [resource]
 script = ExtResource("1")
 true_type = 0
+approach_stream = ExtResource("4")
+knock_stream = ExtResource("5")
+subject_scene = ExtResource("3")
 questions = [ExtResource("2")]
 reveal_text = "Human."

@@ -69,6 +69,13 @@ cellular_return_type = 0
 noise = SubResource("FastNoiseLite_4wr1s")
 color_ramp = SubResource("Gradient_7e0vu")
 
+[sub_resource type="Environment" id="Environment_main"]
+background_mode = 1
+background_color = Color(0.14, 0.12, 0.1, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.72, 0.66, 0.58, 1)
+ambient_light_energy = 0.55
+
 [node name="main" type="Node3D" unique_id=2092766603]
 
 [node name="EncounterDirector" type="Node" parent="." unique_id=1187000083]
@@ -113,7 +120,14 @@ sorting_offset = -1.0
 texture = SubResource("NoiseTexture2D_72uko")
 
 [node name="subject_anchor" type="Marker3D" parent="world" unique_id=353364536]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -0.8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.8)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.8660254, -0.3535534, 0.3535534, 0, 0.7071068, 0.7071068, -0.5, -0.6123724, 0.6123724, 0, 3, 2)
+light_energy = 1.1
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_main")
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=1892879549]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3284752, 2.3263311)

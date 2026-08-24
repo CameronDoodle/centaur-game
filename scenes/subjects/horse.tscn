@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://scene_horse_01"]
+
+[ext_resource type="Script" uid="uid://csubjectidle01" path="res://code/subject_idle.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://u32p7b7pgrmc" path="res://art/horse/Horse.glb" id="2"]
+
+[node name="Horse" type="Node3D"]
+transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0, 0)
+script = ExtResource("1")
+idle_hint = "Idle"
+
+[node name="HorseModel" parent="." instance=ExtResource("2")]
+
+[node name="Face" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.55, 1.4)

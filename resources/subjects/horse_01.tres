@@ -1,10 +1,16 @@
-[gd_resource type="Resource" script_class="SubjectDef" load_steps=3 format=3 uid="uid://subject_horse_01"]
+[gd_resource type="Resource" script_class="SubjectDef" load_steps=6 format=3 uid="uid://subject_horse_01"]
 
 [ext_resource type="Script" path="res://resources/subject_def.gd" id="1"]
 [ext_resource type="Resource" uid="uid://question_horse_name" path="res://resources/subjects/horse_01_q1.tres" id="2"]
+[ext_resource type="PackedScene" uid="uid://scene_horse_01" path="res://scenes/subjects/horse.tscn" id="3"]
+[ext_resource type="AudioStream" uid="uid://dxmg1qoxpkx81" path="res://sfx/horse_approach.mp3" id="4"]
+[ext_resource type="AudioStream" uid="uid://chrt52usavikf" path="res://sfx/horse_knocking.mp3" id="5"]
 
 [resource]
 script = ExtResource("1")
 true_type = 1
+approach_stream = ExtResource("4")
+knock_stream = ExtResource("5")
+subject_scene = ExtResource("3")
 questions = [ExtResource("2")]
 reveal_text = "Horse."
