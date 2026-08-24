@@ -1,0 +1,43 @@
+[gd_scene format=3 uid="uid://dl8dmno27m3ga"]
+
+[sub_resource type="Gradient" id="Gradient_7dm0k"]
+offsets = PackedFloat32Array(0)
+colors = PackedColorArray(0.41034192, 0.24177265, 0.11708579, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_72uko"]
+gradient = SubResource("Gradient_7dm0k")
+width = 800
+height = 400
+
+[sub_resource type="Gradient" id="Gradient_ig7tw"]
+offsets = PackedFloat32Array(0)
+colors = PackedColorArray(0.23156539, 0.10582975, 0.014491146, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_4wr1s"]
+gradient = SubResource("Gradient_ig7tw")
+width = 100
+height = 200
+
+[sub_resource type="Gradient" id="Gradient_0xm2m"]
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_7e0vu"]
+gradient = SubResource("Gradient_0xm2m")
+
+[node name="Node3D" type="Node3D" unique_id=28989610]
+
+[node name="Wall" type="Sprite3D" parent="." unique_id=1625026622]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+texture = SubResource("GradientTexture2D_72uko")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=673600950]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3284752, 2.3263311)
+
+[node name="Door" type="Node3D" parent="." unique_id=442039197]
+
+[node name="Sprite3D" type="Sprite3D" parent="Door" unique_id=1657172524]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+sorting_offset = 1.0
+texture = SubResource("GradientTexture2D_4wr1s")
+
+[node name="Sprite3D" type="Sprite3D" parent="." unique_id=294934172]
+texture = SubResource("GradientTexture2D_7e0vu")
