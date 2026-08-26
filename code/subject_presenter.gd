@@ -2,11 +2,12 @@ class_name SubjectPresenter
 extends Node3D
 
 @export var door_fill := 0.9
-@export var door_clearance := 0.7
+@export var door_clearance := 2.0
 
 var subject_anchor: Marker3D
 var gate_camera: Camera3D
 var door: Node3D
+var door_top: Node3D
 var door_open: Node3D
 var side_window: Node3D
 var peephole_view: SubViewportContainer
@@ -24,8 +25,9 @@ func _ready() -> void:
 	subject_anchor = parent.get_node("world/subject_anchor") as Marker3D
 	gate_camera = parent.get_node("Camera3D") as Camera3D
 	door = parent.get_node("world/door") as Node3D
-	door_open = parent.get_node("world/door_open") as Node3D
-	side_window = parent.get_node("world/side_window") as Node3D
+	door_top = parent.get_node_or_null("world/door_top") as Node3D
+	door_open = parent.get_node_or_null("world/door_open") as Node3D
+	side_window = parent.get_node_or_null("world/side_window") as Node3D
 	peephole_view = parent.get_node("PeepholeLayer/PeepholeView") as SubViewportContainer
 	if peephole_view:
 		peephole_viewport = peephole_view.get_node("SubViewport") as SubViewport
@@ -130,8 +132,6 @@ func is_in_peephole() -> bool:
 
 
 func set_door_closed() -> void:
-	if door:
-		door.visible = true
 	if door_open:
 		door_open.visible = false
 	if side_window:
@@ -139,31 +139,27 @@ func set_door_closed() -> void:
 
 
 func play_accept(on_complete: Callable = Callable()) -> void:
-	if door:
-		door.visible = false
 	if door_open:
 		door_open.visible = true
 	if side_window:
 		side_window.visible = false
 	if _subject_instance and _subject_instance.has_method("play_walk"):
 		_subject_instance.play_walk()
-	_tween_subject(Vector3(0.0, 0.0, 1.5), on_complete)
+	_tween_subject(_door_offset_target(Vector3(0.0, 0.0, 5.0)), on_complete)
 
 
 func play_reject(on_complete: Callable = Callable()) -> void:
-	if door:
-		door.visible = true
 	if door_open:
 		door_open.visible = false
 	if side_window:
 		side_window.visible = true
-	_tween_subject(Vector3(1.4, 0.0, 0.2), on_complete)
+	_tween_subject(_door_offset_target(Vector3(-2.5, 0.0, 0.0)), on_complete)
 
 
 func _fit_subject_to_gate() -> void:
 	if _subject_instance == null or not is_instance_valid(_subject_instance):
 		return
-	var door_height := GateFit.door_world_height(door)
+	var door_height := _door_world_height()
 	if not GateFit.fit_stature(_subject_instance, door_height, door_fill):
 		_subject_instance.visible = true
 		return
@@ -181,6 +177,41 @@ func _fit_subject_to_gate() -> void:
 	_subject_instance.visible = true
 
 
+func _door_offset_target(offset: Vector3) -> Vector3:
+	if door:
+		return door.global_position + offset
+	return offset
+
+
+func _door_world_height() -> float:
+	return GateFit.door_world_height(door, door_top)
+
+
+func _get_subject_aabb(subject: Node3D) -> AABB:
+	var merged := AABB()
+	var has_bounds := false
+	for mesh in _find_mesh_instances(subject):
+		var local_aabb := mesh.get_aabb()
+		if local_aabb.size == Vector3.ZERO:
+			continue
+		var global_aabb := mesh.global_transform * local_aabb
+		if not has_bounds:
+			merged = global_aabb
+			has_bounds = true
+		else:
+			merged = merged.merge(global_aabb)
+	return merged if has_bounds else AABB()
+
+
+func _find_mesh_instances(root: Node) -> Array[MeshInstance3D]:
+	var meshes: Array[MeshInstance3D] = []
+	if root is MeshInstance3D:
+		meshes.append(root)
+	for child in root.get_children():
+		meshes.append_array(_find_mesh_instances(child))
+	return meshes
+
+
 func _tween_subject(target: Vector3, on_complete: Callable) -> void:
 	if _subject_instance == null or not is_instance_valid(_subject_instance):
 		if on_complete.is_valid():
@@ -190,7 +221,7 @@ func _tween_subject(target: Vector3, on_complete: Callable) -> void:
 		_move_tween.kill()
 	target.y = _subject_instance.global_position.y
 	_move_tween = create_tween()
-	_move_tween.tween_property(_subject_instance, "global_position", target, 1.2)
+	_move_tween.tween_property(_subject_instance, "global_position", target, 2.2)
 	_move_tween.tween_callback(func() -> void:
 		if on_complete.is_valid():
 			on_complete.call()

@@ -1,21 +1,18 @@
-[gd_resource type="Resource" script_class="SubjectDef" format=3 uid="uid://b1lf62p2bu6mw"]
+[gd_resource type="Resource" script_class="SubjectDef" format=3 uid="uid://bndri1xrtrlvf"]
 
 [ext_resource type="Script" uid="uid://dls1yg3rjh6ps" path="res://resources/subject_def.gd" id="1"]
 [ext_resource type="Resource" path="res://resources/subjects/centaur_01_q1.tres" id="2"]
 [ext_resource type="Resource" path="res://resources/subjects/centaur_01_q2.tres" id="3"]
 [ext_resource type="Script" uid="uid://b8h7bdjqop5nh" path="res://resources/question_def.gd" id="3_cce3k"]
 [ext_resource type="PackedScene" uid="uid://c3x5vtuajwv6t" path="res://scenes/subjects/centaur.tscn" id="4"]
-[ext_resource type="AudioStream" uid="uid://d4kng6kbw2isj" path="res://sfx/human_approach.mp3" id="5"]
-[ext_resource type="AudioStream" uid="uid://chrt52usavikf" path="res://sfx/horse_knocking.mp3" id="6"]
 
 [resource]
 script = ExtResource("1")
 true_type = 2
-approach_stream = ExtResource("5")
-knock_stream = ExtResource("6")
+knock_kind = 1
 subject_scene = ExtResource("4")
 questions = Array[ExtResource("3_cce3k")]([ExtResource("3"), ExtResource("2")])
 reveal_text = "Centaur. Wearing a horse mask and sneakers."
-peephole_position = Vector3(0, 0, 0)
+peephole_position = Vector3(0, -0.06, -0.09)
 peephole_rotation_degrees = Vector3(4, 0, 0)
-peephole_scale = 0.95
+peephole_scale = 0.7

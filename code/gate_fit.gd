@@ -2,7 +2,9 @@ class_name GateFit
 extends RefCounted
 
 
-static func door_world_height(door: Node3D) -> float:
+static func door_world_height(door: Node3D, door_top: Node3D = null) -> float:
+	if door and door_top:
+		return absf(door_top.global_position.y - door.global_position.y)
 	if door is Sprite3D:
 		var sprite := door as Sprite3D
 		if sprite.texture:

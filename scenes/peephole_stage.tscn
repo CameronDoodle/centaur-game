@@ -1,13 +1,7 @@
 [gd_scene format=3 uid="uid://0vdt3btnjjmy"]
 
-[ext_resource type="Script" uid="uid://dpeepholestage01" path="res://code/peephole_stage.gd" id="1_stage"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_backdrop"]
-shading_mode = 0
-albedo_color = Color(0.08, 0.06, 0.05, 1)
-
-[sub_resource type="QuadMesh" id="QuadMesh_backdrop"]
-size = Vector2(6, 6)
+[ext_resource type="Script" uid="uid://du0ej25lcw4se" path="res://code/peephole_stage.gd" id="1_stage"]
+[ext_resource type="PackedScene" uid="uid://c3x5vtuajwv6t" path="res://scenes/subjects/centaur.tscn" id="2_1p6r5"]
 
 [sub_resource type="Environment" id="Environment_peephole"]
 background_mode = 1
@@ -16,34 +10,42 @@ ambient_light_source = 2
 ambient_light_color = Color(0.7, 0.64, 0.56, 1)
 ambient_light_energy = 0.7
 
-[node name="PeepholeStage" type="Node3D"]
-script = ExtResource("1_stage")
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_backdrop"]
+shading_mode = 0
+albedo_color = Color(0.08, 0.06, 0.05, 1)
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[sub_resource type="QuadMesh" id="QuadMesh_backdrop"]
+size = Vector2(6, 6)
+
+[node name="PeepholeStage" type="Node3D" unique_id=1562453541]
+script = ExtResource("1_stage")
+preview_scene = ExtResource("2_1p6r5")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1297372084]
 environment = SubResource("Environment_peephole")
 
-[node name="KeyLight" type="DirectionalLight3D" parent="."]
+[node name="KeyLight" type="DirectionalLight3D" parent="." unique_id=1640951972]
 transform = Transform3D(0.8660254, -0.3535534, 0.3535534, 0, 0.7071068, 0.7071068, -0.5, -0.6123724, 0.6123724, 0, 1, 2)
 light_energy = 1.15
 
-[node name="FillLight" type="OmniLight3D" parent="."]
+[node name="FillLight" type="OmniLight3D" parent="." unique_id=1182337708]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 0.15, 0.5)
 light_color = Color(1, 0.93, 0.85, 1)
 light_energy = 0.55
 omni_range = 4.0
 
-[node name="Backdrop" type="MeshInstance3D" parent="."]
+[node name="Backdrop" type="MeshInstance3D" parent="." unique_id=2077951924]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.2)
 material_override = SubResource("StandardMaterial3D_backdrop")
 mesh = SubResource("QuadMesh_backdrop")
 
-[node name="Camera3D" type="Camera3D" parent="."]
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1916393917]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.42)
 current = true
 fov = 40.0
 
-[node name="LookTarget" type="Marker3D" parent="."]
+[node name="LookTarget" type="Marker3D" parent="." unique_id=1572552890]
 
-[node name="PosePivot" type="Marker3D" parent="LookTarget"]
+[node name="PosePivot" type="Marker3D" parent="LookTarget" unique_id=1971341391]
 
-[node name="ScalePivot" type="Marker3D" parent="LookTarget/PosePivot"]
+[node name="ScalePivot" type="Marker3D" parent="LookTarget/PosePivot" unique_id=1671271919]

@@ -5,9 +5,9 @@
 [ext_resource type="Script" uid="uid://bmhw2idrbsjqt" path="res://code/subject_presenter.gd" id="3_presenter"]
 [ext_resource type="PackedScene" uid="uid://bw56mt110053" path="res://scenes/hud.tscn" id="4_hud"]
 [ext_resource type="Resource" uid="uid://cpohaxifnbbrq" path="res://resources/shifts/shift_01.tres" id="5_shift_def"]
-[ext_resource type="PackedScene" uid="uid://dfkfvdd3hgsas" path="res://art/3d_models/Walk in the Woods by Don Carson - 38m6Q1H12DU.glb" id="6_o6xl0"]
-[ext_resource type="PackedScene" uid="uid://cjmsw1vy30rca" path="res://art/3d_models/Wall Towers by Quaternius - xKVeMHa2tJ.glb" id="7_tipki"]
 [ext_resource type="PackedScene" uid="uid://0vdt3btnjjmy" path="res://scenes/peephole_stage.tscn" id="8_peephole"]
+[ext_resource type="PackedScene" uid="uid://dint8gcp2agdk" path="res://art/3d_models/Bar scene by Poly by Google - cEbi0acnY23.glb" id="9_bar"]
+[ext_resource type="Script" uid="uid://dtux0pyer2vqh" path="res://code/camera_3d.gd" id="10_cam"]
 
 [sub_resource type="Gradient" id="Gradient_7dm0k"]
 offsets = PackedFloat32Array(0)
@@ -18,27 +18,15 @@ gradient = SubResource("Gradient_7dm0k")
 width = 800
 height = 400
 
-[sub_resource type="Gradient" id="Gradient_ig7tw"]
-interpolation_mode = 1
-offsets = PackedFloat32Array(0, 0.27623126)
-colors = PackedColorArray(0.23156539, 0.10582975, 0.014491146, 1, 0.38175848, 0.19013411, 0.039876327, 1)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_4wr1s"]
-gradient = SubResource("Gradient_ig7tw")
-width = 100
-height = 200
-fill_from = Vector2(0.91, 0)
-repeat = 1
-
 [sub_resource type="Gradient" id="Gradient_peephole"]
 interpolation_mode = 1
 offsets = PackedFloat32Array(0.0021413276, 0.07066381, 0.4261242, 0.5074946)
-colors = PackedColorArray(1, 1, 1, 1, 0.05, 0.05, 0.05, 1, 0.34439746, 0.24892837, 0.21076241, 1, 0.16078432, 0.10980392, 0.08627451, 0)
+colors = PackedColorArray(1, 1, 1, 1, 0.05, 0.05, 0.05, 1, 0.34439746, 0.24892837, 0.21076241, 1, 0.21960784, 0.1254902, 0.07058824, 0)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_peephole"]
 gradient = SubResource("Gradient_peephole")
 fill = 1
-fill_from = Vector2(0.5, 0.491453)
+fill_from = Vector2(0.5, 0.48290598)
 
 [sub_resource type="Gradient" id="Gradient_door_open"]
 interpolation_mode = 1
@@ -91,30 +79,34 @@ script = ExtResource("3_presenter")
 
 [node name="world" type="Node3D" parent="." unique_id=1774684371]
 
+[node name="BarScene" parent="world" unique_id=1288471902 instance=ExtResource("9_bar")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.6280365e-05, -0.0018286705, 0.00041341782)
+
 [node name="wall" type="Sprite3D" parent="world" unique_id=291349820]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 visible = false
 sorting_offset = 0.25
 texture = SubResource("GradientTexture2D_72uko")
 
-[node name="door" type="Sprite3D" parent="world" unique_id=1788293211]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0.16)
-sorting_offset = 0.2
-texture = SubResource("GradientTexture2D_4wr1s")
+[node name="door" type="Marker3D" parent="world" unique_id=1788293211]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.028, 0.691, -8.695)
+
+[node name="door_top" type="Marker3D" parent="world" unique_id=2011844723]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.7327495, 6.438659, -8.694795)
 
 [node name="peephole_rim" type="Sprite3D" parent="world" unique_id=1882979484]
-transform = Transform3D(0.18, 0, 0, 0, 0.18, 0, 0, 0, 0.18, 0, 1.55, 0.17)
+transform = Transform3D(0.55, 0, 0, 0, 0.55, 0, 0, 0, 0.55, -7.978, 5.198, -8.62)
 sorting_offset = 0.21
 texture = SubResource("GradientTexture2D_peephole")
 
-[node name="door_hotspot_peephole" type="Marker3D" parent="world"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.55, 0.17)
+[node name="door_hotspot_peephole" type="Marker3D" parent="world" unique_id=230101567]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.933, 5.053, -8.535)
 
-[node name="door_hotspot_knock" type="Marker3D" parent="world"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0.17)
+[node name="door_hotspot_knock" type="Marker3D" parent="world" unique_id=1873225945]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.003, 3.56, -8.62)
 
-[node name="door_hotspot_approach" type="Marker3D" parent="world"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.12, 0.17)
+[node name="door_hotspot_approach" type="Marker3D" parent="world" unique_id=943127785]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2.195, -8.62)
 
 [node name="door_open" type="Sprite3D" parent="world" unique_id=75006899]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.55, 1, 0.16)
@@ -130,11 +122,12 @@ texture = SubResource("GradientTexture2D_window")
 
 [node name="floor" type="Sprite3D" parent="world" unique_id=314386150]
 transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0.3272295)
+visible = false
 sorting_offset = -1.0
 texture = SubResource("NoiseTexture2D_72uko")
 
 [node name="subject_anchor" type="Marker3D" parent="world" unique_id=353364536]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, -10.7)
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1098747847]
 transform = Transform3D(0.8660254, -0.3535534, 0.3535534, 0, 0.7071068, 0.7071068, -0.5, -0.6123724, 0.6123724, 0, 3, 2)
@@ -144,8 +137,9 @@ light_energy = 1.1
 environment = SubResource("Environment_main")
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=1892879549]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3284752, 2.3263311)
+transform = Transform3D(1, 0, 0, 0, 0.9986295, 0.05233596, 0, -0.05233596, 0.9986295, -8.198, 4.818, -3.406)
 current = true
+script = ExtResource("10_cam")
 
 [node name="PeepholeLayer" type="CanvasLayer" parent="." unique_id=28395697]
 
@@ -179,11 +173,3 @@ layer = 2
 [node name="ShiftDirector" type="Node" parent="." unique_id=1619367649]
 script = ExtResource("1_shift")
 shift_def = ExtResource("5_shift_def")
-
-[node name="Walk in the Woods by Don Carson - 38m6Q1H12DU" parent="." unique_id=1894934127 instance=ExtResource("6_o6xl0")]
-transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 8.831223, 0, 17.343655)
-visible = false
-
-[node name="Root Scene" parent="." unique_id=207750265 instance=ExtResource("7_tipki")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.853218, -0.49223167, 20.421263)
-visible = false

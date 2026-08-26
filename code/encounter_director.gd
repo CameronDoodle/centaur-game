@@ -11,9 +11,13 @@ var audio_approach: AudioStreamPlayer
 var audio_knock: AudioStreamPlayer
 var audio_voice: AudioStreamPlayer
 
+const PLAYER_CAMERA_SCRIPT := preload("res://code/camera_3d.gd")
+
 var phase: Phase = Phase.DONE
 var current_subject: SubjectDef
 var _input_locked: bool = false
+var _approach_stream: AudioStream
+var _knock_stream: AudioStream
 
 
 func _ready() -> void:
@@ -23,6 +27,7 @@ func _ready() -> void:
 	audio_approach = parent.get_node("AudioApproach") as AudioStreamPlayer
 	audio_knock = parent.get_node("AudioKnock") as AudioStreamPlayer
 	audio_voice = parent.get_node("AudioVoice") as AudioStreamPlayer
+	_ensure_player_camera()
 	call_deferred("_bind_hud")
 
 
@@ -50,8 +55,10 @@ func start_encounter(subject: SubjectDef) -> void:
 	hud.set_gate_actions_enabled(false)
 	hud.set_peephole_mode(false)
 	hud.set_skip_visible(false)
-	var has_approach := subject.approach_stream != null
-	var has_knock := subject.knock_stream != null
+	_approach_stream = ClueSfx.pick(subject.approach_kind, true)
+	_knock_stream = ClueSfx.pick(subject.knock_kind, false)
+	var has_approach := _approach_stream != null
+	var has_knock := _knock_stream != null
 	hud.show_investigation(has_approach, has_knock)
 	_set_phase(Phase.APPROACH)
 	_play_approach()
@@ -67,6 +74,7 @@ func force_miss() -> void:
 	hud.hide_investigation()
 	hud.set_peephole_mode(false)
 	subject_presenter.exit_peephole()
+	_call_camera("snap_to_rest")
 	subject_presenter.clear_subject()
 	subject_presenter.set_door_closed()
 	_set_phase(Phase.DONE)
@@ -78,8 +86,8 @@ func _set_phase(new_phase: Phase) -> void:
 
 
 func _play_approach() -> void:
-	if current_subject.approach_stream and audio_approach:
-		audio_approach.stream = current_subject.approach_stream
+	if _approach_stream and audio_approach:
+		audio_approach.stream = _approach_stream
 		audio_approach.play()
 		if not audio_approach.finished.is_connected(_on_approach_finished):
 			audio_approach.finished.connect(_on_approach_finished, CONNECT_ONE_SHOT)
@@ -96,8 +104,8 @@ func _on_approach_finished() -> void:
 
 
 func _play_knock() -> void:
-	if current_subject.knock_stream and audio_knock:
-		audio_knock.stream = current_subject.knock_stream
+	if _knock_stream and audio_knock:
+		audio_knock.stream = _knock_stream
 		audio_knock.play()
 		if not audio_knock.finished.is_connected(_on_knock_finished):
 			audio_knock.finished.connect(_on_knock_finished, CONNECT_ONE_SHOT)
@@ -191,7 +199,7 @@ func _replay_clue(is_approach: bool) -> void:
 			_stop_approach_audio()
 			hud.set_clue_replay_playing(false, audio_knock.playing)
 			return
-		stream = current_subject.approach_stream
+		stream = _approach_stream
 		finished_handler = _on_replay_approach_finished
 		_stop_knock_audio()
 		hud.set_clue_replay_playing(true, false)
@@ -201,7 +209,7 @@ func _replay_clue(is_approach: bool) -> void:
 			_stop_knock_audio()
 			hud.set_clue_replay_playing(audio_approach.playing, false)
 			return
-		stream = current_subject.knock_stream
+		stream = _knock_stream
 		finished_handler = _on_replay_knock_finished
 		_stop_approach_audio()
 		hud.set_clue_replay_playing(false, true)
@@ -232,6 +240,7 @@ func _on_peephole_pressed() -> void:
 		return
 	_input_locked = true
 	hud.set_gate_actions_enabled(false)
+	_call_camera("move_to_peephole")
 	hud.play_blackout(
 		func() -> void:
 			subject_presenter.enter_peephole()
@@ -240,7 +249,8 @@ func _on_peephole_pressed() -> void:
 			hud.load_tuner_pose(pose.position, pose.rotation_degrees, pose.scale)
 			hud.set_tuner_status("F8 toggles this panel."),
 		func() -> void:
-			_input_locked = false
+			_input_locked = false,
+		_camera_move_duration()
 	)
 
 
@@ -248,13 +258,16 @@ func _on_peephole_back_pressed() -> void:
 	if phase != Phase.OPEN or _input_locked:
 		return
 	_input_locked = true
-	hud.play_blackout(
+	hud.play_fade_from_black(
 		func() -> void:
+			hud.set_fisheye_enabled(false)
 			subject_presenter.exit_peephole()
 			hud.set_peephole_mode(false)
-			hud.set_gate_actions_enabled(true),
+			hud.set_gate_actions_enabled(true)
+			_call_camera("return_to_rest"),
 		func() -> void:
-			_input_locked = false
+			_input_locked = false,
+		_camera_move_duration()
 	)
 
 
@@ -299,6 +312,7 @@ func _resolve(accepted: bool) -> void:
 	hud.hide_investigation()
 	hud.set_peephole_mode(false)
 	subject_presenter.exit_peephole()
+	_call_camera("snap_to_rest")
 	_set_phase(Phase.RESOLVE)
 	var correct := _is_decision_correct(accepted)
 	var scored := correct
@@ -319,6 +333,30 @@ func _resolve(accepted: bool) -> void:
 		subject_presenter.play_accept(on_resolve_done)
 	else:
 		subject_presenter.play_reject(on_resolve_done)
+
+
+func _camera_move_duration() -> float:
+	var camera := _ensure_player_camera()
+	if camera != null and "peephole_move_duration" in camera:
+		return float(camera.get("peephole_move_duration"))
+	return hud.BLACKOUT_DURATION
+
+
+func _call_camera(method: String) -> void:
+	var camera := _ensure_player_camera()
+	if camera != null and camera.has_method(method):
+		camera.call(method)
+
+
+func _ensure_player_camera() -> Camera3D:
+	var camera := get_parent().get_node_or_null("Camera3D") as Camera3D
+	if camera == null:
+		return null
+	if not camera.has_method("move_to_peephole"):
+		camera.set_script(PLAYER_CAMERA_SCRIPT)
+		if camera.has_method("capture_rest"):
+			camera.capture_rest()
+	return camera
 
 
 func _is_decision_correct(accepted: bool) -> bool:

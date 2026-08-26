@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://bhxdfiio8wqvy"]
+
+[ext_resource type="PackedScene" uid="uid://dint8gcp2agdk" path="res://art/3d_models/Bar scene by Poly by Google - cEbi0acnY23.glb" id="1_n3v43"]
+
+[node name="Node3D" type="Node3D" unique_id=399860614]
+
+[node name="Bar scene by Poly by Google - cEbi0acnY23" parent="." unique_id=442507617 instance=ExtResource("1_n3v43")]
+
+[node name="white_door_marker" type="Marker3D" parent="." unique_id=502146771]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.7327495, 0.6911988, -8.694795)
+
+[node name="player_head_marker" type="Marker3D" parent="." unique_id=2091952615]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.957956, 4.817684, -3.4061441)
+
+[node name="window_marker" type="Marker3D" parent="." unique_id=1110089914]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.982381, 5, -3.6748035)

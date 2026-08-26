@@ -13,7 +13,7 @@ signal peephole_pose_changed(position: Vector3, rotation_degrees: Vector3, pose_
 signal peephole_pose_save_pressed
 signal skip_pressed
 
-const BLACKOUT_DURATION := 0.22
+const BLACKOUT_DURATION := 0.75
 const ICON_TINT := Color(0.95, 0.9, 0.82, 1)
 
 @onready var timer_label: Label = %TimerLabel
@@ -170,18 +170,42 @@ func _update_door_hotspot(hotspot: VBoxContainer, marker: Marker3D) -> void:
 	hotspot.visible = true
 
 
-func play_blackout(on_black: Callable, on_complete: Callable = Callable()) -> void:
+func play_blackout(
+	on_black: Callable,
+	on_complete: Callable = Callable(),
+	duration: float = BLACKOUT_DURATION
+) -> void:
 	if _fade_tween:
 		_fade_tween.kill()
+	var fade_duration := duration if duration > 0.0 else BLACKOUT_DURATION
 	fade_rect.visible = true
 	fade_rect.modulate.a = 0.0
 	_fade_tween = create_tween()
-	_fade_tween.tween_property(fade_rect, "modulate:a", 1.0, BLACKOUT_DURATION)
+	_fade_tween.tween_property(fade_rect, "modulate:a", 1.0, fade_duration)
 	_fade_tween.tween_callback(func() -> void:
 		if on_black.is_valid():
 			on_black.call()
 	)
-	_fade_tween.tween_property(fade_rect, "modulate:a", 0.0, BLACKOUT_DURATION)
+	_fade_tween.tween_property(fade_rect, "modulate:a", 0.0, fade_duration)
+	_fade_tween.tween_callback(func() -> void:
+		if on_complete.is_valid():
+			on_complete.call()
+	)
+
+
+func play_fade_from_black(
+	on_start: Callable = Callable(),
+	on_complete: Callable = Callable(),
+	duration: float = BLACKOUT_DURATION) -> void:
+	if _fade_tween:
+		_fade_tween.kill()
+	var fade_duration := duration if duration > 0.0 else BLACKOUT_DURATION
+	fade_rect.visible = true
+	fade_rect.modulate.a = 1.0
+	if on_start.is_valid():
+		on_start.call()
+	_fade_tween = create_tween()
+	_fade_tween.tween_property(fade_rect, "modulate:a", 0.0, fade_duration)
 	_fade_tween.tween_callback(func() -> void:
 		if on_complete.is_valid():
 			on_complete.call()
@@ -330,10 +354,14 @@ func _apply_clue_button_states() -> void:
 	knock_icon.disabled = not _clue_knock_visible
 
 
+func set_fisheye_enabled(enabled: bool) -> void:
+	fisheye_overlay.visible = enabled
+
+
 func set_peephole_mode(active: bool) -> void:
 	gate_actions.visible = not active
 	peephole_actions.visible = active
-	fisheye_overlay.visible = active
+	set_fisheye_enabled(active)
 	if active:
 		set_door_overlay_visible(false)
 		set_chat_visible(false)

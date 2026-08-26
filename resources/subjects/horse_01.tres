@@ -1,21 +1,19 @@
-[gd_resource type="Resource" script_class="SubjectDef" format=3 uid="uid://dg8oxdn52luaq"]
+[gd_resource type="Resource" script_class="SubjectDef" format=3 uid="uid://dxwx24ipgrp0q"]
 
 [ext_resource type="Script" uid="uid://dls1yg3rjh6ps" path="res://resources/subject_def.gd" id="1"]
 [ext_resource type="Resource" path="res://resources/subjects/horse_01_q1.tres" id="2"]
-[ext_resource type="Resource" path="res://resources/subjects/horse_01_q2.tres" id="6"]
 [ext_resource type="PackedScene" path="res://scenes/subjects/horse.tscn" id="3"]
 [ext_resource type="Script" uid="uid://b8h7bdjqop5nh" path="res://resources/question_def.gd" id="3_suips"]
-[ext_resource type="AudioStream" uid="uid://dxmg1qoxpkx81" path="res://sfx/horse_approach.mp3" id="4"]
-[ext_resource type="AudioStream" uid="uid://chrt52usavikf" path="res://sfx/horse_knocking.mp3" id="5"]
+[ext_resource type="Resource" path="res://resources/subjects/horse_01_q2.tres" id="6"]
 
 [resource]
 script = ExtResource("1")
 true_type = 1
-approach_stream = ExtResource("4")
-knock_stream = ExtResource("5")
+approach_kind = 1
+knock_kind = 1
 subject_scene = ExtResource("3")
 questions = Array[ExtResource("3_suips")]([ExtResource("6"), ExtResource("2")])
 reveal_text = "Horse."
-peephole_position = Vector3(0, 0, 0)
-peephole_rotation_degrees = Vector3(-1, 0, 0)
-peephole_scale = 0.95
+peephole_position = Vector3(0, 0.02, -0.1)
+peephole_rotation_degrees = Vector3(19, 0, 0)
+peephole_scale = 0.35
