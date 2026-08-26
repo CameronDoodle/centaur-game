@@ -9,3 +9,7 @@ enum TrueType { HUMAN, HORSE, CENTAUR }
 @export var subject_scene: PackedScene
 @export var questions: Array[QuestionDef] = []
 @export var reveal_text: String = ""
+@export_group("Peephole")
+@export var peephole_position := Vector3.ZERO
+@export var peephole_rotation_degrees := Vector3.ZERO
+@export var peephole_scale := 2.5

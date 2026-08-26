@@ -4,7 +4,10 @@
 [ext_resource type="Script" uid="uid://duvx3toais4ut" path="res://code/encounter_director.gd" id="2_encounter"]
 [ext_resource type="Script" uid="uid://bmhw2idrbsjqt" path="res://code/subject_presenter.gd" id="3_presenter"]
 [ext_resource type="PackedScene" uid="uid://bw56mt110053" path="res://scenes/hud.tscn" id="4_hud"]
-[ext_resource type="Resource" path="res://resources/shifts/shift_01.tres" id="5_shift_def"]
+[ext_resource type="Resource" uid="uid://cpohaxifnbbrq" path="res://resources/shifts/shift_01.tres" id="5_shift_def"]
+[ext_resource type="PackedScene" uid="uid://dfkfvdd3hgsas" path="res://art/3d_models/Walk in the Woods by Don Carson - 38m6Q1H12DU.glb" id="6_o6xl0"]
+[ext_resource type="PackedScene" uid="uid://cjmsw1vy30rca" path="res://art/3d_models/Wall Towers by Quaternius - xKVeMHa2tJ.glb" id="7_tipki"]
+[ext_resource type="PackedScene" uid="uid://0vdt3btnjjmy" path="res://scenes/peephole_stage.tscn" id="8_peephole"]
 
 [sub_resource type="Gradient" id="Gradient_7dm0k"]
 offsets = PackedFloat32Array(0)
@@ -28,12 +31,14 @@ fill_from = Vector2(0.91, 0)
 repeat = 1
 
 [sub_resource type="Gradient" id="Gradient_peephole"]
-offsets = PackedFloat32Array(0, 0.55, 1)
-colors = PackedColorArray(0.05, 0.05, 0.05, 1, 0.15, 0.1, 0.08, 1, 0.05, 0.05, 0.05, 1)
+interpolation_mode = 1
+offsets = PackedFloat32Array(0.0021413276, 0.07066381, 0.4261242, 0.5074946)
+colors = PackedColorArray(1, 1, 1, 1, 0.05, 0.05, 0.05, 1, 0.34439746, 0.24892837, 0.21076241, 1, 0.16078432, 0.10980392, 0.08627451, 0)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_peephole"]
 gradient = SubResource("Gradient_peephole")
 fill = 1
+fill_from = Vector2(0.5, 0.491453)
 
 [sub_resource type="Gradient" id="Gradient_door_open"]
 interpolation_mode = 1
@@ -122,20 +127,36 @@ texture = SubResource("NoiseTexture2D_72uko")
 [node name="subject_anchor" type="Marker3D" parent="world" unique_id=353364536]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.8)
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1098747847]
 transform = Transform3D(0.8660254, -0.3535534, 0.3535534, 0, 0.7071068, 0.7071068, -0.5, -0.6123724, 0.6123724, 0, 3, 2)
 light_energy = 1.1
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=381803592]
 environment = SubResource("Environment_main")
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=1892879549]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3284752, 2.3263311)
 current = true
 
-[node name="PeepholeCamera3D" type="Camera3D" parent="." unique_id=1783172395]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, 0.14)
-fov = 55.0
+[node name="PeepholeLayer" type="CanvasLayer" parent="." unique_id=28395697]
+
+[node name="PeepholeView" type="SubViewportContainer" parent="PeepholeLayer" unique_id=1221904425]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="PeepholeLayer/PeepholeView" unique_id=1186475315]
+own_world_3d = true
+handle_input_locally = false
+size = Vector2i(1152, 648)
+render_target_update_mode = 0
+
+[node name="PeepholeStage" parent="PeepholeLayer/PeepholeView/SubViewport" unique_id=2132929695 instance=ExtResource("8_peephole")]
 
 [node name="AudioApproach" type="AudioStreamPlayer" parent="." unique_id=617160447]
 
@@ -144,7 +165,16 @@ fov = 55.0
 [node name="AudioVoice" type="AudioStreamPlayer" parent="." unique_id=667453496]
 
 [node name="HUD" parent="." unique_id=1716120783 instance=ExtResource("4_hud")]
+layer = 2
 
 [node name="ShiftDirector" type="Node" parent="." unique_id=1619367649]
 script = ExtResource("1_shift")
 shift_def = ExtResource("5_shift_def")
+
+[node name="Walk in the Woods by Don Carson - 38m6Q1H12DU" parent="." unique_id=1894934127 instance=ExtResource("6_o6xl0")]
+transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 8.831223, 0, 17.343655)
+visible = false
+
+[node name="Root Scene" parent="." unique_id=207750265 instance=ExtResource("7_tipki")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.853218, -0.49223167, 20.421263)
+visible = false

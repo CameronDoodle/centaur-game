@@ -32,13 +32,15 @@ func _bind_hud() -> void:
 	hud.question_pressed.connect(_on_question_pressed)
 	hud.accept_pressed.connect(_on_accept_pressed)
 	hud.reject_pressed.connect(_on_reject_pressed)
+	hud.peephole_pose_changed.connect(_on_peephole_pose_changed)
+	hud.peephole_pose_save_pressed.connect(_on_peephole_pose_save_pressed)
 
 
 func start_encounter(subject: SubjectDef) -> void:
 	current_subject = subject
 	_input_locked = false
 	subject_presenter.set_door_closed()
-	subject_presenter.spawn_subject(subject.subject_scene)
+	subject_presenter.spawn_subject(subject)
 	hud.hide_reveal()
 	hud.clear_subtitle()
 	hud.set_questions(subject.questions)
@@ -104,18 +106,42 @@ func _on_peephole_pressed() -> void:
 		return
 	_input_locked = true
 	hud.set_gate_actions_enabled(false)
-	hud.set_peephole_mode(true)
-	subject_presenter.enter_peephole(func() -> void:
-		_input_locked = false
+	hud.play_blackout(
+		func() -> void:
+			subject_presenter.enter_peephole()
+			hud.set_peephole_mode(true)
+			var pose := subject_presenter.get_peephole_pose()
+			hud.load_tuner_pose(pose.position, pose.rotation_degrees, pose.scale)
+			hud.set_tuner_status("F8 toggles this panel."),
+		func() -> void:
+			_input_locked = false
 	)
 
 
 func _on_peephole_back_pressed() -> void:
-	if phase != Phase.OPEN:
+	if phase != Phase.OPEN or _input_locked:
 		return
-	subject_presenter.exit_peephole()
-	hud.set_peephole_mode(false)
-	hud.set_gate_actions_enabled(true)
+	_input_locked = true
+	hud.play_blackout(
+		func() -> void:
+			subject_presenter.exit_peephole()
+			hud.set_peephole_mode(false)
+			hud.set_gate_actions_enabled(true),
+		func() -> void:
+			_input_locked = false
+	)
+
+
+func _on_peephole_pose_changed(
+	pose_position: Vector3,
+	pose_rotation_degrees: Vector3,
+	pose_scale: float
+) -> void:
+	subject_presenter.apply_peephole_pose(pose_position, pose_rotation_degrees, pose_scale)
+
+
+func _on_peephole_pose_save_pressed() -> void:
+	hud.set_tuner_status(subject_presenter.save_peephole_pose())
 
 
 func _on_question_pressed(index: int) -> void:

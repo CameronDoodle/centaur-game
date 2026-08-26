@@ -1,12 +1,12 @@
-[gd_resource type="Resource" script_class="ShiftDef" load_steps=5 format=3 uid="uid://shift_01"]
+[gd_resource type="Resource" script_class="ShiftDef" format=3 uid="uid://cpohaxifnbbrq"]
 
-[ext_resource type="Script" path="res://resources/shift_def.gd" id="1"]
-[ext_resource type="Resource" uid="uid://subject_human_01" path="res://resources/subjects/human_01.tres" id="2"]
-[ext_resource type="Resource" uid="uid://subject_horse_01" path="res://resources/subjects/horse_01.tres" id="3"]
-[ext_resource type="Resource" uid="uid://subject_centaur_01" path="res://resources/subjects/centaur_01.tres" id="4"]
+[ext_resource type="Script" uid="uid://br88kjyyxdfu3" path="res://resources/shift_def.gd" id="1"]
+[ext_resource type="Resource" uid="uid://dfa7mweyhktqx" path="res://resources/subjects/human_01.tres" id="2"]
+[ext_resource type="Script" uid="uid://dls1yg3rjh6ps" path="res://resources/subject_def.gd" id="2_27oce"]
+[ext_resource type="Resource" path="res://resources/subjects/horse_01.tres" id="3"]
+[ext_resource type="Resource" path="res://resources/subjects/centaur_01.tres" id="4"]
 
 [resource]
 script = ExtResource("1")
-subjects = [ExtResource("2"), ExtResource("3"), ExtResource("4")]
-strikes_allowed = 3
-shift_timer_seconds = 90.0
+subjects = Array[ExtResource("2_27oce")]([ExtResource("2"), ExtResource("3"), ExtResource("4")])
+shift_timer_seconds = 1200.0

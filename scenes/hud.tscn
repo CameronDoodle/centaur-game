@@ -1,15 +1,16 @@
 [gd_scene format=3 uid="uid://bw56mt110053"]
 
-[ext_resource type="Script" path="res://code/hud.gd" id="1_hud"]
-[ext_resource type="Shader" path="res://art/shaders/fisheye.gdshader" id="2_fisheye"]
+[ext_resource type="Script" uid="uid://bvo3qkw36gnul" path="res://code/hud.gd" id="1_hud"]
+[ext_resource type="Shader" uid="uid://c5pnqv1166ta7" path="res://art/shaders/fisheye.gdshader" id="2_fisheye"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_fisheye"]
 shader = ExtResource("2_fisheye")
+shader_parameter/strength = 0.85
 
-[node name="HUD" type="CanvasLayer"]
+[node name="HUD" type="CanvasLayer" unique_id=594433590]
 script = ExtResource("1_hud")
 
-[node name="FisheyeOverlay" type="ColorRect" parent="."]
+[node name="FisheyeOverlay" type="ColorRect" parent="." unique_id=1234559070]
 unique_name_in_owner = true
 visible = false
 material = SubResource("ShaderMaterial_fisheye")
@@ -20,7 +21,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Margin" type="MarginContainer" parent="."]
+[node name="Margin" type="MarginContainer" parent="." unique_id=1930309040]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -31,81 +32,80 @@ theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 16
 
-[node name="Layout" type="VBoxContainer" parent="Margin"]
+[node name="Layout" type="VBoxContainer" parent="Margin" unique_id=682748020]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="TopBar" type="HBoxContainer" parent="Margin/Layout"]
+[node name="TopBar" type="HBoxContainer" parent="Margin/Layout" unique_id=840947305]
 layout_mode = 2
 
-[node name="TimerLabel" type="Label" parent="Margin/Layout/TopBar"]
+[node name="TimerLabel" type="Label" parent="Margin/Layout/TopBar" unique_id=2067000045]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "00:00"
 
-[node name="ScoreLabel" type="Label" parent="Margin/Layout/TopBar"]
+[node name="ScoreLabel" type="Label" parent="Margin/Layout/TopBar" unique_id=2070153815]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Score: 0"
 
-[node name="StrikesLabel" type="Label" parent="Margin/Layout/TopBar"]
+[node name="StrikesLabel" type="Label" parent="Margin/Layout/TopBar" unique_id=1405823829]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Strikes: 0 / 3"
 
-[node name="SubtitleLabel" type="Label" parent="Margin/Layout"]
+[node name="SubtitleLabel" type="Label" parent="Margin/Layout" unique_id=1775550859]
 unique_name_in_owner = true
 layout_mode = 2
 autowrap_mode = 3
-text = ""
 
-[node name="Spacer" type="Control" parent="Margin/Layout"]
+[node name="Spacer" type="Control" parent="Margin/Layout" unique_id=2058075052]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="GateActions" type="VBoxContainer" parent="Margin/Layout"]
+[node name="GateActions" type="VBoxContainer" parent="Margin/Layout" unique_id=2136981101]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="PeepholeButton" type="Button" parent="Margin/Layout/GateActions"]
+[node name="PeepholeButton" type="Button" parent="Margin/Layout/GateActions" unique_id=564776245]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Peephole"
 
-[node name="QuestionButtons" type="VBoxContainer" parent="Margin/Layout/GateActions"]
+[node name="QuestionButtons" type="VBoxContainer" parent="Margin/Layout/GateActions" unique_id=819914501]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="DecisionRow" type="HBoxContainer" parent="Margin/Layout/GateActions"]
+[node name="DecisionRow" type="HBoxContainer" parent="Margin/Layout/GateActions" unique_id=1978335062]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="AcceptButton" type="Button" parent="Margin/Layout/GateActions/DecisionRow"]
+[node name="AcceptButton" type="Button" parent="Margin/Layout/GateActions/DecisionRow" unique_id=1292173328]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Accept"
 
-[node name="RejectButton" type="Button" parent="Margin/Layout/GateActions/DecisionRow"]
+[node name="RejectButton" type="Button" parent="Margin/Layout/GateActions/DecisionRow" unique_id=736072719]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Reject"
 
-[node name="PeepholeActions" type="VBoxContainer" parent="Margin/Layout"]
+[node name="PeepholeActions" type="VBoxContainer" parent="Margin/Layout" unique_id=1568472910]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 
-[node name="BackButton" type="Button" parent="Margin/Layout/PeepholeActions"]
+[node name="BackButton" type="Button" parent="Margin/Layout/PeepholeActions" unique_id=1653165517]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Back"
 
-[node name="RevealPanel" type="PanelContainer" parent="."]
+[node name="RevealPanel" type="PanelContainer" parent="." unique_id=2107919900]
 unique_name_in_owner = true
 visible = false
 anchors_preset = 8
@@ -120,14 +120,14 @@ offset_bottom = 40.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="RevealLabel" type="Label" parent="RevealPanel"]
+[node name="RevealLabel" type="Label" parent="RevealPanel" unique_id=2048619452]
 unique_name_in_owner = true
 layout_mode = 2
+text = "Reveal"
 horizontal_alignment = 1
 vertical_alignment = 1
-text = "Reveal"
 
-[node name="SummaryPanel" type="PanelContainer" parent="."]
+[node name="SummaryPanel" type="PanelContainer" parent="." unique_id=923038010]
 unique_name_in_owner = true
 visible = false
 anchors_preset = 8
@@ -142,18 +142,156 @@ offset_bottom = 80.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="SummaryVBox" type="VBoxContainer" parent="SummaryPanel"]
+[node name="SummaryVBox" type="VBoxContainer" parent="SummaryPanel" unique_id=1005314973]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="SummaryLabel" type="Label" parent="SummaryPanel/SummaryVBox"]
+[node name="SummaryLabel" type="Label" parent="SummaryPanel/SummaryVBox" unique_id=448417977]
 unique_name_in_owner = true
 layout_mode = 2
+text = "Summary"
 horizontal_alignment = 1
 autowrap_mode = 3
-text = "Summary"
 
-[node name="ReplayButton" type="Button" parent="SummaryPanel/SummaryVBox"]
+[node name="ReplayButton" type="Button" parent="SummaryPanel/SummaryVBox" unique_id=259067674]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Replay Shift"
+
+[node name="PeepholeTuner" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -292.0
+offset_right = 280.0
+offset_bottom = -16.0
+grow_vertical = 0
+
+[node name="TunerMargin" type="MarginContainer" parent="PeepholeTuner"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="TunerVBox" type="VBoxContainer" parent="PeepholeTuner/TunerMargin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="TunerTitle" type="Label" parent="PeepholeTuner/TunerMargin/TunerVBox"]
+layout_mode = 2
+text = "Peephole Tune (F8)"
+
+[node name="TunerPosLabel" type="Label" parent="PeepholeTuner/TunerMargin/TunerVBox"]
+layout_mode = 2
+text = "Position"
+
+[node name="TunerPosRow" type="HBoxContainer" parent="PeepholeTuner/TunerMargin/TunerVBox"]
+layout_mode = 2
+
+[node name="TunerPosX" type="SpinBox" parent="PeepholeTuner/TunerMargin/TunerVBox/TunerPosRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = -5.0
+max_value = 5.0
+step = 0.01
+allow_greater = true
+allow_lesser = true
+prefix = "X"
+
+[node name="TunerPosY" type="SpinBox" parent="PeepholeTuner/TunerMargin/TunerVBox/TunerPosRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = -5.0
+max_value = 5.0
+step = 0.01
+allow_greater = true
+allow_lesser = true
+prefix = "Y"
+
+[node name="TunerPosZ" type="SpinBox" parent="PeepholeTuner/TunerMargin/TunerVBox/TunerPosRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = -5.0
+max_value = 5.0
+step = 0.01
+allow_greater = true
+allow_lesser = true
+prefix = "Z"
+
+[node name="TunerRotLabel" type="Label" parent="PeepholeTuner/TunerMargin/TunerVBox"]
+layout_mode = 2
+text = "Rotation"
+
+[node name="TunerRotRow" type="HBoxContainer" parent="PeepholeTuner/TunerMargin/TunerVBox"]
+layout_mode = 2
+
+[node name="TunerRotX" type="SpinBox" parent="PeepholeTuner/TunerMargin/TunerVBox/TunerRotRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = -180.0
+max_value = 180.0
+step = 1.0
+allow_greater = true
+allow_lesser = true
+prefix = "X"
+
+[node name="TunerRotY" type="SpinBox" parent="PeepholeTuner/TunerMargin/TunerVBox/TunerRotRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = -180.0
+max_value = 180.0
+step = 1.0
+allow_greater = true
+allow_lesser = true
+prefix = "Y"
+
+[node name="TunerRotZ" type="SpinBox" parent="PeepholeTuner/TunerMargin/TunerVBox/TunerRotRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = -180.0
+max_value = 180.0
+step = 1.0
+allow_greater = true
+allow_lesser = true
+prefix = "Z"
+
+[node name="TunerScale" type="SpinBox" parent="PeepholeTuner/TunerMargin/TunerVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 0.1
+max_value = 10.0
+step = 0.05
+value = 2.5
+allow_greater = true
+prefix = "Scale"
+
+[node name="TunerSaveButton" type="Button" parent="PeepholeTuner/TunerMargin/TunerVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Save to SubjectDef"
+
+[node name="TunerStatus" type="Label" parent="PeepholeTuner/TunerMargin/TunerVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 3
+
+[node name="FadeRect" type="ColorRect" parent="."]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)

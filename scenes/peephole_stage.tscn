@@ -1,0 +1,49 @@
+[gd_scene format=3 uid="uid://0vdt3btnjjmy"]
+
+[ext_resource type="Script" uid="uid://dpeepholestage01" path="res://code/peephole_stage.gd" id="1_stage"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_backdrop"]
+shading_mode = 0
+albedo_color = Color(0.08, 0.06, 0.05, 1)
+
+[sub_resource type="QuadMesh" id="QuadMesh_backdrop"]
+size = Vector2(6, 6)
+
+[sub_resource type="Environment" id="Environment_peephole"]
+background_mode = 1
+background_color = Color(0.08, 0.06, 0.05, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.7, 0.64, 0.56, 1)
+ambient_light_energy = 0.7
+
+[node name="PeepholeStage" type="Node3D"]
+script = ExtResource("1_stage")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_peephole")
+
+[node name="KeyLight" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.8660254, -0.3535534, 0.3535534, 0, 0.7071068, 0.7071068, -0.5, -0.6123724, 0.6123724, 0, 1, 2)
+light_energy = 1.15
+
+[node name="FillLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 0.15, 0.5)
+light_color = Color(1, 0.93, 0.85, 1)
+light_energy = 0.55
+omni_range = 4.0
+
+[node name="Backdrop" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.2)
+material_override = SubResource("StandardMaterial3D_backdrop")
+mesh = SubResource("QuadMesh_backdrop")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.42)
+current = true
+fov = 40.0
+
+[node name="LookTarget" type="Marker3D" parent="."]
+
+[node name="PosePivot" type="Marker3D" parent="LookTarget"]
+
+[node name="ScalePivot" type="Marker3D" parent="LookTarget/PosePivot"]
