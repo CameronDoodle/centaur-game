@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="QuestionDef" load_steps=2 format=3 uid="uid://question_human_horse"]
+
+[ext_resource type="Script" path="res://resources/question_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+button_label = "Are you a horse?"
+subtitle = "No. Just a regular human guy."

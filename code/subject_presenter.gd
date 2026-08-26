@@ -2,7 +2,7 @@ class_name SubjectPresenter
 extends Node3D
 
 @export var door_fill := 0.9
-@export var door_clearance := 0.35
+@export var door_clearance := 0.7
 
 var subject_anchor: Marker3D
 var gate_camera: Camera3D
@@ -44,6 +44,7 @@ func spawn_subject(subject: SubjectDef) -> void:
 	if subject == null or subject.subject_scene == null or subject_anchor == null:
 		return
 	_subject_instance = subject.subject_scene.instantiate() as Node3D
+	_subject_instance.visible = false
 	subject_anchor.add_child(_subject_instance)
 	call_deferred("_fit_subject_to_gate")
 	if peephole_stage:
@@ -161,9 +162,11 @@ func _fit_subject_to_gate() -> void:
 	var aabb := _get_subject_aabb(_subject_instance)
 	if aabb.size == Vector3.ZERO:
 		push_warning("SubjectPresenter: no mesh bounds on %s" % _subject_instance.name)
+		_subject_instance.visible = true
 		return
 	var mesh_height := aabb.size.y
 	if mesh_height <= 0.001:
+		_subject_instance.visible = true
 		return
 	var target_height := _door_world_height() * door_fill
 	var scale_factor := target_height / mesh_height
@@ -172,6 +175,7 @@ func _fit_subject_to_gate() -> void:
 	_subject_instance.global_position.y += -aabb.position.y
 	aabb = _get_subject_aabb(_subject_instance)
 	if door == null:
+		_subject_instance.visible = true
 		return
 	var face := _subject_instance.find_child("Face", true, false) as Node3D
 	var forward_extent := aabb.position.z + aabb.size.z
@@ -180,6 +184,7 @@ func _fit_subject_to_gate() -> void:
 	var max_allowed_z := door.global_position.z - door_clearance
 	if forward_extent > max_allowed_z:
 		_subject_instance.global_position.z -= forward_extent - max_allowed_z
+	_subject_instance.visible = true
 
 
 func _door_world_height() -> float:

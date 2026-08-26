@@ -125,7 +125,7 @@ sorting_offset = -1.0
 texture = SubResource("NoiseTexture2D_72uko")
 
 [node name="subject_anchor" type="Marker3D" parent="world" unique_id=353364536]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.0)
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1098747847]
 transform = Transform3D(0.8660254, -0.3535534, 0.3535534, 0, 0.7071068, 0.7071068, -0.5, -0.6123724, 0.6123724, 0, 3, 2)

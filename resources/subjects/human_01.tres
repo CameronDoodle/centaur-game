@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dls1yg3rjh6ps" path="res://resources/subject_def.gd" id="1"]
 [ext_resource type="Resource" path="res://resources/subjects/human_01_q1.tres" id="2"]
+[ext_resource type="Resource" path="res://resources/subjects/human_01_q2.tres" id="6"]
 [ext_resource type="PackedScene" path="res://scenes/subjects/human.tscn" id="3"]
 [ext_resource type="Script" uid="uid://b8h7bdjqop5nh" path="res://resources/question_def.gd" id="3_h5pff"]
 [ext_resource type="AudioStream" uid="uid://d4kng6kbw2isj" path="res://sfx/human_approach.mp3" id="4"]
@@ -12,7 +13,7 @@ script = ExtResource("1")
 approach_stream = ExtResource("4")
 knock_stream = ExtResource("5")
 subject_scene = ExtResource("3")
-questions = Array[ExtResource("3_h5pff")]([ExtResource("2")])
+questions = Array[ExtResource("3_h5pff")]([ExtResource("2"), ExtResource("6")])
 reveal_text = "Human."
 peephole_position = Vector3(0, -0.32, 0)
 peephole_rotation_degrees = Vector3(14, 0, 0)
