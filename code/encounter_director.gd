@@ -34,6 +34,7 @@ func _bind_hud() -> void:
 	hud.reject_pressed.connect(_on_reject_pressed)
 	hud.peephole_pose_changed.connect(_on_peephole_pose_changed)
 	hud.peephole_pose_save_pressed.connect(_on_peephole_pose_save_pressed)
+	hud.skip_pressed.connect(_on_skip_pressed)
 
 
 func start_encounter(subject: SubjectDef) -> void:
@@ -46,6 +47,7 @@ func start_encounter(subject: SubjectDef) -> void:
 	hud.set_questions(subject.questions)
 	hud.set_gate_actions_enabled(false)
 	hud.set_peephole_mode(false)
+	hud.set_skip_visible(false)
 	_set_phase(Phase.APPROACH)
 	_play_approach()
 
@@ -54,6 +56,8 @@ func force_miss() -> void:
 	if phase == Phase.DONE:
 		return
 	_input_locked = true
+	_stop_encounter_audio()
+	hud.set_skip_visible(false)
 	hud.set_gate_actions_enabled(false)
 	hud.set_peephole_mode(false)
 	subject_presenter.exit_peephole()
@@ -73,7 +77,9 @@ func _play_approach() -> void:
 		audio_approach.play()
 		if not audio_approach.finished.is_connected(_on_approach_finished):
 			audio_approach.finished.connect(_on_approach_finished, CONNECT_ONE_SHOT)
+		hud.set_skip_visible(true, "Skip approach")
 	else:
+		hud.set_skip_visible(false)
 		_on_approach_finished()
 
 
@@ -90,15 +96,49 @@ func _play_knock() -> void:
 		audio_knock.play()
 		if not audio_knock.finished.is_connected(_on_knock_finished):
 			audio_knock.finished.connect(_on_knock_finished, CONNECT_ONE_SHOT)
+		hud.set_skip_visible(true, "Skip knock")
 	else:
+		hud.set_skip_visible(false)
 		_on_knock_finished()
 
 
 func _on_knock_finished() -> void:
 	if phase != Phase.KNOCK:
 		return
+	hud.set_skip_visible(false)
 	_set_phase(Phase.OPEN)
 	hud.set_gate_actions_enabled(true)
+
+
+func _on_skip_pressed() -> void:
+	match phase:
+		Phase.APPROACH:
+			_stop_approach_audio()
+			_on_approach_finished()
+		Phase.KNOCK:
+			_stop_knock_audio()
+			_on_knock_finished()
+
+
+func _stop_approach_audio() -> void:
+	if audio_approach == null:
+		return
+	if audio_approach.finished.is_connected(_on_approach_finished):
+		audio_approach.finished.disconnect(_on_approach_finished)
+	audio_approach.stop()
+
+
+func _stop_knock_audio() -> void:
+	if audio_knock == null:
+		return
+	if audio_knock.finished.is_connected(_on_knock_finished):
+		audio_knock.finished.disconnect(_on_knock_finished)
+	audio_knock.stop()
+
+
+func _stop_encounter_audio() -> void:
+	_stop_approach_audio()
+	_stop_knock_audio()
 
 
 func _on_peephole_pressed() -> void:

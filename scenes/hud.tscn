@@ -69,6 +69,12 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 8
 
+[node name="SkipButton" type="Button" parent="Margin/Layout/GateActions" unique_id=3847291056]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = "Skip"
+
 [node name="PeepholeButton" type="Button" parent="Margin/Layout/GateActions" unique_id=564776245]
 unique_name_in_owner = true
 layout_mode = 2

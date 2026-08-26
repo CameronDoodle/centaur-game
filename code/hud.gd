@@ -9,6 +9,7 @@ signal reject_pressed
 signal summary_replay_pressed
 signal peephole_pose_changed(position: Vector3, rotation_degrees: Vector3, pose_scale: float)
 signal peephole_pose_save_pressed
+signal skip_pressed
 
 const BLACKOUT_DURATION := 0.22
 
@@ -23,6 +24,7 @@ const BLACKOUT_DURATION := 0.22
 @onready var gate_actions: VBoxContainer = %GateActions
 @onready var peephole_actions: VBoxContainer = %PeepholeActions
 @onready var question_buttons: VBoxContainer = %QuestionButtons
+@onready var skip_button: Button = %SkipButton
 @onready var peephole_button: Button = %PeepholeButton
 @onready var accept_button: Button = %AcceptButton
 @onready var reject_button: Button = %RejectButton
@@ -47,6 +49,7 @@ var _syncing_tuner: bool = false
 
 
 func _ready() -> void:
+	skip_button.pressed.connect(func() -> void: skip_pressed.emit())
 	peephole_button.pressed.connect(func() -> void: peephole_pressed.emit())
 	back_button.pressed.connect(func() -> void: peephole_back_pressed.emit())
 	accept_button.pressed.connect(func() -> void: accept_pressed.emit())
@@ -63,6 +66,7 @@ func _ready() -> void:
 	hide_summary()
 	set_peephole_mode(false)
 	set_gate_actions_enabled(false)
+	set_skip_visible(false)
 	fade_rect.modulate.a = 0.0
 	set_tuner_open(false)
 
@@ -123,6 +127,12 @@ func set_questions(questions: Array[QuestionDef]) -> void:
 		var index := i
 		button.pressed.connect(func() -> void: question_pressed.emit(index))
 		question_buttons.add_child(button)
+
+
+func set_skip_visible(visible: bool, label: String = "") -> void:
+	skip_button.visible = visible
+	if not label.is_empty():
+		skip_button.text = label
 
 
 func set_gate_actions_enabled(enabled: bool) -> void:
