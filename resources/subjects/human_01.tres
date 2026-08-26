@@ -15,6 +15,6 @@ knock_stream = ExtResource("5")
 subject_scene = ExtResource("3")
 questions = Array[ExtResource("3_h5pff")]([ExtResource("2"), ExtResource("6")])
 reveal_text = "Human."
-peephole_position = Vector3(0, -0.32, 0)
+peephole_position = Vector3(0, 0, 0)
 peephole_rotation_degrees = Vector3(14, 0, 0)
 peephole_scale = 0.5

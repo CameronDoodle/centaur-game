@@ -16,6 +16,6 @@ knock_stream = ExtResource("5")
 subject_scene = ExtResource("3")
 questions = Array[ExtResource("3_suips")]([ExtResource("6"), ExtResource("2")])
 reveal_text = "Horse."
-peephole_position = Vector3(0, -1.07, -1.61)
+peephole_position = Vector3(0, 0, 0)
 peephole_rotation_degrees = Vector3(-1, 0, 0)
 peephole_scale = 0.95

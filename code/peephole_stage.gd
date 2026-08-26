@@ -25,7 +25,8 @@ func present(
 	subject_scene: PackedScene,
 	pose_position: Vector3,
 	pose_rotation_degrees: Vector3,
-	pose_scale: float
+	pose_scale: float,
+	appearance: Dictionary = {}
 ) -> void:
 	clear()
 	if subject_scene == null or scale_pivot == null:
@@ -34,6 +35,8 @@ func present(
 	if _subject_instance == null:
 		return
 	scale_pivot.add_child(_subject_instance)
+	if _subject_instance.has_method("apply_appearance"):
+		_subject_instance.apply_appearance(appearance)
 	_subject_instance.position = Vector3.ZERO
 	_subject_instance.rotation = Vector3.ZERO
 	call_deferred("_finish_present", pose_position, pose_rotation_degrees, pose_scale)
@@ -68,8 +71,11 @@ func _finish_present(
 ) -> void:
 	if _subject_instance == null or not is_instance_valid(_subject_instance):
 		return
+	pose_pivot.position = Vector3.ZERO
+	pose_pivot.rotation_degrees = pose_rotation_degrees
+	scale_pivot.scale = Vector3.ONE * maxf(pose_scale, 0.01)
 	_align_face_to_pivot()
-	apply_pose(pose_position, pose_rotation_degrees, pose_scale)
+	pose_pivot.position = pose_position
 	if _subject_instance.has_method("play_idle"):
 		_subject_instance.play_idle()
 

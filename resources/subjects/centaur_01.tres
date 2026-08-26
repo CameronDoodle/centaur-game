@@ -16,6 +16,6 @@ knock_stream = ExtResource("6")
 subject_scene = ExtResource("4")
 questions = Array[ExtResource("3_cce3k")]([ExtResource("3"), ExtResource("2")])
 reveal_text = "Centaur. Wearing a horse mask and sneakers."
-peephole_position = Vector3(0, -1.02, -0.43)
+peephole_position = Vector3(0, 0, 0)
 peephole_rotation_degrees = Vector3(4, 0, 0)
 peephole_scale = 0.95

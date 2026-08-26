@@ -1,16 +1,14 @@
-[gd_scene format=3 uid="uid://c3x5vtuajwv6t"]
+[gd_scene load_steps=2 format=3 uid="uid://c3x5vtuajwv6t"]
 
 [ext_resource type="Script" uid="uid://dv2n57j3746xa" path="res://code/centaur.gd" id="1"]
-[ext_resource type="PackedScene" uid="uid://u32p7b7pgrmc" path="res://art/horse/Horse.glb" id="2"]
-[ext_resource type="PackedScene" uid="uid://07pqsm3n4xto" path="res://art/human/Man.glb" id="3"]
 
 [node name="Centaur" type="Node3D" unique_id=24828742]
 transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0, 0)
 script = ExtResource("1")
 
-[node name="Horse" parent="." unique_id=1003473112 instance=ExtResource("2")]
+[node name="Horse" type="Node3D" parent="."]
 
-[node name="Man" parent="." unique_id=1379181845 instance=ExtResource("3")]
+[node name="Man" type="Node3D" parent="."]
 
 [node name="Face" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, 0.5)

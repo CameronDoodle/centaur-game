@@ -1,14 +1,25 @@
 extends Node3D
 
-## Parents the man's waist onto the horse withers and hides leftover head/legs.
+## Parents a human torso onto a horse body and hides leftover head/legs.
 
 @export var torso_offset := Vector3(0.0, 0.2, -0.3)
-@export var horse_idle_hint := "Idle"
-@export var man_idle_hint := "Man_Idle"
-@export var horse_walk_hint := "Walk"
-@export var man_walk_hint := "Man_Walk"
 
-const HORSE_HIDE_BONES: PackedStringArray = ["Neck", "Head"]
+const HORSE_ATTACH_BONES: PackedStringArray = ["Shoulders", "Torso3", "Torso"]
+const HORSE_HIDE_BONES: PackedStringArray = [
+	"Neck",
+	"Neck1",
+	"Neck2",
+	"Neck3",
+	"Head",
+	"Ear1.L",
+	"Ear2.L",
+	"Ear3.L",
+	"Ear4.L",
+	"Ear1.R",
+	"Ear2.R",
+	"Ear3.R",
+	"Ear4.R",
+]
 const MAN_HIDE_BONES: PackedStringArray = [
 	"UpperLeg.L",
 	"LowerLeg.L",
@@ -19,44 +30,78 @@ const MAN_HIDE_BONES: PackedStringArray = [
 ]
 const BONE_HIDE_SCALE := Vector3(0.01, 0.01, 0.01)
 
-@onready var _horse: Node3D = $Horse
-@onready var _man: Node3D = $Man
+@onready var _horse_slot: Node3D = $Horse
+@onready var _man_slot: Node3D = $Man
+@onready var _face: Marker3D = $Face
 
+var _horse: Node3D
+var _man: Node3D
 var _horse_skeleton: Skeleton3D
 var _man_skeleton: Skeleton3D
 var _shoulder_bone: int = -1
 var _hips_bone: int = -1
 var _horse_hide_indices: PackedInt32Array = []
 var _man_hide_indices: PackedInt32Array = []
+var _appearance: Dictionary = {}
 
 
 func _ready() -> void:
 	process_priority = 100
+	if not _appearance.is_empty():
+		_rebuild_models()
+
+
+func apply_appearance(appearance: Dictionary) -> void:
+	_appearance = appearance
+	if is_node_ready():
+		_rebuild_models()
+
+
+func _rebuild_models() -> void:
+	if _horse_slot == null or _man_slot == null:
+		return
+	set_process(true)
+	_replace_model(_horse_slot, _appearance.get(ModelCatalog.HORSE_KEY) as PackedScene)
+	_replace_model(_man_slot, _appearance.get(ModelCatalog.HUMAN_KEY) as PackedScene)
+	_horse = _horse_slot.get_child(0) as Node3D if _horse_slot.get_child_count() > 0 else null
+	_man = _man_slot.get_child(0) as Node3D if _man_slot.get_child_count() > 0 else null
+	ModelCatalog.normalize(_horse, ModelCatalog.HORSE_KEY)
+	ModelCatalog.normalize(_man, ModelCatalog.HUMAN_KEY)
 	_horse_skeleton = _find_skeleton(_horse)
 	_man_skeleton = _find_skeleton(_man)
 	if _horse_skeleton == null or _man_skeleton == null:
 		push_error("Centaur: missing Skeleton3D on Horse or Man.")
 		set_process(false)
 		return
-	_shoulder_bone = _horse_skeleton.find_bone("Shoulders")
+	_shoulder_bone = _find_first_bone(_horse_skeleton, HORSE_ATTACH_BONES)
 	_hips_bone = _man_skeleton.find_bone("Hips")
 	if _shoulder_bone < 0 or _hips_bone < 0:
-		push_error("Centaur: Could not find Shoulders or Hips bones.")
+		push_error("Centaur: Could not find horse attach or human Hips bone.")
 		set_process(false)
 		return
 	_horse_hide_indices = _bone_indices(_horse_skeleton, HORSE_HIDE_BONES)
 	_man_hide_indices = _bone_indices(_man_skeleton, MAN_HIDE_BONES)
 	_zero_bone_rest_positions(_horse_skeleton, _horse_hide_indices)
-	_make_unshaded(_horse)
-	_make_unshaded(_man)
 	play_idle()
 	_apply_hidden_bone_scales()
 	_glue_torso()
+	_update_face()
 
 
 func _process(_delta: float) -> void:
+	if _horse_skeleton == null or _man_skeleton == null:
+		return
 	_apply_hidden_bone_scales()
 	_glue_torso()
+	_update_face()
+
+
+func _replace_model(slot: Node3D, model_scene: PackedScene) -> void:
+	for child in slot.get_children():
+		slot.remove_child(child)
+		child.queue_free()
+	if model_scene:
+		slot.add_child(model_scene.instantiate())
 
 
 func _glue_torso() -> void:
@@ -88,11 +133,17 @@ func _bone_indices(skeleton: Skeleton3D, names: PackedStringArray) -> PackedInt3
 	var indices := PackedInt32Array()
 	for bone_name in names:
 		var bone_index := skeleton.find_bone(bone_name)
-		if bone_index < 0:
-			push_warning("Centaur: bone not found: %s" % bone_name)
-			continue
-		indices.append(bone_index)
+		if bone_index >= 0:
+			indices.append(bone_index)
 	return indices
+
+
+func _find_first_bone(skeleton: Skeleton3D, names: PackedStringArray) -> int:
+	for bone_name in names:
+		var bone_index := skeleton.find_bone(bone_name)
+		if bone_index >= 0:
+			return bone_index
+	return -1
 
 
 func _bone_world_position(skeleton: Skeleton3D, bone_index: int) -> Vector3:
@@ -100,49 +151,41 @@ func _bone_world_position(skeleton: Skeleton3D, bone_index: int) -> Vector3:
 
 
 func play_idle() -> void:
-	_play_animation(_horse, horse_idle_hint, false)
-	_play_animation(_man, man_idle_hint, false)
+	_play_animation(_horse, ["Idle"])
+	_play_animation(_man, ["Man_Idle", "Idle"])
 
 
 func play_walk() -> void:
-	_play_animation(_horse, horse_walk_hint, true)
-	_play_animation(_man, man_walk_hint, true)
+	_play_animation(_horse, ["Walk"])
+	_play_animation(_man, ["Man_Walk", "Walk"])
 
 
-func _play_animation(root: Node, hint: String, ends_with: bool) -> void:
+func _play_animation(root: Node, hints: Array[String]) -> void:
 	var player := _find_animation_player(root)
 	if player == null:
 		return
-	var anim_name := ""
-	for candidate in player.get_animation_list():
-		var matches := candidate.ends_with(hint) if ends_with else hint in candidate
-		if matches:
-			anim_name = candidate
-			break
-	if anim_name.is_empty():
+	for hint in hints:
+		for candidate in player.get_animation_list():
+			if candidate != hint and not candidate.ends_with("|%s" % hint):
+				continue
+			var animation := player.get_animation(candidate)
+			if animation:
+				animation.loop_mode = Animation.LOOP_LINEAR
+			player.play(candidate)
+			return
+
+
+func _update_face() -> void:
+	if _face == null or _man_skeleton == null:
 		return
-	var animation := player.get_animation(anim_name)
-	if animation:
-		animation.loop_mode = Animation.LOOP_LINEAR
-	player.play(anim_name)
-
-
-func _make_unshaded(root: Node) -> void:
-	if root is MeshInstance3D:
-		var mesh_instance := root as MeshInstance3D
-		var mesh := mesh_instance.mesh
-		if mesh:
-			for surface_index in mesh.get_surface_count():
-				var material := mesh_instance.get_active_material(surface_index)
-				if material is BaseMaterial3D:
-					var unique_material := (material as BaseMaterial3D).duplicate() as BaseMaterial3D
-					unique_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-					mesh_instance.set_surface_override_material(surface_index, unique_material)
-	for child in root.get_children():
-		_make_unshaded(child)
+	var head_bone := _man_skeleton.find_bone("Head")
+	if head_bone >= 0:
+		_face.global_position = _bone_world_position(_man_skeleton, head_bone)
 
 
 func _find_skeleton(root: Node) -> Skeleton3D:
+	if root == null:
+		return null
 	if root is Skeleton3D:
 		return root
 	for child in root.get_children():

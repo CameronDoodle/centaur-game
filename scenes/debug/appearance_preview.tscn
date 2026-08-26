@@ -1,0 +1,47 @@
+[gd_scene format=3 uid="uid://bs5rspdo01cco"]
+
+[ext_resource type="Script" uid="uid://0tlujrni46ra" path="res://code/appearance_preview.gd" id="1_preview"]
+[ext_resource type="Script" uid="uid://cpn68osqwt3bn" path="res://code/debug_fly_camera.gd" id="2_fly_cam"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_ground"]
+size = Vector2(40, 30)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
+albedo_color = Color(0.35, 0.3, 0.25, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_door_ruler"]
+size = Vector3(1, 2, 0.08)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_door_ruler"]
+albedo_color = Color(0.38, 0.22, 0.08, 1)
+
+[sub_resource type="Environment" id="Environment_preview"]
+background_mode = 1
+background_color = Color(0.14, 0.12, 0.1, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.72, 0.66, 0.58, 1)
+ambient_light_energy = 0.55
+
+[node name="AppearancePreview" type="Node3D" unique_id=956831020]
+script = ExtResource("1_preview")
+
+[node name="Ground" type="MeshInstance3D" parent="." unique_id=1189600583]
+mesh = SubResource("PlaneMesh_ground")
+surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+
+[node name="DoorRuler" type="MeshInstance3D" parent="." unique_id=1787014897]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("BoxMesh_door_ruler")
+surface_material_override/0 = SubResource("StandardMaterial3D_door_ruler")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1371085215]
+transform = Transform3D(0.8660254, -0.3535534, 0.3535534, 0, 0.7071068, 0.7071068, -0.5, -0.6123724, 0.6123724, 0, 3, 2)
+light_energy = 1.1
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1303419103]
+environment = SubResource("Environment_preview")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=962425898]
+transform = Transform3D(1, 0, 0, 0, 0.9396926, 0.34202015, 0, -0.34202015, 0.9396926, 0, 2.8, 14)
+current = true
+script = ExtResource("2_fly_cam")
