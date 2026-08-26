@@ -140,6 +140,8 @@ func play_accept(on_complete: Callable = Callable()) -> void:
 		door_open.visible = true
 	if side_window:
 		side_window.visible = false
+	if _subject_instance and _subject_instance.has_method("play_walk"):
+		_subject_instance.play_walk()
 	_tween_subject(Vector3(0.0, 0.0, 1.5), on_complete)
 
 

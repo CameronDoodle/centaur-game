@@ -70,6 +70,8 @@ func _finish_present(
 		return
 	_align_face_to_pivot()
 	apply_pose(pose_position, pose_rotation_degrees, pose_scale)
+	if _subject_instance.has_method("play_idle"):
+		_subject_instance.play_idle()
 
 
 func _align_face_to_pivot() -> void:

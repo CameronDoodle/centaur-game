@@ -1,14 +1,28 @@
 extends Node3D
 
 @export var idle_hint := "Idle"
+@export var walk_hint := "Walk"
 
 
 func _ready() -> void:
+	play_idle()
+
+
+func play_idle() -> void:
+	_play_hint(idle_hint, false)
+
+
+func play_walk() -> void:
+	_play_hint(walk_hint, true)
+
+
+func _play_hint(hint: String, ends_with: bool) -> void:
 	var player := _find_animation_player(self)
 	if player == null:
 		return
 	for candidate in player.get_animation_list():
-		if idle_hint in candidate:
+		var matches := candidate.ends_with(hint) if ends_with else hint in candidate
+		if matches:
 			var animation := player.get_animation(candidate)
 			if animation:
 				animation.loop_mode = Animation.LOOP_LINEAR

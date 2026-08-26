@@ -5,6 +5,8 @@ extends Node3D
 @export var torso_offset := Vector3(0.0, 0.2, -0.3)
 @export var horse_idle_hint := "Idle"
 @export var man_idle_hint := "Man_Idle"
+@export var horse_walk_hint := "Walk"
+@export var man_walk_hint := "Man_Walk"
 
 const HORSE_HIDE_BONES: PackedStringArray = ["Neck", "Head"]
 const MAN_HIDE_BONES: PackedStringArray = [
@@ -47,8 +49,7 @@ func _ready() -> void:
 	_zero_bone_rest_positions(_horse_skeleton, _horse_hide_indices)
 	_make_unshaded(_horse)
 	_make_unshaded(_man)
-	_play_idle(_horse, horse_idle_hint)
-	_play_idle(_man, man_idle_hint)
+	play_idle()
 	_apply_hidden_bone_scales()
 	_glue_torso()
 
@@ -98,13 +99,24 @@ func _bone_world_position(skeleton: Skeleton3D, bone_index: int) -> Vector3:
 	return skeleton.to_global(skeleton.get_bone_global_pose(bone_index).origin)
 
 
-func _play_idle(root: Node, hint: String) -> void:
+func play_idle() -> void:
+	_play_animation(_horse, horse_idle_hint, false)
+	_play_animation(_man, man_idle_hint, false)
+
+
+func play_walk() -> void:
+	_play_animation(_horse, horse_walk_hint, true)
+	_play_animation(_man, man_walk_hint, true)
+
+
+func _play_animation(root: Node, hint: String, ends_with: bool) -> void:
 	var player := _find_animation_player(root)
 	if player == null:
 		return
 	var anim_name := ""
 	for candidate in player.get_animation_list():
-		if hint in candidate:
+		var matches := candidate.ends_with(hint) if ends_with else hint in candidate
+		if matches:
 			anim_name = candidate
 			break
 	if anim_name.is_empty():
