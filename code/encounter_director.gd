@@ -29,6 +29,8 @@ func _ready() -> void:
 func _bind_hud() -> void:
 	hud.peephole_pressed.connect(_on_peephole_pressed)
 	hud.peephole_back_pressed.connect(_on_peephole_back_pressed)
+	hud.replay_approach_pressed.connect(_on_replay_approach_pressed)
+	hud.replay_knock_pressed.connect(_on_replay_knock_pressed)
 	hud.question_pressed.connect(_on_question_pressed)
 	hud.accept_pressed.connect(_on_accept_pressed)
 	hud.reject_pressed.connect(_on_reject_pressed)
@@ -48,6 +50,9 @@ func start_encounter(subject: SubjectDef) -> void:
 	hud.set_gate_actions_enabled(false)
 	hud.set_peephole_mode(false)
 	hud.set_skip_visible(false)
+	var has_approach := subject.approach_stream != null
+	var has_knock := subject.knock_stream != null
+	hud.show_investigation(has_approach, has_knock)
 	_set_phase(Phase.APPROACH)
 	_play_approach()
 
@@ -59,6 +64,7 @@ func force_miss() -> void:
 	_stop_encounter_audio()
 	hud.set_skip_visible(false)
 	hud.set_gate_actions_enabled(false)
+	hud.hide_investigation()
 	hud.set_peephole_mode(false)
 	subject_presenter.exit_peephole()
 	subject_presenter.clear_subject()
@@ -77,9 +83,8 @@ func _play_approach() -> void:
 		audio_approach.play()
 		if not audio_approach.finished.is_connected(_on_approach_finished):
 			audio_approach.finished.connect(_on_approach_finished, CONNECT_ONE_SHOT)
-		hud.set_skip_visible(true, "Skip approach")
+		hud.set_clue_replay_playing(true, false)
 	else:
-		hud.set_skip_visible(false)
 		_on_approach_finished()
 
 
@@ -96,16 +101,15 @@ func _play_knock() -> void:
 		audio_knock.play()
 		if not audio_knock.finished.is_connected(_on_knock_finished):
 			audio_knock.finished.connect(_on_knock_finished, CONNECT_ONE_SHOT)
-		hud.set_skip_visible(true, "Skip knock")
+		hud.set_clue_replay_playing(false, true)
 	else:
-		hud.set_skip_visible(false)
 		_on_knock_finished()
 
 
 func _on_knock_finished() -> void:
 	if phase != Phase.KNOCK:
 		return
-	hud.set_skip_visible(false)
+	hud.set_clue_replay_playing(false, false)
 	_set_phase(Phase.OPEN)
 	hud.set_gate_actions_enabled(true)
 
@@ -125,6 +129,8 @@ func _stop_approach_audio() -> void:
 		return
 	if audio_approach.finished.is_connected(_on_approach_finished):
 		audio_approach.finished.disconnect(_on_approach_finished)
+	if audio_approach.finished.is_connected(_on_replay_approach_finished):
+		audio_approach.finished.disconnect(_on_replay_approach_finished)
 	audio_approach.stop()
 
 
@@ -133,12 +139,92 @@ func _stop_knock_audio() -> void:
 		return
 	if audio_knock.finished.is_connected(_on_knock_finished):
 		audio_knock.finished.disconnect(_on_knock_finished)
+	if audio_knock.finished.is_connected(_on_replay_knock_finished):
+		audio_knock.finished.disconnect(_on_replay_knock_finished)
 	audio_knock.stop()
 
 
 func _stop_encounter_audio() -> void:
 	_stop_approach_audio()
 	_stop_knock_audio()
+	hud.set_clue_replay_playing(false, false)
+
+
+func _on_replay_approach_pressed() -> void:
+	match phase:
+		Phase.APPROACH:
+			_stop_approach_audio()
+			_set_phase(Phase.KNOCK)
+			_play_knock()
+		Phase.KNOCK:
+			_stop_knock_audio()
+			hud.set_clue_replay_playing(false, false)
+			_set_phase(Phase.OPEN)
+			hud.set_gate_actions_enabled(true)
+			_replay_clue(true)
+		Phase.OPEN:
+			_replay_clue(true)
+
+
+func _on_replay_knock_pressed() -> void:
+	match phase:
+		Phase.APPROACH:
+			_stop_approach_audio()
+			_set_phase(Phase.KNOCK)
+			_play_knock()
+		Phase.KNOCK:
+			_stop_knock_audio()
+			_on_knock_finished()
+		Phase.OPEN:
+			_replay_clue(false)
+
+
+func _replay_clue(is_approach: bool) -> void:
+	if phase != Phase.OPEN or _input_locked or subject_presenter.is_in_peephole():
+		return
+	var stream: AudioStream
+	var player: AudioStreamPlayer
+	var finished_handler: Callable
+	if is_approach:
+		player = audio_approach
+		if player != null and player.playing:
+			_stop_approach_audio()
+			hud.set_clue_replay_playing(false, audio_knock.playing)
+			return
+		stream = current_subject.approach_stream
+		finished_handler = _on_replay_approach_finished
+		_stop_knock_audio()
+		hud.set_clue_replay_playing(true, false)
+	else:
+		player = audio_knock
+		if player != null and player.playing:
+			_stop_knock_audio()
+			hud.set_clue_replay_playing(audio_approach.playing, false)
+			return
+		stream = current_subject.knock_stream
+		finished_handler = _on_replay_knock_finished
+		_stop_approach_audio()
+		hud.set_clue_replay_playing(false, true)
+	if stream == null or player == null:
+		hud.set_clue_replay_playing(false, false)
+		return
+	player.stream = stream
+	player.play()
+	if player.finished.is_connected(finished_handler):
+		player.finished.disconnect(finished_handler)
+	player.finished.connect(finished_handler, CONNECT_ONE_SHOT)
+
+
+func _on_replay_approach_finished() -> void:
+	if phase != Phase.OPEN:
+		return
+	hud.set_clue_replay_playing(false, audio_knock.playing)
+
+
+func _on_replay_knock_finished() -> void:
+	if phase != Phase.OPEN:
+		return
+	hud.set_clue_replay_playing(audio_approach.playing, false)
 
 
 func _on_peephole_pressed() -> void:
@@ -208,7 +294,9 @@ func _resolve(accepted: bool) -> void:
 	if phase != Phase.OPEN or _input_locked:
 		return
 	_input_locked = true
+	_stop_encounter_audio()
 	hud.set_gate_actions_enabled(false)
+	hud.hide_investigation()
 	hud.set_peephole_mode(false)
 	subject_presenter.exit_peephole()
 	_set_phase(Phase.RESOLVE)
