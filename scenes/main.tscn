@@ -36,16 +36,16 @@ ground_bottom_color = Color(0.22, 0.18, 0.14, 1)
 ground_horizon_color = Color(0.58, 0.5, 0.4, 1)
 ground_curve = 0.08
 
-[sub_resource type="Sky" id="Sky_main"]
+[sub_resource type="Sky" id="Sky_dp3eg"]
 sky_material = SubResource("ProceduralSkyMaterial_muem4")
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 2
 background_color = Color(0.14, 0.12, 0.1, 1)
-sky = SubResource("Sky_main")
+sky = SubResource("Sky_dp3eg")
 ambient_light_source = 2
 ambient_light_color = Color(0.72, 0.66, 0.58, 1)
-ambient_light_energy = 0.55
+ambient_light_energy = 0.36
 
 [node name="main" type="Node3D" unique_id=2092766603]
 
@@ -54,6 +54,8 @@ script = ExtResource("2_encounter")
 
 [node name="SubjectPresenter" type="Node3D" parent="." unique_id=1447802059]
 script = ExtResource("3_presenter")
+walk_speed = 3.0
+penalty_walk_distance = 15.0
 
 [node name="world" type="Node3D" parent="." unique_id=1774684371]
 
@@ -65,11 +67,19 @@ script = ExtResource("16_door_hinge")
 transform = Transform3D(-5.98846e-08, 0, 1.37, 0, 1.505, 0, -1.37, 0, -5.98846e-08, 1.2167854, 2.8578506, -0.11303806)
 mesh = ExtResource("6_trceg")
 
+[node name="peephole_rim" type="Sprite3D" parent="world/door_hinge_marker/ChahinDoor" unique_id=1882979484]
+transform = Transform3D(-1.7548366e-08, 0, -0.40145987, 0, 0.36544847, 0, 0.40145987, 0, -1.7548366e-08, -0.1520114, 1.2018418, 0.04881382)
+sorting_offset = 0.21
+texture = SubResource("GradientTexture2D_peephole")
+
 [node name="SF Street by Alan Zimmerman - cnTMgkFoTS0" parent="world" unique_id=1134064020 instance=ExtResource("11_ya4ey")]
 transform = Transform3D(12.31, 0, 0, 0, 12.31, 0, 0, 0, 12.31, -52.275917, 5.188063, -7.308785)
 
 [node name="SF Street by Alan Zimmerman - cnTMgkFoTS1" parent="world" unique_id=66705578 instance=ExtResource("11_ya4ey")]
 transform = Transform3D(-12.31, 0, -1.0761744e-06, 0, 12.31, 0, 1.0761744e-06, 0, -12.31, -79.42415, 4.9130287, -88.91483)
+
+[node name="SF Street by Alan Zimmerman - cnTMgkFoTS2" parent="world" unique_id=798476373 instance=ExtResource("11_ya4ey")]
+transform = Transform3D(-5.380872e-07, 0, -12.31, 0, 12.31, 0, 12.31, 0, -5.380872e-07, 29.242144, 0.63416386, -48.698883)
 
 [node name="BarScene" parent="world" unique_id=189082042 instance=ExtResource("4_eb6dy")]
 
@@ -79,11 +89,6 @@ visible = false
 
 [node name="door_top" type="Marker3D" parent="world" unique_id=2011844723]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.7327495, 6.438659, -8.694795)
-
-[node name="peephole_rim" type="Sprite3D" parent="world" unique_id=1882979484]
-transform = Transform3D(0.55, 0, 0, 0, 0.55, 0, 0, 0, 0.55, -7.978, 5.198, -8.62)
-sorting_offset = 0.21
-texture = SubResource("GradientTexture2D_peephole")
 
 [node name="door_hotspot_peephole" type="Marker3D" parent="world" unique_id=230101567]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.933, 5.053, -8.535)
@@ -100,18 +105,28 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, -10.7)
 [node name="outside_window_marker" type="Marker3D" parent="world" unique_id=1286979813]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.010759, 0, -5.9983044)
 
+[node name="path_avoid_camera_marker" type="Marker3D" parent="world" unique_id=849642784]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.078005, 0.56666374, -3.5729616)
+
 [node name="dialogue_box_marker" type="Marker3D" parent="world" unique_id=702205353]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.2399154, 6.020543, -8.808638)
 
 [node name="DialogueBox" parent="world/dialogue_box_marker" unique_id=1130722046 instance=ExtResource("11_dialogue")]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1098747847]
-transform = Transform3D(0.8660254, -0.3535534, 0.3535534, 0, 0.7071068, 0.7071068, -0.5, -0.6123724, 0.6123724, 0, 3, 2)
-light_energy = 1.1
+transform = Transform3D(0.8660253, -0.35355335, 0.35355338, 0, 0.70710677, 0.7071067, -0.49999997, -0.61237234, 0.6123724, 0, 4.793578, 2)
+light_energy = 0.754
+shadow_enabled = true
+
+[node name="OmniLight3D" type="OmniLight3D" parent="." unique_id=936307964]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.7246377, 7.164141, -0.82008815)
+light_energy = 5.08
+omni_range = 14.6
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=381803592]
 environment = SubResource("Environment_main")
 script = ExtResource("12_sky")
+ambient_light_energy = 0.36
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=1892879549]
 transform = Transform3D(1, 0, 0, 0, 0.9986295, 0.052335963, 0, -0.052335963, 0.9986295, -8.198, 4.818, -3.406)
@@ -121,6 +136,8 @@ mouse_look_max_yaw_degrees = 5.7
 mouse_look_max_pitch_degrees = 5.7
 mouse_look_smoothing = 4.0
 reject_look_delay = 1.5
+wrong_accept_push_delay_offset = -0.7999999999999998
+wrong_accept_track_duration = 1.5
 
 [node name="PeepholeLayer" type="CanvasLayer" parent="." unique_id=28395697]
 
@@ -137,7 +154,7 @@ stretch = true
 [node name="SubViewport" type="SubViewport" parent="PeepholeLayer/PeepholeView" unique_id=1186475315]
 own_world_3d = true
 handle_input_locally = false
-size = Vector2i(1920, 1080)
+size = Vector2i(1152, 648)
 render_target_update_mode = 0
 
 [node name="PeepholeStage" parent="PeepholeLayer/PeepholeView/SubViewport" unique_id=2132929695 instance=ExtResource("8_peephole")]

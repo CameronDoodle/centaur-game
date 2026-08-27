@@ -20,6 +20,9 @@ var _input_locked: bool = false
 var _approach_stream: AudioStream
 var _knock_stream: AudioStream
 var _question_subtitles: Array[String] = []
+var _wrong_accept_join_remaining: int = 0
+var _wrong_accept_join_scored: bool = false
+var _wrong_accept_join_strike: bool = false
 
 
 func _ready() -> void:
@@ -51,7 +54,7 @@ func _bind_hud() -> void:
 func start_encounter(subject: SubjectDef) -> void:
 	current_subject = subject
 	_input_locked = false
-	subject_presenter.set_door_closed()
+	subject_presenter.set_door_closed(false)
 	subject_presenter.spawn_subject(subject)
 	hud.hide_reveal()
 	if dialogue_box != null:
@@ -343,7 +346,6 @@ func _resolve(accepted: bool) -> void:
 		dialogue_box.hide_box()
 	hud.set_peephole_mode(false)
 	subject_presenter.exit_peephole()
-	_call_camera("snap_to_rest")
 	_set_phase(Phase.RESOLVE)
 	var correct := _is_decision_correct(accepted)
 	var scored := correct
@@ -356,9 +358,15 @@ func _resolve(accepted: bool) -> void:
 	)
 	hud.show_reveal(current_subject.reveal_text)
 	if accepted:
-		subject_presenter.play_accept(func() -> void:
-			_finish_resolve(scored, strike, false)
-		)
+		var wrong_accept := not correct
+		if wrong_accept:
+			_begin_wrong_accept_resolve(scored, strike)
+		else:
+			var on_passed_marker := func() -> void:
+				hud.hide_reveal()
+				_set_phase(Phase.DONE)
+				encounter_finished.emit(scored, strike, true)
+			subject_presenter.play_accept(Callable(), on_passed_marker)
 		return
 	var penalty := not correct
 	var on_walk_done := func() -> void:
@@ -379,8 +387,30 @@ func _resolve(accepted: bool) -> void:
 func _finish_resolve(scored: bool, strike: bool, skip_handoff_delay: bool) -> void:
 	subject_presenter.clear_subject()
 	subject_presenter.set_door_closed()
+	hud.hide_reveal()
+	_call_camera("snap_to_rest")
 	_set_phase(Phase.DONE)
 	encounter_finished.emit(scored, strike, skip_handoff_delay)
+
+
+func _begin_wrong_accept_resolve(scored: bool, strike: bool) -> void:
+	_wrong_accept_join_scored = scored
+	_wrong_accept_join_strike = strike
+	_wrong_accept_join_remaining = 2
+	_call_camera("snap_to_rest")
+	var subject := subject_presenter.get_active_subject()
+	var knock_delay := subject_presenter.wrong_accept_knock_delay()
+	var join := Callable(self, "_on_wrong_accept_join_step")
+	subject_presenter.play_accept_penalty(join)
+	_play_wrong_accept_sequence(subject, knock_delay, join)
+
+
+func _on_wrong_accept_join_step() -> void:
+	if _wrong_accept_join_remaining <= 0:
+		return
+	_wrong_accept_join_remaining -= 1
+	if _wrong_accept_join_remaining <= 0:
+		_finish_resolve(_wrong_accept_join_scored, _wrong_accept_join_strike, true)
 
 
 func _begin_reject_camera_follow(subject: Node3D) -> void:
@@ -393,6 +423,43 @@ func _end_reject_camera_follow(on_complete: Callable) -> void:
 	var camera := _ensure_player_camera()
 	if camera != null and camera.has_method("end_reject_follow"):
 		camera.call("end_reject_follow", on_complete)
+		return
+	if on_complete.is_valid():
+		on_complete.call()
+
+
+func _play_wrong_accept_sequence(
+	subject: Node3D,
+	knock_delay: float,
+	on_complete: Callable
+) -> void:
+	var camera := _ensure_player_camera()
+	if camera == null:
+		if on_complete.is_valid():
+			on_complete.call()
+		return
+	if subject == null or not is_instance_valid(subject):
+		subject = subject_presenter.get_active_subject()
+	if camera.has_method("play_wrong_accept_sequence"):
+		camera.call("play_wrong_accept_sequence", subject, knock_delay, on_complete)
+		return
+	if on_complete.is_valid():
+		on_complete.call()
+
+
+func _begin_wrong_accept_penalty(subject: Node3D = null) -> void:
+	var camera := _ensure_player_camera()
+	if camera == null or not camera.has_method("begin_wrong_accept_penalty"):
+		return
+	if subject == null or not is_instance_valid(subject):
+		subject = subject_presenter.get_active_subject()
+	camera.call("begin_wrong_accept_penalty", subject)
+
+
+func _end_wrong_accept_penalty(on_complete: Callable) -> void:
+	var camera := _ensure_player_camera()
+	if camera != null and camera.has_method("end_wrong_accept_penalty"):
+		camera.call("end_wrong_accept_penalty", on_complete)
 		return
 	if on_complete.is_valid():
 		on_complete.call()

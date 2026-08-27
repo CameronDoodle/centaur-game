@@ -28,17 +28,40 @@ extends Camera3D
 @export_range(0.5, 12.0, 0.01) var reject_look_blend: float = 3.0
 @export var reject_look_height: float = 1.6
 
+@export_group("Wrong Accept Penalty")
+@export_range(-5.0, 5.0, 0.05) var wrong_accept_push_delay_offset: float = 0.0
+@export_range(0.0, 8.0, 0.01) var wrong_accept_knock_distance: float = 2.2
+@export_range(0.05, 2.0, 0.01) var wrong_accept_knock_duration: float = 0.12
+@export_range(0.0, 3.0, 0.01) var wrong_accept_track_delay: float = 0.0
+@export_range(0.1, 4.0, 0.01) var wrong_accept_track_ease_in: float = 0.35
+@export_range(0.5, 12.0, 0.01) var wrong_accept_track_blend: float = 6.0
+@export_range(0.1, 12.0, 0.05) var wrong_accept_track_duration: float = 2.0
+@export_range(0.1, 3.0, 0.01) var wrong_accept_return_duration: float = 0.75
+
+@export_group("Idle Resume")
+@export_range(0.1, 2.0, 0.01) var idle_resume_duration: float = 0.35
+
 var _time: float = 0.0
 var _mouse_look_current: Vector2 = Vector2.ZERO
 var _rest_transform: Transform3D
 var _bobbing: bool = true
+var _idle_blend: float = 1.0
 var _move_tween: Tween
 var _reject_delay_tween: Tween
+var _idle_blend_tween: Tween
 var _tracking_subject: Node3D
 var _tracking_active: bool = false
 var _follow_weight: float = 0.0
 var _lagged_look: Vector3 = Vector3.ZERO
 var _rest_return_callback: Callable
+var _knock_offset: Vector3 = Vector3.ZERO
+var _knock_tween: Tween
+var _wrong_accept_penalty: bool = false
+var _penalty_returning: bool = false
+var _penalty_return_tween: Tween
+var _penalty_sequence_tween: Tween
+var _penalty_sequence_on_complete: Callable
+var _tracked_yaw: float = 0.0
 
 
 func _ready() -> void:
@@ -53,22 +76,32 @@ func capture_rest() -> void:
 
 
 func _process(delta: float) -> void:
-	if _tracking_active:
-		_process_reject_follow(delta)
+	if not _bobbing and not _wrong_accept_penalty:
 		return
-	if not _bobbing or not bob_enabled:
-		return
-	_time += delta * idle_speed
-	var bob_y := sin(_time) * idle_amount
-	var bob_x := cos(_time * 0.5) * idle_amount * idle_horizontal_ratio
-	var pitch := deg_to_rad(sin(_time) * bob_pitch_degrees)
-	var roll := deg_to_rad(cos(_time * 0.5) * bob_roll_degrees)
-	var target_look := _mouse_look_target()
+	var blend := _idle_blend
+	var bob_y := 0.0
+	var bob_x := 0.0
+	var pitch := 0.0
+	var roll := 0.0
+	if _bobbing and bob_enabled:
+		_time += delta * idle_speed
+		bob_y = sin(_time) * idle_amount * blend
+		bob_x = cos(_time * 0.5) * idle_amount * idle_horizontal_ratio * blend
+		pitch = deg_to_rad(sin(_time) * bob_pitch_degrees) * blend
+		roll = deg_to_rad(cos(_time * 0.5) * bob_roll_degrees) * blend
+	var target_look := _mouse_look_target() * blend
 	var catch_up := 1.0 - exp(-mouse_look_smoothing * delta)
 	_mouse_look_current = _mouse_look_current.lerp(target_look, catch_up)
 	var rest_euler := _rest_transform.basis.get_euler()
-	position = _rest_transform.origin + Vector3(bob_x, bob_y, 0.0)
-	rotation = rest_euler + Vector3(pitch + _mouse_look_current.y, _mouse_look_current.x, roll)
+	position = _rest_transform.origin + Vector3(bob_x, bob_y, 0.0) + _knock_offset
+	var bob_rotation := Vector3(pitch, 0.0, roll)
+	if _wrong_accept_penalty:
+		_apply_wrong_accept_tracking(delta, rest_euler, bob_rotation)
+	elif _tracking_active:
+		rotation = rest_euler + bob_rotation + Vector3(_mouse_look_current.y, _mouse_look_current.x, 0.0)
+		_apply_reject_tracking(delta)
+	else:
+		rotation = rest_euler + bob_rotation + Vector3(_mouse_look_current.y, _mouse_look_current.x, 0.0)
 
 
 func move_to_peephole() -> void:
@@ -84,11 +117,14 @@ func return_to_rest(on_complete: Callable = Callable()) -> void:
 
 func snap_to_rest() -> void:
 	_cancel_reject_follow()
+	_cancel_wrong_accept_penalty()
+	_kill_idle_blend_tween()
 	if _move_tween:
 		_move_tween.kill()
 		_move_tween = null
 	transform = _rest_transform
 	_mouse_look_current = Vector2.ZERO
+	_idle_blend = 1.0
 	_bobbing = true
 
 
@@ -96,6 +132,7 @@ func begin_reject_follow(subject: Node3D) -> void:
 	_cancel_reject_follow()
 	if subject == null or not is_instance_valid(subject):
 		return
+	_kill_idle_blend_tween()
 	_tracking_subject = subject
 	_reject_delay_tween = create_tween()
 	_reject_delay_tween.tween_interval(reject_look_delay)
@@ -114,12 +151,148 @@ func end_reject_follow(on_complete: Callable = Callable()) -> void:
 	_tween_camera(rest_global.origin, rest_global.basis, true, on_complete)
 
 
+func play_wrong_accept_sequence(
+	subject: Node3D,
+	knock_delay: float,
+	on_complete: Callable = Callable()
+) -> void:
+	_cancel_wrong_accept_penalty()
+	if subject == null or not is_instance_valid(subject):
+		_penalty_sequence_on_complete = Callable()
+		if on_complete.is_valid():
+			on_complete.call()
+		return
+	_penalty_sequence_on_complete = on_complete
+	_wrong_accept_penalty = true
+	_penalty_returning = false
+	_tracking_subject = subject
+	_tracking_active = false
+	_follow_weight = 0.0
+	_tracked_yaw = _rest_transform.basis.get_euler().y
+	_knock_offset = Vector3.ZERO
+	var knock_dir := Vector3(_rest_transform.basis.x.x, 0.0, _rest_transform.basis.x.z)
+	if knock_dir.length_squared() < 0.0001:
+		knock_dir = Vector3.RIGHT
+	knock_dir = knock_dir.normalized()
+	var push_delay := maxf(0.0, knock_delay + wrong_accept_push_delay_offset)
+	_penalty_sequence_tween = create_tween()
+	if push_delay > 0.0:
+		_penalty_sequence_tween.tween_interval(push_delay)
+	_penalty_sequence_tween.set_trans(Tween.TRANS_QUAD)
+	_penalty_sequence_tween.set_ease(Tween.EASE_OUT)
+	_penalty_sequence_tween.tween_method(
+		func(weight: float) -> void:
+			_knock_offset = knock_dir * wrong_accept_knock_distance * weight,
+		0.0,
+		1.0,
+		wrong_accept_knock_duration
+	)
+	if wrong_accept_track_delay > 0.0:
+		_penalty_sequence_tween.tween_interval(wrong_accept_track_delay)
+	_penalty_sequence_tween.tween_callback(func() -> void:
+		_tracking_active = true
+	)
+	_penalty_sequence_tween.tween_interval(wrong_accept_track_duration)
+	_penalty_sequence_tween.tween_callback(func() -> void:
+		_penalty_sequence_tween = null
+		end_wrong_accept_penalty()
+	)
+
+
+func begin_wrong_accept_penalty(subject: Node3D) -> void:
+	_cancel_wrong_accept_penalty()
+	if subject == null or not is_instance_valid(subject):
+		return
+	_wrong_accept_penalty = true
+	_penalty_returning = false
+	_tracking_subject = subject
+	_tracking_active = true
+	_follow_weight = 0.0
+	_tracked_yaw = _rest_transform.basis.get_euler().y
+	if _knock_tween:
+		_knock_tween.kill()
+		_knock_tween = null
+	var knock_dir := Vector3(_rest_transform.basis.x.x, 0.0, _rest_transform.basis.x.z)
+	if knock_dir.length_squared() < 0.0001:
+		knock_dir = Vector3.RIGHT
+	knock_dir = knock_dir.normalized()
+	_knock_offset = Vector3.ZERO
+	_knock_tween = create_tween()
+	_knock_tween.set_trans(Tween.TRANS_QUAD)
+	_knock_tween.set_ease(Tween.EASE_OUT)
+	_knock_tween.tween_method(
+		func(weight: float) -> void:
+			_knock_offset = knock_dir * wrong_accept_knock_distance * weight,
+		0.0,
+		1.0,
+		wrong_accept_knock_duration
+	)
+
+
+func end_wrong_accept_penalty(on_complete: Callable = Callable()) -> void:
+	var complete := on_complete if on_complete.is_valid() else _penalty_sequence_on_complete
+	if _knock_tween:
+		_knock_tween.kill()
+		_knock_tween = null
+	if _penalty_return_tween:
+		_penalty_return_tween.kill()
+		_penalty_return_tween = null
+	_penalty_returning = true
+	var start_knock := _knock_offset
+	var start_weight := _follow_weight
+	_penalty_return_tween = create_tween()
+	_penalty_return_tween.set_trans(Tween.TRANS_SINE)
+	_penalty_return_tween.set_ease(Tween.EASE_IN_OUT)
+	_penalty_return_tween.set_parallel(true)
+	_penalty_return_tween.tween_method(
+		func(weight: float) -> void:
+			_knock_offset = start_knock * (1.0 - weight)
+			_follow_weight = start_weight * (1.0 - weight),
+		0.0,
+		1.0,
+		wrong_accept_return_duration
+	)
+	_penalty_return_tween.set_parallel(false)
+	_penalty_return_tween.tween_callback(func() -> void:
+		_penalty_return_tween = null
+		_complete_wrong_accept_penalty(complete)
+	)
+
+
+func _complete_wrong_accept_penalty(on_complete: Callable) -> void:
+	_penalty_sequence_on_complete = Callable()
+	_cancel_wrong_accept_penalty()
+	if on_complete.is_valid():
+		on_complete.call()
+
+
 func _cancel_reject_follow() -> void:
 	_kill_reject_delay()
+	if not _wrong_accept_penalty:
+		_tracking_active = false
+		_tracking_subject = null
+		_follow_weight = 0.0
+	_rest_return_callback = Callable()
+
+
+func _cancel_wrong_accept_penalty() -> void:
+	if _penalty_sequence_tween:
+		_penalty_sequence_tween.kill()
+		_penalty_sequence_tween = null
+	if _knock_tween:
+		_knock_tween.kill()
+		_knock_tween = null
+	if _penalty_return_tween:
+		_penalty_return_tween.kill()
+		_penalty_return_tween = null
+	_knock_offset = Vector3.ZERO
+	_wrong_accept_penalty = false
+	_penalty_returning = false
 	_tracking_active = false
 	_tracking_subject = null
 	_follow_weight = 0.0
-	_rest_return_callback = Callable()
+	_tracked_yaw = 0.0
+	_penalty_sequence_on_complete = Callable()
 
 
 func _kill_reject_delay() -> void:
@@ -135,8 +308,6 @@ func _start_reject_tracking() -> void:
 	if _move_tween:
 		_move_tween.kill()
 		_move_tween = null
-	_bobbing = false
-	transform = _rest_transform
 	_follow_weight = 0.0
 	_lagged_look = _reject_look_point(_tracking_subject)
 	_tracking_active = true
@@ -149,23 +320,54 @@ func _stop_reject_tracking() -> void:
 	_follow_weight = 0.0
 
 
-func _process_reject_follow(delta: float) -> void:
+func _apply_reject_tracking(delta: float) -> void:
 	if _tracking_subject == null or not is_instance_valid(_tracking_subject):
 		_tracking_active = false
 		return
-	var rest_global := _rest_global_transform()
-	global_position = rest_global.origin
+	var ease_in := maxf(reject_look_ease_in, 0.05)
+	_follow_weight = move_toward(_follow_weight, 1.0, delta / ease_in)
 	_lagged_look = _lagged_look.lerp(
 		_reject_look_point(_tracking_subject),
 		1.0 - exp(-reject_look_blend * delta)
 	)
 	if global_position.distance_squared_to(_lagged_look) < 0.0001:
 		return
-	var ease_in := maxf(reject_look_ease_in, 0.05)
-	_follow_weight = move_toward(_follow_weight, 1.0, delta / ease_in)
+	var base_basis := global_transform.basis
 	look_at(_lagged_look, Vector3.UP)
-	if _follow_weight < 1.0:
-		global_transform.basis = rest_global.basis.slerp(global_transform.basis, _follow_weight)
+	var track_basis := global_transform.basis
+	global_transform.basis = base_basis.slerp(track_basis, _follow_weight)
+
+
+func _apply_wrong_accept_tracking(delta: float, rest_euler: Vector3, bob_rotation: Vector3) -> void:
+	if _tracking_subject == null or not is_instance_valid(_tracking_subject):
+		_tracking_active = false
+		rotation = rest_euler + bob_rotation + Vector3(_mouse_look_current.y, _mouse_look_current.x, 0.0)
+		return
+	if not _penalty_returning and _tracking_active:
+		var ease_in := maxf(wrong_accept_track_ease_in, 0.05)
+		_follow_weight = move_toward(_follow_weight, 1.0, delta / ease_in)
+	var desired_yaw := _tracked_yaw
+	if _tracking_active:
+		desired_yaw = _penalty_yaw_to_subject(_tracking_subject)
+		var track_catch_up := 1.0 - exp(-wrong_accept_track_blend * delta)
+		_tracked_yaw = lerp_angle(_tracked_yaw, desired_yaw, track_catch_up)
+	var yaw := lerp_angle(rest_euler.y, _tracked_yaw, _follow_weight)
+	rotation = Vector3(
+		rest_euler.x + bob_rotation.x + _mouse_look_current.y,
+		yaw + _mouse_look_current.x,
+		rest_euler.z + bob_rotation.z
+	)
+
+
+func _penalty_yaw_to_subject(subject: Node3D) -> float:
+	var look := subject.global_position
+	look.y = global_position.y
+	var offset := look - global_position
+	offset.y = 0.0
+	if offset.length_squared() < 0.04:
+		return _tracked_yaw
+	var look_basis := Basis.looking_at(offset, Vector3.UP)
+	return look_basis.get_euler().y
 
 
 func _reject_look_point(subject: Node3D) -> Vector3:
@@ -202,7 +404,7 @@ func _subject_visual_aabb(subject: Node3D) -> AABB:
 
 
 func _can_mouse_look() -> bool:
-	return mouse_look_enabled and _bobbing and not _tracking_active
+	return mouse_look_enabled and _bobbing
 
 
 func _mouse_look_target() -> Vector2:
@@ -231,6 +433,8 @@ func _tween_camera(
 	on_complete: Callable = Callable()
 ) -> void:
 	_bobbing = false
+	_kill_idle_blend_tween()
+	_idle_blend = 0.0
 	_mouse_look_current = Vector2.ZERO
 	if _move_tween:
 		_move_tween.kill()
@@ -253,13 +457,34 @@ func _tween_camera(
 	_move_tween.tween_callback(func() -> void:
 		_move_tween = null
 		if resume_bob:
-			transform = _rest_transform
 			_bobbing = true
+			_begin_idle_blend()
 		var callback := _rest_return_callback
 		_rest_return_callback = Callable()
 		if callback.is_valid():
 			callback.call()
 	)
+
+
+func _begin_idle_blend() -> void:
+	_time = 0.0
+	_idle_blend = 0.0
+	_mouse_look_current = Vector2.ZERO
+	_kill_idle_blend_tween()
+	_idle_blend_tween = create_tween()
+	_idle_blend_tween.set_trans(Tween.TRANS_SINE)
+	_idle_blend_tween.set_ease(Tween.EASE_IN_OUT)
+	_idle_blend_tween.tween_property(self, "_idle_blend", 1.0, idle_resume_duration)
+	_idle_blend_tween.tween_callback(func() -> void:
+		_idle_blend_tween = null
+		_idle_blend = 1.0
+	)
+
+
+func _kill_idle_blend_tween() -> void:
+	if _idle_blend_tween:
+		_idle_blend_tween.kill()
+		_idle_blend_tween = null
 
 
 func _rest_global_transform() -> Transform3D:

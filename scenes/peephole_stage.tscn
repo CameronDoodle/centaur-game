@@ -2,13 +2,29 @@
 
 [ext_resource type="Script" uid="uid://du0ej25lcw4se" path="res://code/peephole_stage.gd" id="1_stage"]
 [ext_resource type="PackedScene" uid="uid://c3x5vtuajwv6t" path="res://scenes/subjects/centaur.tscn" id="2_1p6r5"]
+[ext_resource type="PackedScene" uid="uid://b00v134jpu65o" path="res://art/3d_models/SF Street by Alan Zimmerman - cnTMgkFoTS0.glb" id="3_5fj20"]
+[ext_resource type="Script" uid="uid://ccmg7f85n06nt" path="res://code/skybox.gd" id="4_c5fpl"]
 
-[sub_resource type="Environment" id="Environment_peephole"]
-background_mode = 1
-background_color = Color(0.08, 0.06, 0.05, 1)
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_c5fpl"]
+sky_top_color = Color(0.38, 0.58, 0.82, 1)
+sky_horizon_color = Color(0.86, 0.74, 0.58, 1)
+sky_curve = 0.155
+sky_energy_multiplier = 0.91
+ground_bottom_color = Color(0.22, 0.18, 0.14, 1)
+ground_horizon_color = Color(0.58, 0.5, 0.4, 1)
+ground_curve = 0.08
+
+[sub_resource type="Sky" id="Sky_s6w1f"]
+sky_material = SubResource("ProceduralSkyMaterial_c5fpl")
+
+[sub_resource type="Environment" id="Environment_w773y"]
+background_mode = 2
+background_color = Color(0.14, 0.12, 0.1, 1)
+background_energy_multiplier = 1.19
+sky = SubResource("Sky_s6w1f")
 ambient_light_source = 2
-ambient_light_color = Color(0.7, 0.64, 0.56, 1)
-ambient_light_energy = 0.7
+ambient_light_color = Color(0.72, 0.66, 0.58, 1)
+ambient_light_energy = 0.36
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_backdrop"]
 shading_mode = 0
@@ -21,21 +37,27 @@ size = Vector2(6, 6)
 script = ExtResource("1_stage")
 preview_scene = ExtResource("2_1p6r5")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1297372084]
-environment = SubResource("Environment_peephole")
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1966248770]
+environment = SubResource("Environment_w773y")
+script = ExtResource("4_c5fpl")
+sky_curve = 0.155
+sky_energy = 0.91
+background_energy = 1.19
+ambient_light_energy = 0.36
 
 [node name="KeyLight" type="DirectionalLight3D" parent="." unique_id=1640951972]
 transform = Transform3D(0.8660254, -0.3535534, 0.3535534, 0, 0.7071068, 0.7071068, -0.5, -0.6123724, 0.6123724, 0, 1, 2)
-light_energy = 1.15
+light_energy = 0.654
 
 [node name="FillLight" type="OmniLight3D" parent="." unique_id=1182337708]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 0.15, 0.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35791576, 0.4037723, 0.51362354)
 light_color = Color(1, 0.93, 0.85, 1)
 light_energy = 0.55
 omni_range = 4.0
 
 [node name="Backdrop" type="MeshInstance3D" parent="." unique_id=2077951924]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.2)
+visible = false
 material_override = SubResource("StandardMaterial3D_backdrop")
 mesh = SubResource("QuadMesh_backdrop")
 
@@ -49,3 +71,6 @@ fov = 40.0
 [node name="PosePivot" type="Marker3D" parent="LookTarget" unique_id=1971341391]
 
 [node name="ScalePivot" type="Marker3D" parent="LookTarget/PosePivot" unique_id=1671271919]
+
+[node name="SF Street by Alan Zimmerman - cnTMgkFoTS0" parent="." unique_id=1134064020 instance=ExtResource("3_5fj20")]
+transform = Transform3D(-3.059797e-07, 0, -7, 0, 7, 0, 7, 0, -3.059797e-07, 18.725, -0.311, -23.824)

@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SubjectDef" format=3 uid="uid://dxwx24ipgrp0q"]
+[gd_resource type="Resource" script_class="SubjectDef" format=3 uid="uid://djdv0ujsmstmh"]
 
 [ext_resource type="Script" uid="uid://dls1yg3rjh6ps" path="res://resources/subject_def.gd" id="1"]
 [ext_resource type="Resource" path="res://resources/questions/are_you_a_horse.tres" id="2"]
@@ -15,5 +15,5 @@ subject_scene = ExtResource("3")
 questions = Array[ExtResource("3_suips")]([ExtResource("2"), ExtResource("6")])
 reveal_text = "Horse."
 peephole_position = Vector3(0, 0.02, -0.1)
-peephole_rotation_degrees = Vector3(19, 0, 0)
-peephole_scale = 0.35
+peephole_rotation_degrees = Vector3(-7, 0, 0)
+peephole_scale = 0.5
