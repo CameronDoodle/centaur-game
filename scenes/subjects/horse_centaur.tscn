@@ -5,6 +5,9 @@
 [node name="HorseCentaur" type="Node3D" unique_id=1469647305]
 transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0, 0)
 script = ExtResource("1")
+torso_offset = Vector3(0, 0, 0.3)
+mask_offset = Vector3(0, 0.002, 0)
+horse_mask_length = 0.3
 
 [node name="Horse" type="Node3D" parent="." unique_id=471595567]
 

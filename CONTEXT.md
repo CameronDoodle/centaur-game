@@ -17,11 +17,15 @@ A banned Subject: the same assembled look as a Centaur, but presenting as a Huma
 _Avoid_: Centaur Human, disguise
 
 **Horse Centaur**:
-A banned Subject: the same horse-body and human-torso mix as a Centaur, but with a horse head and neck in place of the human head and neck.
+A banned Subject: the same horse-body and human-torso mix as a Centaur, but with a Horse Mask covering the human head and neck.
 _Avoid_: Disguise, masked centaur, Centaur Horse
 
+**Horse Mask**:
+The horse head worn by a Horse Centaur so the human head is completely covered, ranging from the head alone down the neck and mane to the shoulders or upper back.
+_Avoid_: Grafted head, horse-head graft, disguise mask
+
 **Appearance**:
-The randomized visual look assigned to a Subject for an encounter. A Centaur, Human Centaur, or Horse Centaur Appearance combines a human look and a horse look; on a Horse Centaur the horse look is both the body and the grafted head.
+The randomized visual look assigned to a Subject for an encounter. A Centaur, Human Centaur, or Horse Centaur Appearance combines a human look and a horse look; on a Horse Centaur the horse look is both the body and the Horse Mask.
 _Avoid_: Skin, model
 
 **Face**:

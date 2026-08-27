@@ -5,6 +5,7 @@
 [node name="Centaur" type="Node3D" unique_id=24828742]
 transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0, 0)
 script = ExtResource("1")
+torso_offset = Vector3(0, 0, 0.3)
 
 [node name="Horse" type="Node3D" parent="."]
 

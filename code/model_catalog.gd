@@ -15,6 +15,7 @@ const HORSE_MODELS: Array[PackedScene] = [
 	preload("res://art/horse/Horse.glb"),
 	preload("res://art/horse/Horse by Quaternius - qvTrSG9pZF.glb"),
 	preload("res://art/horse/White Horse by Quaternius - bEdE4rmZy9.glb"),
+	preload("res://art/horse/Black Horse.glb"),
 ]
 
 static var _reference_heights: Dictionary = {}
