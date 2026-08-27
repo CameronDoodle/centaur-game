@@ -39,3 +39,11 @@ _Avoid_: Main camera, world view
 **Peephole**:
 A close-up fisheye view through the door hole, using a separate stage and per-subject pose tuning.
 _Avoid_: Zoom, close-up camera
+
+**Shift**:
+One timed session at the Gate, defined by which Subject types may appear, how many attendants approach, and how many strikes are allowed.
+_Avoid_: Level, round, campaign
+
+**Shift Roster**:
+The ordered list of Shifts the player works through.
+_Avoid_: Level, round, campaign

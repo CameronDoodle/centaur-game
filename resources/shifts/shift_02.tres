@@ -1,10 +1,8 @@
-[gd_resource type="Resource" script_class="ShiftDef" format=3 uid="uid://cpohaxifnbbrq"]
+[gd_resource type="Resource" script_class="ShiftDef" format=3 uid="uid://b1c3d5e7gag2h"]
 
 [ext_resource type="Script" uid="uid://br88kjyyxdfu3" path="res://resources/shift_def.gd" id="1"]
 
 [resource]
 script = ExtResource("1")
-include_human_centaur = false
 include_horse_centaur = false
-subject_count = 4
-shift_timer_seconds = 180.0
+shift_timer_seconds = 150.0

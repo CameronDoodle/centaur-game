@@ -1,0 +1,82 @@
+[gd_scene format=3 uid="uid://bklwaapf7wvc7"]
+
+[ext_resource type="Script" uid="uid://ctq1a6q7p0myt" path="res://code/dialogue_box.gd" id="1_dialogue"]
+[ext_resource type="Script" uid="uid://bm2b2ukexifkg" path="res://code/speech_bubble_tail.gd" id="2_tail"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_panel"]
+size = Vector2(2.2, 3.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_panel"]
+size = Vector3(2.2, 3.3, 0.02)
+
+[node name="DialogueBox" type="Node3D" unique_id=2115255500]
+script = ExtResource("1_dialogue")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=2066437982]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1, -1.65, 0.12)
+mesh = SubResource("QuadMesh_panel")
+
+[node name="SubViewport" type="SubViewport" parent="." unique_id=164833698]
+disable_3d = true
+own_world_3d = true
+transparent_bg = true
+size = Vector2i(440, 660)
+render_target_update_mode = 4
+
+[node name="Root" type="Control" parent="SubViewport" unique_id=521913281]
+clip_contents = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Layout" type="VBoxContainer" parent="SubViewport/Root" unique_id=669887899]
+layout_mode = 1
+offset_right = 440.0
+offset_bottom = 660.0
+grow_horizontal = 2
+theme_override_constants/separation = 8
+
+[node name="ReplyBubble" type="HBoxContainer" parent="SubViewport/Root/Layout" unique_id=1643361407]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = -6
+
+[node name="SpeechBubbleTail" type="Control" parent="SubViewport/Root/Layout/ReplyBubble" unique_id=815825438]
+unique_name_in_owner = true
+z_index = 1
+custom_minimum_size = Vector2(18, 22)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 8
+mouse_filter = 2
+script = ExtResource("2_tail")
+
+[node name="ReplyPanel" type="PanelContainer" parent="SubViewport/Root/Layout/ReplyBubble" unique_id=226756529]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ReplyLabel" type="Label" parent="SubViewport/Root/Layout/ReplyBubble/ReplyPanel" unique_id=1058872211]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "Reply"
+autowrap_mode = 3
+
+[node name="QuestionButtons" type="VBoxContainer" parent="SubViewport/Root/Layout" unique_id=1577053710]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=167932899]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1779193980]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1, -1.65, 0.12)
+shape = SubResource("BoxShape3D_panel")

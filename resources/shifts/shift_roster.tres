@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ShiftRoster" format=3 uid="uid://baw3e5t7u1i0o"]
+
+[ext_resource type="Script" uid="uid://dkq8m2nvw4p1x" path="res://resources/shift_roster.gd" id="1"]
+[ext_resource type="Script" uid="uid://br88kjyyxdfu3" path="res://resources/shift_def.gd" id="2"]
+[ext_resource type="Resource" uid="uid://cpohaxifnbbrq" path="res://resources/shifts/shift_01.tres" id="3"]
+[ext_resource type="Resource" uid="uid://b1c3d5e7gag2h" path="res://resources/shifts/shift_02.tres" id="4"]
+[ext_resource type="Resource" uid="uid://c6d8e0f2g4h5i" path="res://resources/shifts/shift_03.tres" id="5"]
+[ext_resource type="Resource" uid="uid://c0etyjtwxnfr" path="res://resources/shifts/shift_04.tres" id="6"]
+
+[resource]
+script = ExtResource("1")
+shifts = Array[ExtResource("2")]([ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6")])

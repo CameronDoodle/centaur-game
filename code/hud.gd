@@ -5,10 +5,10 @@ signal peephole_pressed
 signal peephole_back_pressed
 signal replay_approach_pressed
 signal replay_knock_pressed
-signal question_pressed(index: int)
 signal accept_pressed
 signal reject_pressed
 signal summary_replay_pressed
+signal summary_next_pressed
 signal peephole_pose_changed(position: Vector3, rotation_degrees: Vector3, pose_scale: float)
 signal peephole_pose_save_pressed
 signal skip_pressed
@@ -16,22 +16,22 @@ signal skip_pressed
 const BLACKOUT_DURATION := 0.75
 const ICON_TINT := Color(0.95, 0.9, 0.82, 1)
 
+@onready var shift_label: Label = %ShiftLabel
 @onready var timer_label: Label = %TimerLabel
 @onready var score_label: Label = %ScoreLabel
 @onready var strikes_label: Label = %StrikesLabel
-@onready var chat_reply_label: Label = %ChatReply
 @onready var reveal_panel: PanelContainer = %RevealPanel
 @onready var reveal_label: Label = %RevealLabel
 @onready var summary_panel: PanelContainer = %SummaryPanel
 @onready var summary_label: Label = %SummaryLabel
 @onready var gate_actions: VBoxContainer = %GateActions
 @onready var peephole_actions: VBoxContainer = %PeepholeActions
-@onready var question_buttons: VBoxContainer = %QuestionButtons
 @onready var skip_button: Button = %SkipButton
 @onready var accept_button: Button = %AcceptButton
 @onready var reject_button: Button = %RejectButton
 @onready var back_button: Button = %BackButton
 @onready var replay_button: Button = %ReplayButton
+@onready var next_button: Button = %NextButton
 @onready var fisheye_overlay: ColorRect = %FisheyeOverlay
 @onready var fade_rect: ColorRect = %FadeRect
 @onready var door_overlay: Control = %DoorOverlay
@@ -43,7 +43,6 @@ const ICON_TINT := Color(0.95, 0.9, 0.82, 1)
 @onready var knock_playback_fill: ColorRect = %KnockPlaybackFill
 @onready var approach_icon: TextureButton = %ApproachIcon
 @onready var approach_playback_fill: ColorRect = %ApproachPlaybackFill
-@onready var chat_panel: PanelContainer = %ChatPanel
 @onready var tuner_panel: PanelContainer = %PeepholeTuner
 @onready var tuner_pos_x: SpinBox = %TunerPosX
 @onready var tuner_pos_y: SpinBox = %TunerPosY
@@ -82,6 +81,7 @@ func _ready() -> void:
 	accept_button.pressed.connect(func() -> void: accept_pressed.emit())
 	reject_button.pressed.connect(func() -> void: reject_pressed.emit())
 	replay_button.pressed.connect(func() -> void: summary_replay_pressed.emit())
+	next_button.pressed.connect(func() -> void: summary_next_pressed.emit())
 	tuner_save_button.pressed.connect(func() -> void: peephole_pose_save_pressed.emit())
 	for spin in [
 		tuner_pos_x, tuner_pos_y, tuner_pos_z,
@@ -107,7 +107,6 @@ func _ready() -> void:
 	set_gate_actions_enabled(false)
 	set_skip_visible(false)
 	set_door_overlay_visible(false)
-	set_chat_visible(false)
 	set_clue_replay_visible(false, false)
 	fade_rect.modulate.a = 0.0
 	set_tuner_open(false)
@@ -212,6 +211,10 @@ func play_fade_from_black(
 	)
 
 
+func set_shift_progress(current: int, total: int) -> void:
+	shift_label.text = "Shift %d / %d" % [current, total]
+
+
 func set_timer_text(text: String) -> void:
 	timer_label.text = text
 
@@ -222,27 +225,6 @@ func set_score(score: int) -> void:
 
 func set_strikes(strikes_used: int, strikes_allowed: int) -> void:
 	strikes_label.text = "Strikes: %d / %d" % [strikes_used, strikes_allowed]
-
-
-func set_subtitle(text: String) -> void:
-	chat_reply_label.text = text
-	chat_reply_label.visible = not text.is_empty()
-
-
-func clear_subtitle() -> void:
-	set_subtitle("")
-
-
-func set_questions(questions: Array[QuestionDef]) -> void:
-	for child in question_buttons.get_children():
-		child.queue_free()
-	for i in questions.size():
-		var question := questions[i]
-		var button := Button.new()
-		button.text = question.button_label
-		var index := i
-		button.pressed.connect(func() -> void: question_pressed.emit(index))
-		question_buttons.add_child(button)
 
 
 func set_skip_visible(visible: bool, label: String = "") -> void:
@@ -258,10 +240,6 @@ func set_door_overlay_visible(visible: bool) -> void:
 		peephole_hotspot.visible = false
 		knock_hotspot.visible = false
 		approach_hotspot.visible = false
-
-
-func set_chat_visible(visible: bool) -> void:
-	chat_panel.visible = visible
 
 
 func set_clue_replay_visible(approach: bool, knock: bool) -> void:
@@ -343,9 +321,6 @@ func set_gate_actions_enabled(enabled: bool) -> void:
 	peephole_icon.disabled = not enabled
 	accept_button.disabled = not enabled
 	reject_button.disabled = not enabled
-	for child in question_buttons.get_children():
-		if child is Button:
-			child.disabled = not enabled
 	_apply_clue_button_states()
 
 
@@ -364,11 +339,9 @@ func set_peephole_mode(active: bool) -> void:
 	set_fisheye_enabled(active)
 	if active:
 		set_door_overlay_visible(false)
-		set_chat_visible(false)
 		set_tuner_open(false)
 	elif _investigation_active:
 		set_door_overlay_visible(true)
-		set_chat_visible(true)
 		set_clue_replay_visible(_clue_approach_visible, _clue_knock_visible)
 		peephole_hotspot.visible = true
 
@@ -404,8 +377,11 @@ func hide_reveal() -> void:
 	reveal_panel.visible = false
 
 
-func show_summary(text: String) -> void:
+func show_summary(text: String, show_replay: bool = false, show_next: bool = false) -> void:
+	hide_reveal()
 	summary_label.text = text
+	replay_button.visible = show_replay
+	next_button.visible = show_next
 	summary_panel.visible = true
 	set_gate_actions_enabled(false)
 	set_peephole_mode(false)
@@ -419,7 +395,6 @@ func hide_summary() -> void:
 func show_investigation(has_approach: bool, has_knock: bool) -> void:
 	_investigation_active = true
 	set_door_overlay_visible(true)
-	set_chat_visible(true)
 	set_clue_replay_visible(has_approach, has_knock)
 	peephole_hotspot.visible = true
 
@@ -427,7 +402,6 @@ func show_investigation(has_approach: bool, has_knock: bool) -> void:
 func hide_investigation() -> void:
 	_investigation_active = false
 	set_door_overlay_visible(false)
-	set_chat_visible(false)
 
 
 func _on_tuner_value_changed(_value: float) -> void:

@@ -7,6 +7,7 @@ signal encounter_finished(scored: bool, strike: bool, skip_handoff_delay: bool)
 
 var subject_presenter: SubjectPresenter
 var hud: HUD
+var dialogue_box: DialogueBox
 var audio_approach: AudioStreamPlayer
 var audio_knock: AudioStreamPlayer
 var audio_voice: AudioStreamPlayer
@@ -25,6 +26,7 @@ func _ready() -> void:
 	var parent := get_parent()
 	subject_presenter = parent.get_node("SubjectPresenter") as SubjectPresenter
 	hud = parent.get_node("HUD") as HUD
+	dialogue_box = parent.get_node("world/dialogue_box_marker/DialogueBox") as DialogueBox
 	audio_approach = parent.get_node("AudioApproach") as AudioStreamPlayer
 	audio_knock = parent.get_node("AudioKnock") as AudioStreamPlayer
 	audio_voice = parent.get_node("AudioVoice") as AudioStreamPlayer
@@ -37,7 +39,8 @@ func _bind_hud() -> void:
 	hud.peephole_back_pressed.connect(_on_peephole_back_pressed)
 	hud.replay_approach_pressed.connect(_on_replay_approach_pressed)
 	hud.replay_knock_pressed.connect(_on_replay_knock_pressed)
-	hud.question_pressed.connect(_on_question_pressed)
+	if dialogue_box != null:
+		dialogue_box.question_pressed.connect(_on_question_pressed)
 	hud.accept_pressed.connect(_on_accept_pressed)
 	hud.reject_pressed.connect(_on_reject_pressed)
 	hud.peephole_pose_changed.connect(_on_peephole_pose_changed)
@@ -51,14 +54,17 @@ func start_encounter(subject: SubjectDef) -> void:
 	subject_presenter.set_door_closed()
 	subject_presenter.spawn_subject(subject)
 	hud.hide_reveal()
-	hud.clear_subtitle()
+	if dialogue_box != null:
+		dialogue_box.clear_reply()
 	_question_subtitles.clear()
 	for question in subject.questions:
 		var line := DialoguePools.pick(question.prompt_key, subject.true_type)
 		if line.is_empty():
 			line = question.subtitle
 		_question_subtitles.append(line)
-	hud.set_questions(subject.questions)
+	if dialogue_box != null:
+		dialogue_box.set_questions(subject.questions)
+		dialogue_box.set_questions_enabled(false)
 	hud.set_gate_actions_enabled(false)
 	hud.set_peephole_mode(false)
 	hud.set_skip_visible(false)
@@ -70,6 +76,8 @@ func start_encounter(subject: SubjectDef) -> void:
 	var has_approach := _approach_stream != null
 	var has_knock := _knock_stream != null
 	hud.show_investigation(has_approach, has_knock)
+	if dialogue_box != null:
+		dialogue_box.show_box()
 	_set_phase(Phase.APPROACH)
 	_play_approach()
 
@@ -82,6 +90,8 @@ func force_miss() -> void:
 	hud.set_skip_visible(false)
 	hud.set_gate_actions_enabled(false)
 	hud.hide_investigation()
+	if dialogue_box != null:
+		dialogue_box.hide_box()
 	hud.set_peephole_mode(false)
 	subject_presenter.exit_peephole()
 	_call_camera("snap_to_rest")
@@ -130,6 +140,8 @@ func _on_knock_finished() -> void:
 	hud.set_clue_replay_playing(false, false)
 	_set_phase(Phase.OPEN)
 	hud.set_gate_actions_enabled(true)
+	if dialogue_box != null:
+		dialogue_box.set_questions_enabled(true)
 
 
 func _on_skip_pressed() -> void:
@@ -179,6 +191,8 @@ func _on_replay_approach_pressed() -> void:
 			hud.set_clue_replay_playing(false, false)
 			_set_phase(Phase.OPEN)
 			hud.set_gate_actions_enabled(true)
+			if dialogue_box != null:
+				dialogue_box.set_questions_enabled(true)
 			_replay_clue(true)
 		Phase.OPEN:
 			_replay_clue(true)
@@ -250,6 +264,9 @@ func _on_peephole_pressed() -> void:
 		return
 	_input_locked = true
 	hud.set_gate_actions_enabled(false)
+	if dialogue_box != null:
+		dialogue_box.set_questions_enabled(false)
+		dialogue_box.hide_box()
 	_call_camera("move_to_peephole")
 	hud.play_blackout(
 		func() -> void:
@@ -274,6 +291,9 @@ func _on_peephole_back_pressed() -> void:
 			subject_presenter.exit_peephole()
 			hud.set_peephole_mode(false)
 			hud.set_gate_actions_enabled(true)
+			if dialogue_box != null:
+				dialogue_box.show_box()
+				dialogue_box.set_questions_enabled(true)
 			_call_camera("return_to_rest"),
 		func() -> void:
 			_input_locked = false,
@@ -300,7 +320,8 @@ func _on_question_pressed(index: int) -> void:
 		return
 	var question := current_subject.questions[index]
 	var subtitle := _question_subtitles[index] if index < _question_subtitles.size() else question.subtitle
-	hud.set_subtitle(subtitle)
+	if dialogue_box != null:
+		dialogue_box.set_reply(subtitle)
 
 
 func _on_accept_pressed() -> void:
@@ -318,6 +339,8 @@ func _resolve(accepted: bool) -> void:
 	_stop_encounter_audio()
 	hud.set_gate_actions_enabled(false)
 	hud.hide_investigation()
+	if dialogue_box != null:
+		dialogue_box.hide_box()
 	hud.set_peephole_mode(false)
 	subject_presenter.exit_peephole()
 	_call_camera("snap_to_rest")

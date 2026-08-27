@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SubjectCatalog" format=3 uid="uid://d2f6h8j0k4l50"]
+
+[ext_resource type="Script" uid="uid://bq7t3h5tac2wf" path="res://resources/subject_catalog.gd" id="1"]
+[ext_resource type="Resource" uid="uid://dfa7mweyhktqx" path="res://resources/subjects/human_01.tres" id="2"]
+[ext_resource type="Resource" uid="uid://dxwx24ipgrp0q" path="res://resources/subjects/horse_01.tres" id="3"]
+[ext_resource type="Resource" uid="uid://bndri1xrtrlvf" path="res://resources/subjects/centaur_01.tres" id="4"]
+[ext_resource type="Resource" path="res://resources/subjects/human_centaur_01.tres" id="5"]
+[ext_resource type="Resource" path="res://resources/subjects/horse_centaur_01.tres" id="6"]
+
+[resource]
+script = ExtResource("1")
+human = ExtResource("2")
+horse = ExtResource("3")
+centaur = ExtResource("4")
+human_centaur = ExtResource("5")
+horse_centaur = ExtResource("6")

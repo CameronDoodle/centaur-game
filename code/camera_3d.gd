@@ -1,6 +1,13 @@
 class_name PlayerCamera
 extends Camera3D
 
+@export_group("Mouse Look")
+@export var mouse_look_enabled: bool = true
+@export_range(0.0, 1.0, 0.01) var mouse_look_sensitivity: float = 1.0
+@export_range(0.0, 15.0, 0.1) var mouse_look_max_yaw_degrees: float = 4.0
+@export_range(0.0, 15.0, 0.1) var mouse_look_max_pitch_degrees: float = 3.0
+@export_range(0.5, 20.0, 0.1) var mouse_look_smoothing: float = 6.0
+
 @export_group("Idle Bob")
 @export var bob_enabled: bool = true
 @export_range(0.0, 8.0, 0.01) var idle_speed: float = 1.0
@@ -22,6 +29,7 @@ extends Camera3D
 @export var reject_look_height: float = 1.6
 
 var _time: float = 0.0
+var _mouse_look_current: Vector2 = Vector2.ZERO
 var _rest_transform: Transform3D
 var _bobbing: bool = true
 var _move_tween: Tween
@@ -55,9 +63,12 @@ func _process(delta: float) -> void:
 	var bob_x := cos(_time * 0.5) * idle_amount * idle_horizontal_ratio
 	var pitch := deg_to_rad(sin(_time) * bob_pitch_degrees)
 	var roll := deg_to_rad(cos(_time * 0.5) * bob_roll_degrees)
+	var target_look := _mouse_look_target()
+	var catch_up := 1.0 - exp(-mouse_look_smoothing * delta)
+	_mouse_look_current = _mouse_look_current.lerp(target_look, catch_up)
 	var rest_euler := _rest_transform.basis.get_euler()
 	position = _rest_transform.origin + Vector3(bob_x, bob_y, 0.0)
-	rotation = rest_euler + Vector3(pitch, 0.0, roll)
+	rotation = rest_euler + Vector3(pitch + _mouse_look_current.y, _mouse_look_current.x, roll)
 
 
 func move_to_peephole() -> void:
@@ -77,6 +88,7 @@ func snap_to_rest() -> void:
 		_move_tween.kill()
 		_move_tween = null
 	transform = _rest_transform
+	_mouse_look_current = Vector2.ZERO
 	_bobbing = true
 
 
@@ -189,6 +201,29 @@ func _subject_visual_aabb(subject: Node3D) -> AABB:
 	return merged if has_bounds else AABB()
 
 
+func _can_mouse_look() -> bool:
+	return mouse_look_enabled and _bobbing and not _tracking_active
+
+
+func _mouse_look_target() -> Vector2:
+	if not _can_mouse_look():
+		return Vector2.ZERO
+	var viewport := get_viewport()
+	if viewport == null:
+		return Vector2.ZERO
+	var rect := viewport.get_visible_rect()
+	var center := rect.size * 0.5
+	var offset := viewport.get_mouse_position() - center
+	var normalized := Vector2(
+		offset.x / maxf(center.x, 1.0),
+		offset.y / maxf(center.y, 1.0)
+	).clamp(Vector2(-1.0, -1.0), Vector2(1.0, 1.0)) * mouse_look_sensitivity
+	return Vector2(
+		-normalized.x * deg_to_rad(mouse_look_max_yaw_degrees),
+		-normalized.y * deg_to_rad(mouse_look_max_pitch_degrees)
+	)
+
+
 func _tween_camera(
 	target_origin: Vector3,
 	target_basis: Basis,
@@ -196,6 +231,7 @@ func _tween_camera(
 	on_complete: Callable = Callable()
 ) -> void:
 	_bobbing = false
+	_mouse_look_current = Vector2.ZERO
 	if _move_tween:
 		_move_tween.kill()
 	var start_origin := global_position
