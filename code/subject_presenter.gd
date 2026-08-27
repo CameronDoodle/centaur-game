@@ -10,6 +10,7 @@ var door: Node3D
 var door_top: Node3D
 var door_open: Node3D
 var side_window: Node3D
+var outside_window_marker: Marker3D
 var peephole_view: SubViewportContainer
 var peephole_viewport: SubViewport
 var peephole_stage: PeepholeStage
@@ -18,6 +19,8 @@ var _subject_instance: Node3D
 var _current_def: SubjectDef
 var _move_tween: Tween
 var _in_peephole: bool = false
+var _departing: Array[Node3D] = []
+var _departing_tweens: Dictionary = {}
 
 
 func _ready() -> void:
@@ -28,6 +31,7 @@ func _ready() -> void:
 	door_top = parent.get_node_or_null("world/door_top") as Node3D
 	door_open = parent.get_node_or_null("world/door_open") as Node3D
 	side_window = parent.get_node_or_null("world/side_window") as Node3D
+	outside_window_marker = parent.get_node_or_null("world/outside_window_marker") as Marker3D
 	peephole_view = parent.get_node("PeepholeLayer/PeepholeView") as SubViewportContainer
 	if peephole_view:
 		peephole_viewport = peephole_view.get_node("SubViewport") as SubViewport
@@ -101,12 +105,20 @@ func get_peephole_pose() -> Dictionary:
 
 
 func clear_subject() -> void:
+	if _move_tween:
+		_move_tween.kill()
+		_move_tween = null
 	if _subject_instance and is_instance_valid(_subject_instance):
 		_subject_instance.queue_free()
 	_subject_instance = null
 	_current_def = null
 	if peephole_stage:
 		peephole_stage.clear()
+
+
+func clear_all_subjects() -> void:
+	clear_subject()
+	_clear_departing()
 
 
 func enter_peephole() -> void:
@@ -134,7 +146,7 @@ func is_in_peephole() -> bool:
 func set_door_closed() -> void:
 	if door_open:
 		door_open.visible = false
-	if side_window:
+	if side_window and _departing.is_empty():
 		side_window.visible = false
 
 
@@ -148,12 +160,48 @@ func play_accept(on_complete: Callable = Callable()) -> void:
 	_tween_subject(_door_offset_target(Vector3(0.0, 0.0, 5.0)), on_complete)
 
 
-func play_reject(on_complete: Callable = Callable()) -> void:
+func play_reject(
+	on_complete: Callable = Callable(),
+	on_halfway: Callable = Callable()
+) -> Node3D:
 	if door_open:
 		door_open.visible = false
 	if side_window:
 		side_window.visible = true
-	_tween_subject(_door_offset_target(Vector3(-2.5, 0.0, 0.0)), on_complete)
+	var walker := _subject_instance
+	_subject_instance = null
+	if walker and walker.has_method("play_walk"):
+		walker.play_walk()
+	if walker == null or not is_instance_valid(walker):
+		if on_halfway.is_valid():
+			on_halfway.call()
+		if on_complete.is_valid():
+			on_complete.call()
+		return null
+	_departing.append(walker)
+	if outside_window_marker == null:
+		_tween_departing(
+			walker,
+			_door_offset_target(Vector3(-2.5, 0.0, 0.0)),
+			2.2,
+			on_complete,
+			on_halfway
+		)
+		return walker
+	var mid := outside_window_marker.global_position
+	var start := mid + Vector3(0.0, 0.0, -6.0)
+	var end := mid + Vector3(0.0, 0.0, 6.0)
+	start.y = walker.global_position.y
+	walker.global_position = start
+	walker.look_at(start + Vector3(0.0, 0.0, 1.0), Vector3.UP, true)
+	_tween_departing(
+		walker,
+		end,
+		start.distance_to(end) * 2.2 / 5.0,
+		on_complete,
+		on_halfway
+	)
+	return walker
 
 
 func _fit_subject_to_gate() -> void:
@@ -212,7 +260,7 @@ func _find_mesh_instances(root: Node) -> Array[MeshInstance3D]:
 	return meshes
 
 
-func _tween_subject(target: Vector3, on_complete: Callable) -> void:
+func _tween_subject(target: Vector3, on_complete: Callable, duration: float = 2.2) -> void:
 	if _subject_instance == null or not is_instance_valid(_subject_instance):
 		if on_complete.is_valid():
 			on_complete.call()
@@ -221,8 +269,52 @@ func _tween_subject(target: Vector3, on_complete: Callable) -> void:
 		_move_tween.kill()
 	target.y = _subject_instance.global_position.y
 	_move_tween = create_tween()
-	_move_tween.tween_property(_subject_instance, "global_position", target, 2.2)
+	_move_tween.tween_property(_subject_instance, "global_position", target, duration)
 	_move_tween.tween_callback(func() -> void:
 		if on_complete.is_valid():
 			on_complete.call()
 	)
+
+
+func _tween_departing(
+	walker: Node3D,
+	target: Vector3,
+	duration: float,
+	on_complete: Callable,
+	on_halfway: Callable
+) -> void:
+	target.y = walker.global_position.y
+	var tween := create_tween()
+	_departing_tweens[walker] = tween
+	tween.set_parallel(true)
+	tween.tween_property(walker, "global_position", target, duration)
+	if on_halfway.is_valid():
+		tween.tween_callback(on_halfway).set_delay(duration * 0.5)
+	tween.set_parallel(false)
+	tween.chain().tween_callback(func() -> void:
+		_finish_departing(walker)
+		if on_complete.is_valid():
+			on_complete.call()
+	)
+
+
+func _finish_departing(walker: Node3D) -> void:
+	_departing_tweens.erase(walker)
+	_departing.erase(walker)
+	if is_instance_valid(walker):
+		walker.queue_free()
+	if side_window and _departing.is_empty():
+		side_window.visible = false
+
+
+func _clear_departing() -> void:
+	for tween in _departing_tweens.values():
+		if tween is Tween:
+			(tween as Tween).kill()
+	_departing_tweens.clear()
+	for walker in _departing:
+		if is_instance_valid(walker):
+			walker.queue_free()
+	_departing.clear()
+	if side_window:
+		side_window.visible = false

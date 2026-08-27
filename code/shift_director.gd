@@ -76,7 +76,7 @@ func _start_next_encounter() -> void:
 	encounter_director.start_encounter(subject)
 
 
-func _on_encounter_finished(scored: bool, strike: bool) -> void:
+func _on_encounter_finished(scored: bool, strike: bool, skip_handoff_delay: bool = false) -> void:
 	if not _shift_active:
 		return
 	_waiting_on_encounter = false
@@ -85,7 +85,8 @@ func _on_encounter_finished(scored: bool, strike: bool) -> void:
 	if strike:
 		strikes_used += 1
 	_update_hud_stats()
-	await get_tree().create_timer(1.0).timeout
+	if not skip_handoff_delay:
+		await get_tree().create_timer(1.0).timeout
 	if not _shift_active:
 		return
 	if strikes_used >= shift_def.strikes_allowed:

@@ -3,7 +3,7 @@ extends Node
 
 enum Phase { APPROACH, KNOCK, OPEN, RESOLVE, DONE }
 
-signal encounter_finished(scored: bool, strike: bool)
+signal encounter_finished(scored: bool, strike: bool, skip_handoff_delay: bool)
 
 var subject_presenter: SubjectPresenter
 var hud: HUD
@@ -85,7 +85,7 @@ func force_miss() -> void:
 	hud.set_peephole_mode(false)
 	subject_presenter.exit_peephole()
 	_call_camera("snap_to_rest")
-	subject_presenter.clear_subject()
+	subject_presenter.clear_all_subjects()
 	subject_presenter.set_door_closed()
 	_set_phase(Phase.DONE)
 
@@ -332,15 +332,47 @@ func _resolve(accepted: bool) -> void:
 		]
 	)
 	hud.show_reveal(current_subject.reveal_text)
-	var on_resolve_done := func() -> void:
-		subject_presenter.clear_subject()
-		subject_presenter.set_door_closed()
-		_set_phase(Phase.DONE)
-		encounter_finished.emit(scored, strike)
 	if accepted:
-		subject_presenter.play_accept(on_resolve_done)
-	else:
-		subject_presenter.play_reject(on_resolve_done)
+		subject_presenter.play_accept(func() -> void:
+			_finish_resolve(scored, strike, false)
+		)
+		return
+	var penalty := not correct
+	var on_walk_done := func() -> void:
+		if penalty:
+			_end_reject_camera_follow(func() -> void:
+				_finish_resolve(scored, strike, true)
+			)
+	var on_halfway := Callable()
+	if not penalty:
+		on_halfway = func() -> void:
+			_set_phase(Phase.DONE)
+			encounter_finished.emit(scored, strike, true)
+	var walker := subject_presenter.play_reject(on_walk_done, on_halfway)
+	if penalty:
+		_begin_reject_camera_follow(walker)
+
+
+func _finish_resolve(scored: bool, strike: bool, skip_handoff_delay: bool) -> void:
+	subject_presenter.clear_subject()
+	subject_presenter.set_door_closed()
+	_set_phase(Phase.DONE)
+	encounter_finished.emit(scored, strike, skip_handoff_delay)
+
+
+func _begin_reject_camera_follow(subject: Node3D) -> void:
+	var camera := _ensure_player_camera()
+	if camera != null and camera.has_method("begin_reject_follow"):
+		camera.call("begin_reject_follow", subject)
+
+
+func _end_reject_camera_follow(on_complete: Callable) -> void:
+	var camera := _ensure_player_camera()
+	if camera != null and camera.has_method("end_reject_follow"):
+		camera.call("end_reject_follow", on_complete)
+		return
+	if on_complete.is_valid():
+		on_complete.call()
 
 
 func _camera_move_duration() -> float:
