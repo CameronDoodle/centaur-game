@@ -15,10 +15,22 @@ extends Camera3D
 @export_range(0.05, 3.0, 0.01) var peephole_move_duration: float = 0.75
 @export var look_at_peephole: bool = true
 
+@export_group("Reject Look")
+@export_range(0.0, 8.0, 0.01) var reject_look_delay: float = 2.0
+@export_range(0.1, 4.0, 0.01) var reject_look_ease_in: float = 0.65
+@export_range(0.5, 12.0, 0.01) var reject_look_blend: float = 3.0
+@export var reject_look_height: float = 1.6
+
 var _time: float = 0.0
 var _rest_transform: Transform3D
 var _bobbing: bool = true
 var _move_tween: Tween
+var _reject_delay_tween: Tween
+var _tracking_subject: Node3D
+var _tracking_active: bool = false
+var _follow_weight: float = 0.0
+var _lagged_look: Vector3 = Vector3.ZERO
+var _rest_return_callback: Callable
 
 
 func _ready() -> void:
@@ -33,6 +45,9 @@ func capture_rest() -> void:
 
 
 func _process(delta: float) -> void:
+	if _tracking_active:
+		_process_reject_follow(delta)
+		return
 	if not _bobbing or not bob_enabled:
 		return
 	_time += delta * idle_speed
@@ -50,12 +65,14 @@ func move_to_peephole() -> void:
 	_tween_camera(target_origin, _peephole_basis(target_origin), false)
 
 
-func return_to_rest() -> void:
+func return_to_rest(on_complete: Callable = Callable()) -> void:
+	_stop_reject_tracking()
 	var rest_global := _rest_global_transform()
-	_tween_camera(rest_global.origin, rest_global.basis, true)
+	_tween_camera(rest_global.origin, rest_global.basis, true, on_complete)
 
 
 func snap_to_rest() -> void:
+	_cancel_reject_follow()
 	if _move_tween:
 		_move_tween.kill()
 		_move_tween = null
@@ -63,12 +80,127 @@ func snap_to_rest() -> void:
 	_bobbing = true
 
 
-func _tween_camera(target_origin: Vector3, target_basis: Basis, resume_bob: bool) -> void:
+func begin_reject_follow(subject: Node3D) -> void:
+	_cancel_reject_follow()
+	if subject == null or not is_instance_valid(subject):
+		return
+	_tracking_subject = subject
+	_reject_delay_tween = create_tween()
+	_reject_delay_tween.tween_interval(reject_look_delay)
+	_reject_delay_tween.tween_callback(_start_reject_tracking)
+
+
+func end_reject_follow(on_complete: Callable = Callable()) -> void:
+	_kill_reject_delay()
+	_tracking_active = false
+	_tracking_subject = null
+	_follow_weight = 0.0
+	if _move_tween:
+		_move_tween.kill()
+		_move_tween = null
+	var rest_global := _rest_global_transform()
+	_tween_camera(rest_global.origin, rest_global.basis, true, on_complete)
+
+
+func _cancel_reject_follow() -> void:
+	_kill_reject_delay()
+	_tracking_active = false
+	_tracking_subject = null
+	_follow_weight = 0.0
+	_rest_return_callback = Callable()
+
+
+func _kill_reject_delay() -> void:
+	if _reject_delay_tween:
+		_reject_delay_tween.kill()
+		_reject_delay_tween = null
+
+
+func _start_reject_tracking() -> void:
+	_reject_delay_tween = null
+	if _tracking_subject == null or not is_instance_valid(_tracking_subject):
+		return
+	if _move_tween:
+		_move_tween.kill()
+		_move_tween = null
+	_bobbing = false
+	transform = _rest_transform
+	_follow_weight = 0.0
+	_lagged_look = _reject_look_point(_tracking_subject)
+	_tracking_active = true
+
+
+func _stop_reject_tracking() -> void:
+	_kill_reject_delay()
+	_tracking_active = false
+	_tracking_subject = null
+	_follow_weight = 0.0
+
+
+func _process_reject_follow(delta: float) -> void:
+	if _tracking_subject == null or not is_instance_valid(_tracking_subject):
+		_tracking_active = false
+		return
+	var rest_global := _rest_global_transform()
+	global_position = rest_global.origin
+	_lagged_look = _lagged_look.lerp(
+		_reject_look_point(_tracking_subject),
+		1.0 - exp(-reject_look_blend * delta)
+	)
+	if global_position.distance_squared_to(_lagged_look) < 0.0001:
+		return
+	var ease_in := maxf(reject_look_ease_in, 0.05)
+	_follow_weight = move_toward(_follow_weight, 1.0, delta / ease_in)
+	look_at(_lagged_look, Vector3.UP)
+	if _follow_weight < 1.0:
+		global_transform.basis = rest_global.basis.slerp(global_transform.basis, _follow_weight)
+
+
+func _reject_look_point(subject: Node3D) -> Vector3:
+	var face := subject.find_child("Face", true, false) as Node3D
+	if face:
+		return face.global_position
+	var aabb := _subject_visual_aabb(subject)
+	if aabb.size != Vector3.ZERO:
+		return aabb.get_center()
+	var look := subject.global_position
+	look.y += reject_look_height
+	return look
+
+
+func _subject_visual_aabb(subject: Node3D) -> AABB:
+	var merged := AABB()
+	var has_bounds := false
+	var stack: Array[Node] = [subject]
+	while not stack.is_empty():
+		var node: Node = stack.pop_back()
+		if node is MeshInstance3D:
+			var mesh := node as MeshInstance3D
+			var local_aabb := mesh.get_aabb()
+			if local_aabb.size != Vector3.ZERO:
+				var global_aabb := mesh.global_transform * local_aabb
+				if not has_bounds:
+					merged = global_aabb
+					has_bounds = true
+				else:
+					merged = merged.merge(global_aabb)
+		for child in node.get_children():
+			stack.append(child)
+	return merged if has_bounds else AABB()
+
+
+func _tween_camera(
+	target_origin: Vector3,
+	target_basis: Basis,
+	resume_bob: bool,
+	on_complete: Callable = Callable()
+) -> void:
 	_bobbing = false
 	if _move_tween:
 		_move_tween.kill()
 	var start_origin := global_position
 	var start_basis := global_transform.basis
+	_rest_return_callback = on_complete
 	_move_tween = create_tween()
 	_move_tween.set_trans(Tween.TRANS_SINE)
 	_move_tween.set_ease(Tween.EASE_IN_OUT)
@@ -87,6 +219,10 @@ func _tween_camera(target_origin: Vector3, target_basis: Basis, resume_bob: bool
 		if resume_bob:
 			transform = _rest_transform
 			_bobbing = true
+		var callback := _rest_return_callback
+		_rest_return_callback = Callable()
+		if callback.is_valid():
+			callback.call()
 	)
 
 
