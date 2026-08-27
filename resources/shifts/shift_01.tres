@@ -3,10 +3,12 @@
 [ext_resource type="Script" uid="uid://br88kjyyxdfu3" path="res://resources/shift_def.gd" id="1"]
 [ext_resource type="Resource" uid="uid://dfa7mweyhktqx" path="res://resources/subjects/human_01.tres" id="2"]
 [ext_resource type="Script" uid="uid://dls1yg3rjh6ps" path="res://resources/subject_def.gd" id="2_27oce"]
-[ext_resource type="Resource" path="res://resources/subjects/horse_01.tres" id="3"]
-[ext_resource type="Resource" path="res://resources/subjects/centaur_01.tres" id="4"]
+[ext_resource type="Resource" uid="uid://dxwx24ipgrp0q" path="res://resources/subjects/horse_01.tres" id="3"]
+[ext_resource type="Resource" uid="uid://bndri1xrtrlvf" path="res://resources/subjects/centaur_01.tres" id="4"]
+[ext_resource type="Resource" path="res://resources/subjects/human_centaur_01.tres" id="5"]
+[ext_resource type="Resource" path="res://resources/subjects/horse_centaur_01.tres" id="6"]
 
 [resource]
 script = ExtResource("1")
-subjects = Array[ExtResource("2_27oce")]([ExtResource("2"), ExtResource("3"), ExtResource("4")])
+subjects = Array[ExtResource("2_27oce")]([ExtResource("2"), ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6")])
 shift_timer_seconds = 1200.0

@@ -4,11 +4,13 @@
 
 You are security at a horse racing/rodeo event where centaurs are strictly banned.
 
-Attendants arrive one at a time at a security gate. Every attendant is one of three types:
+Attendants arrive one at a time at a security gate. Every attendant is one of five types:
 
 - **Human** — allowed
 - **Horse** — allowed
-- **Centaur** — banned
+- **Centaur** — banned (unashamed; human head on horse body)
+- **Human Centaur** — banned (same look as Centaur, passing as Human)
+- **Horse Centaur** — banned (horse head grafted onto centaur body, passing as Horse)
 
 Centaurs are actively trying to disguise themselves and sneak into the event.
 
@@ -47,7 +49,7 @@ Before making a decision, the player can gather additional information using a s
 Examples:
 
 - **Peephole** — the gate camera zooms to the door hole, then a fisheye close-up frames the attendant's face from the **full figure** standing behind the door (legs are off-screen from lens placement, not a separate head mesh).
-- **Ask questions** — each subject has authored question buttons; subtitles always show, with optional voice lines when audio exists.
+- **Ask questions** — each subject has authored question buttons; subtitles always show (voice lines optional in future).
 
 The exact available actions and information can expand as the game develops.
 
@@ -56,9 +58,9 @@ The exact available actions and information can expand as the game develops.
 After the knock, the player chooses **Accept** or **Reject**. They never label the attendant Human, Horse, or Centaur directly.
 
 - **Accept** — let them in (correct for Human or Horse).
-- **Reject** — turn them away (correct for Centaur).
+- **Reject** — turn them away (correct for Centaur, Human Centaur, or Horse Centaur).
 
-Score +1 for a correct Accept or Reject. A strike is Accepting a Centaur or Rejecting a Human/Horse.
+Score +1 for a correct Accept or Reject. A strike is Accepting a banned centaur kind or Rejecting a Human/Horse.
 
 Each shift runs on **one timer** for the whole list of attendants; it does not reset between subjects.
 

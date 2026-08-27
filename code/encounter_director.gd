@@ -18,6 +18,7 @@ var current_subject: SubjectDef
 var _input_locked: bool = false
 var _approach_stream: AudioStream
 var _knock_stream: AudioStream
+var _question_subtitles: Array[String] = []
 
 
 func _ready() -> void:
@@ -51,12 +52,21 @@ func start_encounter(subject: SubjectDef) -> void:
 	subject_presenter.spawn_subject(subject)
 	hud.hide_reveal()
 	hud.clear_subtitle()
+	_question_subtitles.clear()
+	for question in subject.questions:
+		var line := DialoguePools.pick(question.prompt_key, subject.true_type)
+		if line.is_empty():
+			line = question.subtitle
+		_question_subtitles.append(line)
 	hud.set_questions(subject.questions)
 	hud.set_gate_actions_enabled(false)
 	hud.set_peephole_mode(false)
 	hud.set_skip_visible(false)
 	_approach_stream = ClueSfx.pick(subject.approach_kind, true)
-	_knock_stream = ClueSfx.pick(subject.knock_kind, false)
+	var knock_kind := subject.knock_kind
+	if subject.true_type == SubjectDef.TrueType.CENTAUR:
+		knock_kind = SubjectDef.ClueKind.HUMAN if randi() % 2 == 0 else SubjectDef.ClueKind.HORSE
+	_knock_stream = ClueSfx.pick(knock_kind, false)
 	var has_approach := _approach_stream != null
 	var has_knock := _knock_stream != null
 	hud.show_investigation(has_approach, has_knock)
@@ -289,10 +299,8 @@ func _on_question_pressed(index: int) -> void:
 	if index < 0 or index >= current_subject.questions.size():
 		return
 	var question := current_subject.questions[index]
-	hud.set_subtitle(question.subtitle)
-	if question.voice_stream and audio_voice:
-		audio_voice.stream = question.voice_stream
-		audio_voice.play()
+	var subtitle := _question_subtitles[index] if index < _question_subtitles.size() else question.subtitle
+	hud.set_subtitle(subtitle)
 
 
 func _on_accept_pressed() -> void:
@@ -360,8 +368,6 @@ func _ensure_player_camera() -> Camera3D:
 
 
 func _is_decision_correct(accepted: bool) -> bool:
-	match current_subject.true_type:
-		SubjectDef.TrueType.CENTAUR:
-			return not accepted
-		_:
-			return accepted
+	if SubjectDef.is_banned(current_subject.true_type):
+		return not accepted
+	return accepted

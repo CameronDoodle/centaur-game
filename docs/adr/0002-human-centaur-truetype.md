@@ -1,0 +1,3 @@
+# Human Centaur is its own TrueType
+
+Human Centaur — a centaur presenting as a Human through human footsteps, hand knock, and human-flavored speech — shares the same assembled scene and silhouette as Centaur but must spawn, score, and author clues separately from the unashamed Centaur. We model it as `SubjectDef.TrueType.HUMAN_CENTAUR` rather than a Disguise or Persona flag on Centaur so dialogue pools, approach/knock kinds, and encounter resources stay parallel to Horse Centaur. A Disguise field would reintroduce the coupling ADR 0001 rejected for Horse Centaur. The discriminator is clues and speech, not silhouette.

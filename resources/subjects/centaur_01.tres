@@ -1,18 +1,18 @@
 [gd_resource type="Resource" script_class="SubjectDef" format=3 uid="uid://bndri1xrtrlvf"]
 
 [ext_resource type="Script" uid="uid://dls1yg3rjh6ps" path="res://resources/subject_def.gd" id="1"]
-[ext_resource type="Resource" path="res://resources/subjects/centaur_01_q1.tres" id="2"]
-[ext_resource type="Resource" path="res://resources/subjects/centaur_01_q2.tres" id="3"]
+[ext_resource type="Resource" path="res://resources/questions/are_you_a_horse.tres" id="2"]
+[ext_resource type="Resource" path="res://resources/questions/whats_your_name.tres" id="3"]
 [ext_resource type="Script" uid="uid://b8h7bdjqop5nh" path="res://resources/question_def.gd" id="3_cce3k"]
 [ext_resource type="PackedScene" uid="uid://c3x5vtuajwv6t" path="res://scenes/subjects/centaur.tscn" id="4"]
 
 [resource]
 script = ExtResource("1")
 true_type = 2
-knock_kind = 1
+approach_kind = 1
 subject_scene = ExtResource("4")
-questions = Array[ExtResource("3_cce3k")]([ExtResource("3"), ExtResource("2")])
-reveal_text = "Centaur. Wearing a horse mask and sneakers."
+questions = Array[ExtResource("3_cce3k")]([ExtResource("2"), ExtResource("3")])
+reveal_text = "Centaur."
 peephole_position = Vector3(0, -0.06, -0.09)
 peephole_rotation_degrees = Vector3(4, 0, 0)
 peephole_scale = 0.7

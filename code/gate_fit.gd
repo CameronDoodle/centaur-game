@@ -28,6 +28,11 @@ static func fit_stature(subject: Node3D, door_height: float, door_fill: float) -
 
 
 static func get_ground_y(subject: Node3D) -> float:
+	var horse := subject.get_node_or_null("Horse") as Node3D
+	if horse:
+		var horse_aabb := get_subject_aabb(horse)
+		if horse_aabb.size != Vector3.ZERO:
+			return horse_aabb.position.y
 	if _should_ground_to_feet(subject):
 		var foot_y := _foot_bottom_y(subject)
 		if is_finite(foot_y):
@@ -36,10 +41,11 @@ static func get_ground_y(subject: Node3D) -> float:
 
 
 static func _stature_height(subject: Node3D, aabb: AABB) -> float:
-	if _should_ground_to_feet(subject):
-		var ground_y := get_ground_y(subject)
-		return aabb.position.y + aabb.size.y - ground_y
-	return aabb.size.y
+	var top_y := aabb.position.y + aabb.size.y
+	var grafted_top := _grafted_head_top_y(subject)
+	if is_finite(grafted_top):
+		top_y = maxf(top_y, grafted_top)
+	return top_y - get_ground_y(subject)
 
 
 static func get_subject_aabb(subject: Node3D) -> AABB:
@@ -89,10 +95,27 @@ static func _find_skeleton(root: Node) -> Skeleton3D:
 	return null
 
 
+static func _grafted_head_top_y(subject: Node3D) -> float:
+	var horse_head := subject.get_node_or_null("HorseHead") as Node3D
+	if horse_head == null:
+		return NAN
+	var skeleton := _find_skeleton(horse_head)
+	if skeleton:
+		var head_bone := skeleton.find_bone("Head")
+		if head_bone >= 0:
+			return skeleton.to_global(skeleton.get_bone_global_pose(head_bone).origin).y
+	var face := subject.get_node_or_null("Face") as Node3D
+	if face:
+		return face.global_position.y
+	return NAN
+
+
 static func _find_mesh_instances(root: Node) -> Array[MeshInstance3D]:
 	var meshes: Array[MeshInstance3D] = []
 	if root is MeshInstance3D:
 		meshes.append(root)
 	for child in root.get_children():
+		if child.name == "HorseHead":
+			continue
 		meshes.append_array(_find_mesh_instances(child))
 	return meshes

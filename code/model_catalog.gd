@@ -27,7 +27,7 @@ static func roll(true_type: SubjectDef.TrueType) -> Dictionary:
 			appearance[HUMAN_KEY] = HUMAN_MODELS.pick_random()
 		SubjectDef.TrueType.HORSE:
 			appearance[HORSE_KEY] = HORSE_MODELS.pick_random()
-		SubjectDef.TrueType.CENTAUR:
+		SubjectDef.TrueType.CENTAUR, SubjectDef.TrueType.HORSE_CENTAUR, SubjectDef.TrueType.HUMAN_CENTAUR:
 			appearance[HUMAN_KEY] = HUMAN_MODELS.pick_random()
 			appearance[HORSE_KEY] = HORSE_MODELS.pick_random()
 	return appearance

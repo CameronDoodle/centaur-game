@@ -3,6 +3,7 @@ extends Node3D
 const HUMAN_SCENE := preload("res://scenes/subjects/human.tscn")
 const HORSE_SCENE := preload("res://scenes/subjects/horse.tscn")
 const CENTAUR_SCENE := preload("res://scenes/subjects/centaur.tscn")
+const HORSE_CENTAUR_SCENE := preload("res://scenes/subjects/horse_centaur.tscn")
 
 @export var door_height := 2.0
 @export var door_fill := 0.9
@@ -13,7 +14,8 @@ const CENTAUR_SCENE := preload("res://scenes/subjects/centaur.tscn")
 func _ready() -> void:
 	_spawn_row(0.0, HUMAN_SCENE, ModelCatalog.HUMAN_MODELS, ModelCatalog.HUMAN_KEY)
 	_spawn_row(-row_spacing, HORSE_SCENE, ModelCatalog.HORSE_MODELS, ModelCatalog.HORSE_KEY)
-	_spawn_centaur_row(-row_spacing * 2.0)
+	_spawn_centaur_row(-row_spacing * 2.0, CENTAUR_SCENE)
+	_spawn_centaur_row(-row_spacing * 3.0, HORSE_CENTAUR_SCENE)
 
 
 func _spawn_row(
@@ -28,7 +30,7 @@ func _spawn_row(
 	_spawn_subjects(row_z, subject_scene, appearances)
 
 
-func _spawn_centaur_row(row_z: float) -> void:
+func _spawn_centaur_row(row_z: float, subject_scene: PackedScene) -> void:
 	var appearances: Array[Dictionary] = []
 	for human_scene in ModelCatalog.HUMAN_MODELS:
 		for horse_scene in ModelCatalog.HORSE_MODELS:
@@ -36,7 +38,7 @@ func _spawn_centaur_row(row_z: float) -> void:
 				ModelCatalog.HUMAN_KEY: human_scene,
 				ModelCatalog.HORSE_KEY: horse_scene,
 			})
-	_spawn_subjects(row_z, CENTAUR_SCENE, appearances)
+	_spawn_subjects(row_z, subject_scene, appearances)
 
 
 func _spawn_subjects(

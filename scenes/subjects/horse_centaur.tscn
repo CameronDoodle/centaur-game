@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://ey504o0fkb7m"]
+
+[ext_resource type="Script" uid="uid://dv2n57j3746xa" path="res://code/centaur.gd" id="1"]
+
+[node name="HorseCentaur" type="Node3D" unique_id=1469647305]
+transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0, 0)
+script = ExtResource("1")
+
+[node name="Horse" type="Node3D" parent="." unique_id=471595567]
+
+[node name="Man" type="Node3D" parent="." unique_id=1595092048]
+
+[node name="HorseHead" type="Node3D" parent="." unique_id=1556819893]
+
+[node name="Face" type="Marker3D" parent="." unique_id=541171902]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, 0.5)

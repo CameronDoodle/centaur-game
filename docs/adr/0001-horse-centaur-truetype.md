@@ -1,0 +1,3 @@
+# Horse Centaur is its own TrueType
+
+LORE describes three creature types and a separate Disguise idea for centaurs pretending to be Human or Horse. Horse Centaur — a centaur with a horse head instead of a human head — is a distinct banned look that must generate, preview, and score like Human, Horse, and Centaur. We model it as `SubjectDef.TrueType.HORSE_CENTAUR` rather than a Disguise flag on Centaur so spawn and appearance preview stay parallel across kinds, while `_is_decision_correct` still treats both banned kinds the same (Reject is correct). A Disguise field would couple appearance fraud to creature type and make preview-only work harder to wire without touching encounter resources.
