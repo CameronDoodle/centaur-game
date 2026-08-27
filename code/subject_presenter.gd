@@ -8,7 +8,7 @@ var subject_anchor: Marker3D
 var gate_camera: Camera3D
 var door: Node3D
 var door_top: Node3D
-var door_open: Node3D
+var door_hinge: DoorHinge
 var side_window: Node3D
 var outside_window_marker: Marker3D
 var peephole_view: SubViewportContainer
@@ -29,7 +29,7 @@ func _ready() -> void:
 	gate_camera = parent.get_node("Camera3D") as Camera3D
 	door = parent.get_node("world/door") as Node3D
 	door_top = parent.get_node_or_null("world/door_top") as Node3D
-	door_open = parent.get_node_or_null("world/door_open") as Node3D
+	door_hinge = parent.get_node_or_null("world/door_hinge_marker") as DoorHinge
 	side_window = parent.get_node_or_null("world/side_window") as Node3D
 	outside_window_marker = parent.get_node_or_null("world/outside_window_marker") as Marker3D
 	peephole_view = parent.get_node("PeepholeLayer/PeepholeView") as SubViewportContainer
@@ -38,8 +38,8 @@ func _ready() -> void:
 		peephole_stage = peephole_viewport.get_node("PeepholeStage") as PeepholeStage
 		peephole_view.visible = false
 		peephole_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
-	if door_open:
-		door_open.visible = false
+	if door_hinge:
+		door_hinge.snap_closed()
 	if side_window:
 		side_window.visible = false
 
@@ -144,28 +144,38 @@ func is_in_peephole() -> bool:
 
 
 func set_door_closed() -> void:
-	if door_open:
-		door_open.visible = false
+	if door_hinge:
+		door_hinge.snap_closed()
 	if side_window and _departing.is_empty():
 		side_window.visible = false
 
 
 func play_accept(on_complete: Callable = Callable()) -> void:
-	if door_open:
-		door_open.visible = true
 	if side_window:
 		side_window.visible = false
-	if _subject_instance and _subject_instance.has_method("play_walk"):
-		_subject_instance.play_walk()
-	_tween_subject(_door_offset_target(Vector3(0.0, 0.0, 5.0)), on_complete)
+	var walk_through := func() -> void:
+		if _subject_instance and _subject_instance.has_method("play_walk"):
+			_subject_instance.play_walk()
+		_tween_subject(
+			_door_offset_target(Vector3(0.0, 0.0, 5.0)),
+			func() -> void:
+				if door_hinge:
+					door_hinge.close(on_complete)
+				elif on_complete.is_valid():
+					on_complete.call()
+		)
+	if door_hinge:
+		door_hinge.open(walk_through)
+	else:
+		walk_through.call()
 
 
 func play_reject(
 	on_complete: Callable = Callable(),
 	on_halfway: Callable = Callable()
 ) -> Node3D:
-	if door_open:
-		door_open.visible = false
+	if door_hinge:
+		door_hinge.snap_closed()
 	if side_window:
 		side_window.visible = true
 	var walker := _subject_instance

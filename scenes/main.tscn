@@ -3,22 +3,20 @@
 [ext_resource type="Script" uid="uid://bkxg2jpffotap" path="res://code/shift_director.gd" id="1_shift"]
 [ext_resource type="Script" uid="uid://duvx3toais4ut" path="res://code/encounter_director.gd" id="2_encounter"]
 [ext_resource type="Script" uid="uid://bmhw2idrbsjqt" path="res://code/subject_presenter.gd" id="3_presenter"]
-[ext_resource type="PackedScene" uid="uid://10c1pu188aid" path="res://art/3d_models/bar_with_window.glb" id="3_tipki"]
+[ext_resource type="PackedScene" uid="uid://qbipf4ntto7l" path="res://art/3d_models/bar_no_door.glb" id="4_eb6dy"]
 [ext_resource type="PackedScene" uid="uid://bw56mt110053" path="res://scenes/hud.tscn" id="4_hud"]
 [ext_resource type="Resource" uid="uid://baw3e5t7u1i0o" path="res://resources/shifts/shift_roster.tres" id="5_roster"]
 [ext_resource type="Resource" uid="uid://d2f6h8j0k4l50" path="res://resources/subjects/subject_catalog.tres" id="6_catalog"]
+[ext_resource type="ArrayMesh" uid="uid://d32ya2vko5wmx" path="res://art/3d_models/CHAHIN_DOOR.obj" id="6_trceg"]
 [ext_resource type="PackedScene" uid="uid://0vdt3btnjjmy" path="res://scenes/peephole_stage.tscn" id="8_peephole"]
 [ext_resource type="Script" uid="uid://dtux0pyer2vqh" path="res://code/camera_3d.gd" id="10_cam"]
-[ext_resource type="PackedScene" uid="uid://c8dialoguebox01" path="res://scenes/dialogue_box.tscn" id="11_dialogue"]
-
-[sub_resource type="Gradient" id="Gradient_7dm0k"]
-offsets = PackedFloat32Array(0)
-colors = PackedColorArray(0.41034192, 0.24177265, 0.11708579, 1)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_72uko"]
-gradient = SubResource("Gradient_7dm0k")
-width = 800
-height = 400
+[ext_resource type="PackedScene" uid="uid://bklwaapf7wvc7" path="res://scenes/dialogue_box.tscn" id="11_dialogue"]
+[ext_resource type="PackedScene" uid="uid://b00v134jpu65o" path="res://art/3d_models/SF Street by Alan Zimmerman - cnTMgkFoTS0.glb" id="11_ya4ey"]
+[ext_resource type="Script" uid="uid://ccmg7f85n06nt" path="res://code/skybox.gd" id="12_sky"]
+[ext_resource type="AudioStream" uid="uid://cta7q88od3ow8" path="res://sfx/ambient_bar_sounds.wav" id="13_ambient"]
+[ext_resource type="AudioStream" uid="uid://br6o67welnh6t" path="res://sfx/background_music.wav" id="14_music"]
+[ext_resource type="Script" uid="uid://cdt215vjynm2e" path="res://code/looping_audio.gd" id="15_loop_audio"]
+[ext_resource type="Script" uid="uid://c8k3m2n7p4q1r" path="res://code/door_hinge.gd" id="16_door_hinge"]
 
 [sub_resource type="Gradient" id="Gradient_peephole"]
 interpolation_mode = 1
@@ -30,43 +28,21 @@ gradient = SubResource("Gradient_peephole")
 fill = 1
 fill_from = Vector2(0.5, 0.48290598)
 
-[sub_resource type="Gradient" id="Gradient_door_open"]
-interpolation_mode = 1
-offsets = PackedFloat32Array(0, 0.27623126)
-colors = PackedColorArray(0.12, 0.08, 0.02, 1, 0.28, 0.16, 0.04, 1)
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_muem4"]
+sky_top_color = Color(0.38, 0.58, 0.82, 1)
+sky_horizon_color = Color(0.86, 0.74, 0.58, 1)
+sky_curve = 0.12
+ground_bottom_color = Color(0.22, 0.18, 0.14, 1)
+ground_horizon_color = Color(0.58, 0.5, 0.4, 1)
+ground_curve = 0.08
 
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_door_open"]
-gradient = SubResource("Gradient_door_open")
-width = 100
-height = 200
-fill_from = Vector2(0.91, 0)
-repeat = 1
-
-[sub_resource type="Gradient" id="Gradient_window"]
-offsets = PackedFloat32Array(0)
-colors = PackedColorArray(0.12, 0.18, 0.28, 0.9)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_window"]
-gradient = SubResource("Gradient_window")
-width = 80
-height = 120
-
-[sub_resource type="Gradient" id="Gradient_7e0vu"]
-offsets = PackedFloat32Array(0, 0.30406854, 0.6423983, 0.94004285)
-colors = PackedColorArray(0.8227197, 0.6052856, 0.45245916, 1, 0.8724568, 0.6794229, 0.54591936, 1, 0.89732933, 0.7281922, 0.6123819, 1, 0.8694142, 0.79161406, 0.753944, 1)
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_4wr1s"]
-noise_type = 2
-fractal_octaves = 2
-cellular_return_type = 0
-
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_72uko"]
-noise = SubResource("FastNoiseLite_4wr1s")
-color_ramp = SubResource("Gradient_7e0vu")
+[sub_resource type="Sky" id="Sky_main"]
+sky_material = SubResource("ProceduralSkyMaterial_muem4")
 
 [sub_resource type="Environment" id="Environment_main"]
-background_mode = 1
+background_mode = 2
 background_color = Color(0.14, 0.12, 0.1, 1)
+sky = SubResource("Sky_main")
 ambient_light_source = 2
 ambient_light_color = Color(0.72, 0.66, 0.58, 1)
 ambient_light_energy = 0.55
@@ -81,16 +57,25 @@ script = ExtResource("3_presenter")
 
 [node name="world" type="Node3D" parent="." unique_id=1774684371]
 
-[node name="BarScene" parent="world" unique_id=369327564 instance=ExtResource("3_tipki")]
+[node name="door_hinge_marker" type="Marker3D" parent="world" unique_id=2120752175]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.261661, 0.5313772, -8.715218)
+script = ExtResource("16_door_hinge")
 
-[node name="wall" type="Sprite3D" parent="world" unique_id=291349820]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
-visible = false
-sorting_offset = 0.25
-texture = SubResource("GradientTexture2D_72uko")
+[node name="ChahinDoor" type="MeshInstance3D" parent="world/door_hinge_marker" unique_id=78077642]
+transform = Transform3D(-5.98846e-08, 0, 1.37, 0, 1.505, 0, -1.37, 0, -5.98846e-08, 1.2167854, 2.8578506, -0.11303806)
+mesh = ExtResource("6_trceg")
+
+[node name="SF Street by Alan Zimmerman - cnTMgkFoTS0" parent="world" unique_id=1134064020 instance=ExtResource("11_ya4ey")]
+transform = Transform3D(12.31, 0, 0, 0, 12.31, 0, 0, 0, 12.31, -52.275917, 5.188063, -7.308785)
+
+[node name="SF Street by Alan Zimmerman - cnTMgkFoTS1" parent="world" unique_id=66705578 instance=ExtResource("11_ya4ey")]
+transform = Transform3D(-12.31, 0, -1.0761744e-06, 0, 12.31, 0, 1.0761744e-06, 0, -12.31, -79.42415, 4.9130287, -88.91483)
+
+[node name="BarScene" parent="world" unique_id=189082042 instance=ExtResource("4_eb6dy")]
 
 [node name="door" type="Marker3D" parent="world" unique_id=1788293211]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.028, 0.691, -8.695)
+visible = false
 
 [node name="door_top" type="Marker3D" parent="world" unique_id=2011844723]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.7327495, 6.438659, -8.694795)
@@ -109,24 +94,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.003, 3.56, -8.62)
 [node name="door_hotspot_approach" type="Marker3D" parent="world" unique_id=943127785]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2.195, -8.62)
 
-[node name="door_open" type="Sprite3D" parent="world" unique_id=75006899]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.55, 1, 0.16)
-visible = false
-sorting_offset = 0.19
-texture = SubResource("GradientTexture2D_door_open")
-
-[node name="side_window" type="Sprite3D" parent="world" unique_id=487408127]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.35, 1.35, 0.05)
-visible = false
-sorting_offset = 0.22
-texture = SubResource("GradientTexture2D_window")
-
-[node name="floor" type="Sprite3D" parent="world" unique_id=314386150]
-transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0.3272295)
-visible = false
-sorting_offset = -1.0
-texture = SubResource("NoiseTexture2D_72uko")
-
 [node name="subject_anchor" type="Marker3D" parent="world" unique_id=353364536]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, -10.7)
 
@@ -136,7 +103,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.010759, 0, -5.9983044)
 [node name="dialogue_box_marker" type="Marker3D" parent="world" unique_id=702205353]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.2399154, 6.020543, -8.808638)
 
-[node name="DialogueBox" parent="world/dialogue_box_marker" instance=ExtResource("11_dialogue")]
+[node name="DialogueBox" parent="world/dialogue_box_marker" unique_id=1130722046 instance=ExtResource("11_dialogue")]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1098747847]
 transform = Transform3D(0.8660254, -0.3535534, 0.3535534, 0, 0.7071068, 0.7071068, -0.5, -0.6123724, 0.6123724, 0, 3, 2)
@@ -144,6 +111,7 @@ light_energy = 1.1
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=381803592]
 environment = SubResource("Environment_main")
+script = ExtResource("12_sky")
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=1892879549]
 transform = Transform3D(1, 0, 0, 0, 0.9986295, 0.052335963, 0, -0.052335963, 0.9986295, -8.198, 4.818, -3.406)
@@ -152,6 +120,7 @@ script = ExtResource("10_cam")
 mouse_look_max_yaw_degrees = 5.7
 mouse_look_max_pitch_degrees = 5.7
 mouse_look_smoothing = 4.0
+reject_look_delay = 1.5
 
 [node name="PeepholeLayer" type="CanvasLayer" parent="." unique_id=28395697]
 
@@ -168,7 +137,7 @@ stretch = true
 [node name="SubViewport" type="SubViewport" parent="PeepholeLayer/PeepholeView" unique_id=1186475315]
 own_world_3d = true
 handle_input_locally = false
-size = Vector2i(1152, 648)
+size = Vector2i(1920, 1080)
 render_target_update_mode = 0
 
 [node name="PeepholeStage" parent="PeepholeLayer/PeepholeView/SubViewport" unique_id=2132929695 instance=ExtResource("8_peephole")]
@@ -178,6 +147,16 @@ render_target_update_mode = 0
 [node name="AudioKnock" type="AudioStreamPlayer" parent="." unique_id=1046206884]
 
 [node name="AudioVoice" type="AudioStreamPlayer" parent="." unique_id=667453496]
+
+[node name="AudioAmbient" type="AudioStreamPlayer" parent="." unique_id=2000440927]
+stream = ExtResource("13_ambient")
+playback_type = 1
+script = ExtResource("15_loop_audio")
+
+[node name="AudioMusic" type="AudioStreamPlayer" parent="." unique_id=2034253023]
+stream = ExtResource("14_music")
+playback_type = 1
+script = ExtResource("15_loop_audio")
 
 [node name="HUD" parent="." unique_id=1716120783 instance=ExtResource("4_hud")]
 layer = 2
