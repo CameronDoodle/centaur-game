@@ -10,6 +10,5 @@
 script = ExtResource("1")
 subject_scene = ExtResource("3")
 questions = Array[ExtResource("3_h5pff")]([ExtResource("2"), ExtResource("6")])
-reveal_text = "Human."
 peephole_rotation_degrees = Vector3(14, 0, 0)
 peephole_scale = 0.5

@@ -152,12 +152,18 @@ mouse_filter = 2
 theme_override_constants/separation = 8
 
 [node name="TopBar" type="HBoxContainer" parent="Margin/Layout" unique_id=840947305]
+unique_name_in_owner = true
 layout_mode = 2
 
 [node name="ShiftLabel" type="Label" parent="Margin/Layout/TopBar" unique_id=2067000046]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Shift 1 / 1"
+
+[node name="SubjectsLabel" type="Label" parent="Margin/Layout/TopBar" unique_id=2067000047]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Subjects: 0 / 0"
 
 [node name="TimerLabel" type="Label" parent="Margin/Layout/TopBar" unique_id=2067000045]
 unique_name_in_owner = true
@@ -247,12 +253,31 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -80.0
-offset_right = 200.0
-offset_bottom = 80.0
+offset_left = -240.0
+offset_top = -120.0
+offset_right = 240.0
+offset_bottom = 120.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="WinLabel" type="Label" parent="."]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -120.0
+offset_top = 24.0
+offset_right = 120.0
+offset_bottom = 72.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 36
+text = "You won!"
+horizontal_alignment = 1
 
 [node name="SummaryVBox" type="VBoxContainer" parent="SummaryPanel" unique_id=1005314973]
 layout_mode = 2

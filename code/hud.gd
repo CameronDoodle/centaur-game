@@ -16,7 +16,9 @@ signal skip_pressed
 const BLACKOUT_DURATION := 0.75
 const ICON_TINT := Color(0.95, 0.9, 0.82, 1)
 
+@onready var top_bar: HBoxContainer = %TopBar
 @onready var shift_label: Label = %ShiftLabel
+@onready var subjects_label: Label = %SubjectsLabel
 @onready var timer_label: Label = %TimerLabel
 @onready var score_label: Label = %ScoreLabel
 @onready var strikes_label: Label = %StrikesLabel
@@ -24,6 +26,7 @@ const ICON_TINT := Color(0.95, 0.9, 0.82, 1)
 @onready var reveal_label: Label = %RevealLabel
 @onready var summary_panel: PanelContainer = %SummaryPanel
 @onready var summary_label: Label = %SummaryLabel
+@onready var win_label: Label = %WinLabel
 @onready var gate_actions: VBoxContainer = %GateActions
 @onready var peephole_actions: VBoxContainer = %PeepholeActions
 @onready var skip_button: Button = %SkipButton
@@ -101,6 +104,7 @@ func _ready() -> void:
 		_audio_knock = main.get_node_or_null("AudioKnock") as AudioStreamPlayer
 	hide_reveal()
 	hide_summary()
+	hide_win()
 	_configure_mouse_passthrough()
 	_raise_door_overlay()
 	set_peephole_mode(false)
@@ -211,8 +215,20 @@ func play_fade_from_black(
 	)
 
 
+func hide_session_chrome() -> void:
+	top_bar.visible = false
+
+
+func show_session_chrome() -> void:
+	top_bar.visible = true
+
+
 func set_shift_progress(current: int, total: int) -> void:
 	shift_label.text = "Shift %d / %d" % [current, total]
+
+
+func set_subject_progress(current: int, total: int) -> void:
+	subjects_label.text = "Subjects: %d / %d" % [current, total]
 
 
 func set_timer_text(text: String) -> void:
@@ -390,6 +406,20 @@ func show_summary(text: String, show_replay: bool = false, show_next: bool = fal
 
 func hide_summary() -> void:
 	summary_panel.visible = false
+
+
+func show_win() -> void:
+	hide_reveal()
+	hide_summary()
+	hide_investigation()
+	hide_session_chrome()
+	set_gate_actions_enabled(false)
+	set_peephole_mode(false)
+	win_label.visible = true
+
+
+func hide_win() -> void:
+	win_label.visible = false
 
 
 func show_investigation(has_approach: bool, has_knock: bool) -> void:

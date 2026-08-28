@@ -11,7 +11,6 @@ script = ExtResource("1")
 true_type = 4
 subject_scene = ExtResource("5")
 questions = Array[ExtResource("4")]([ExtResource("2"), ExtResource("3")])
-reveal_text = "Human Centaur."
 peephole_position = Vector3(0, -0.03, -0.09)
 peephole_rotation_degrees = Vector3(4, 0, 0)
 peephole_scale = 0.7

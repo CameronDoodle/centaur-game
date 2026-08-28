@@ -1,0 +1,37 @@
+{
+  "correct_accept": {
+    "human": [
+      { "text": "Come on in!" },
+      { "text": "Right this way." },
+      { "text": "You're good." },
+    ],
+    "horse": [
+      { "text": "Come on in!" },
+      { "text": "Right this way." },
+      { "text": "Why the long face? You're in." },
+    ]
+  },
+  "incorrect_accept": [
+    { "text": "Oh no!" },
+    { "text": "Wait—stop!" },
+    { "text": "That wasn't allowed." },
+  ],
+  "correct_reject": [
+    { "text": "And stay out!" },
+    { "text": "Not today." },
+    { "text": "Nice try." },
+  ],
+  "incorrect_reject": {
+    "human": [
+      { "text": "Poor guy." },
+      { "text": "He was just trying to get in." },
+      { "text": "Now I feel bad." },
+      { "text": "He only wanted a drink." }
+    ],
+    "horse": [
+      { "text": "Poor horse." },
+      { "text": "That horse didn't deserve that." },
+      { "text": "Why the long face? Because of me." }
+    ]
+  }
+}

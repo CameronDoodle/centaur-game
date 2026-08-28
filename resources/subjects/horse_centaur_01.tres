@@ -13,7 +13,6 @@ approach_kind = 1
 knock_kind = 1
 subject_scene = ExtResource("5")
 questions = Array[ExtResource("4")]([ExtResource("2"), ExtResource("3")])
-reveal_text = "Horse Centaur."
 peephole_position = Vector3(0, 0.02, -0.1)
 peephole_rotation_degrees = Vector3(19, 0, 0)
 peephole_scale = 0.35

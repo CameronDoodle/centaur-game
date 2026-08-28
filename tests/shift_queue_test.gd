@@ -8,6 +8,8 @@ func _initialize() -> void:
 func _run() -> void:
 	var failures: PackedStringArray = []
 	_test_pool_and_count(failures)
+	_test_no_consecutive_same_type(failures)
+	_test_single_type_pool_allows_repeats(failures)
 	_test_empty_pool(failures)
 	if failures.is_empty():
 		print("Shift queue generation: all checks passed.")
@@ -44,6 +46,59 @@ func _test_pool_and_count(failures: PackedStringArray) -> void:
 				"Queue contained disallowed type %s."
 				% SubjectDef.TrueType.keys()[subject.true_type]
 			)
+
+
+func _test_no_consecutive_same_type(failures: PackedStringArray) -> void:
+	var shift := ShiftDef.new()
+	shift.include_human = true
+	shift.include_horse = true
+	shift.include_centaur = true
+	shift.include_human_centaur = false
+	shift.include_horse_centaur = false
+	shift.subject_count = 24
+	var catalog := _make_catalog()
+	for attempt in 32:
+		var queue := ShiftDirector.roll_queue(shift, catalog)
+		if queue.size() != shift.subject_count:
+			failures.append(
+				"Attempt %d: expected queue length %d, got %d."
+				% [attempt, shift.subject_count, queue.size()]
+			)
+			continue
+		for i in range(1, queue.size()):
+			if queue[i].true_type == queue[i - 1].true_type:
+				failures.append(
+					"Attempt %d: consecutive %s at indices %d and %d."
+					% [
+						attempt,
+						SubjectDef.TrueType.keys()[queue[i].true_type],
+						i - 1,
+						i,
+					]
+				)
+				break
+
+
+func _test_single_type_pool_allows_repeats(failures: PackedStringArray) -> void:
+	var shift := ShiftDef.new()
+	shift.include_human = false
+	shift.include_horse = false
+	shift.include_centaur = true
+	shift.include_human_centaur = false
+	shift.include_horse_centaur = false
+	shift.subject_count = 5
+	var catalog := _make_catalog()
+	var queue := ShiftDirector.roll_queue(shift, catalog)
+	if queue.size() != 5:
+		failures.append("Single-type pool should fill queue, got %d." % queue.size())
+		return
+	var all_centaur := true
+	for subject in queue:
+		if subject.true_type != SubjectDef.TrueType.CENTAUR:
+			all_centaur = false
+			break
+	if not all_centaur:
+		failures.append("Single-type pool should only produce Centaur subjects.")
 
 
 func _test_empty_pool(failures: PackedStringArray) -> void:

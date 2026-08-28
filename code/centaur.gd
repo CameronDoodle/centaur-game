@@ -60,6 +60,8 @@ var _man_hide_indices: PackedInt32Array = []
 var _man_head_hide_indices: PackedInt32Array = []
 var _mask_from_head: Transform3D = Transform3D.IDENTITY
 var _appearance: Dictionary = {}
+var _horse_locomotion := AnimationHints.new()
+var _man_locomotion := AnimationHints.new()
 
 
 func _ready() -> void:
@@ -501,28 +503,13 @@ func _unscaled_bone_world_transform(skeleton: Skeleton3D, bone_index: int) -> Tr
 
 
 func play_idle() -> void:
-	_play_animation(_horse, ["Idle"])
-	_play_animation(_man, ["Man_Idle", "Idle"])
+	_horse_locomotion.play_looped(_find_animation_player(_horse), PackedStringArray(["Idle"]))
+	_man_locomotion.play_looped(_find_animation_player(_man), PackedStringArray(["Man_Idle", "Idle"]))
 
 
 func play_walk() -> void:
-	_play_animation(_horse, ["Walk"])
-	_play_animation(_man, ["Man_Walk", "Walk"])
-
-
-func _play_animation(root: Node, hints: Array[String]) -> void:
-	var player := _find_animation_player(root)
-	if player == null:
-		return
-	for hint in hints:
-		for candidate in player.get_animation_list():
-			if candidate != hint and not candidate.ends_with("|%s" % hint):
-				continue
-			var animation := player.get_animation(candidate)
-			if animation:
-				animation.loop_mode = Animation.LOOP_LINEAR
-			player.play(candidate)
-			return
+	_horse_locomotion.play_looped(_find_animation_player(_horse), PackedStringArray(["Walk"]))
+	_man_locomotion.play_looped(_find_animation_player(_man), PackedStringArray(["Man_Walk", "Walk"]))
 
 
 func _update_face() -> void:

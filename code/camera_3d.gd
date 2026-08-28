@@ -41,6 +41,9 @@ extends Camera3D
 @export_group("Idle Resume")
 @export_range(0.1, 2.0, 0.01) var idle_resume_duration: float = 0.35
 
+@export_group("Title Transition")
+@export_range(0.5, 6.0, 0.1) var title_fly_duration: float = 2.5
+
 var _time: float = 0.0
 var _mouse_look_current: Vector2 = Vector2.ZERO
 var _rest_transform: Transform3D
@@ -126,6 +129,46 @@ func snap_to_rest() -> void:
 	_mouse_look_current = Vector2.ZERO
 	_idle_blend = 1.0
 	_bobbing = true
+
+
+func hold_at_marker(marker: Marker3D) -> void:
+	if marker == null:
+		return
+	_cancel_reject_follow()
+	_cancel_wrong_accept_penalty()
+	_kill_idle_blend_tween()
+	if _move_tween:
+		_move_tween.kill()
+		_move_tween = null
+	_bobbing = false
+	_idle_blend = 0.0
+	_mouse_look_current = Vector2.ZERO
+	global_transform = marker.global_transform
+
+
+func fly_to_rest(duration: float = -1.0, on_complete: Callable = Callable()) -> void:
+	var rest_global := _rest_global_transform()
+	var fly_duration := duration if duration > 0.0 else title_fly_duration
+	_tween_camera(rest_global.origin, rest_global.basis, true, on_complete, fly_duration)
+
+
+static func window_look_rest(rest: Transform3D) -> Transform3D:
+	var yawed_basis := rest.basis.rotated(Vector3.UP, deg_to_rad(90.0))
+	return Transform3D(yawed_basis, rest.origin)
+
+
+func look_out_window() -> void:
+	_cancel_reject_follow()
+	_cancel_wrong_accept_penalty()
+	_rest_transform = window_look_rest(_rest_transform)
+	var window_global := _rest_global_transform()
+	_tween_camera(
+		window_global.origin,
+		window_global.basis,
+		true,
+		Callable(),
+		title_fly_duration
+	)
 
 
 func begin_reject_follow(subject: Node3D) -> void:
@@ -430,7 +473,8 @@ func _tween_camera(
 	target_origin: Vector3,
 	target_basis: Basis,
 	resume_bob: bool,
-	on_complete: Callable = Callable()
+	on_complete: Callable = Callable(),
+	duration: float = -1.0
 ) -> void:
 	_bobbing = false
 	_kill_idle_blend_tween()
@@ -440,6 +484,7 @@ func _tween_camera(
 		_move_tween.kill()
 	var start_origin := global_position
 	var start_basis := global_transform.basis
+	var move_duration := duration if duration > 0.0 else peephole_move_duration
 	_rest_return_callback = on_complete
 	_move_tween = create_tween()
 	_move_tween.set_trans(Tween.TRANS_SINE)
@@ -452,7 +497,7 @@ func _tween_camera(
 			),
 		0.0,
 		1.0,
-		peephole_move_duration
+		move_duration
 	)
 	_move_tween.tween_callback(func() -> void:
 		_move_tween = null

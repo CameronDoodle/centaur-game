@@ -356,7 +356,9 @@ func _resolve(accepted: bool) -> void:
 			str(correct)
 		]
 	)
-	hud.show_reveal(current_subject.reveal_text)
+	var verdict := VerdictPools.pick(accepted, correct, current_subject.true_type)
+	hud.show_reveal(verdict.get("text", ""))
+	_play_verdict_sfx(str(verdict.get("sfx", "")))
 	if accepted:
 		var wrong_accept := not correct
 		if wrong_accept:
@@ -493,3 +495,16 @@ func _is_decision_correct(accepted: bool) -> bool:
 	if SubjectDef.is_banned(current_subject.true_type):
 		return not accepted
 	return accepted
+
+
+func _play_verdict_sfx(path: String) -> void:
+	if path.is_empty() or audio_voice == null:
+		return
+	if not ResourceLoader.exists(path):
+		push_warning("EncounterDirector: missing verdict sfx %s." % path)
+		return
+	var stream := load(path) as AudioStream
+	if stream == null:
+		return
+	audio_voice.stream = stream
+	audio_voice.play()

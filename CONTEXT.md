@@ -36,6 +36,10 @@ _Avoid_: Head bone, look target
 The main gameplay view from the security booth, showing the closed door and the full subject standing behind it.
 _Avoid_: Main camera, world view
 
+**Title**:
+The launch-only overlay shown before the first Shift, with the project name and a Start control. After Start the player is at the Gate until the Shift Roster is complete; Replay Shift and Next Shift do not return to Title.
+_Avoid_: Home screen, main menu, start game screen, hub
+
 **Peephole**:
 A close-up fisheye view through the door hole, using a separate stage and per-subject pose tuning.
 _Avoid_: Zoom, close-up camera
@@ -47,3 +51,11 @@ _Avoid_: Level, round, campaign
 **Shift Roster**:
 The ordered list of Shifts the player works through.
 _Avoid_: Level, round, campaign
+
+**Win**:
+The state after the last Shift of the Shift Roster succeeds. The player stays at the Gate; Replay Shift and Next Shift are not offered. Human Centaurs and Horse Centaurs walk the street outside the window.
+_Avoid_: Victory screen, ending, credits
+
+**Verdict**:
+The post-decision line after Accept or Reject that tells the player whether they were right, without naming the Subject's type.
+_Avoid_: Reveal, reveal text, outcome, feedback

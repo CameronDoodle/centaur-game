@@ -9,6 +9,8 @@ extends Node3D
 
 var _model_instance: Node3D
 var _skeleton: Skeleton3D
+var _locomotion := AnimationHints.new()
+
 
 func _ready() -> void:
 	_model_instance = _model_slot.get_child(0) as Node3D if _model_slot.get_child_count() > 0 else null
@@ -39,26 +41,11 @@ func apply_appearance(appearance: Dictionary) -> void:
 
 
 func play_idle() -> void:
-	_play_hints(idle_hints)
+	_locomotion.play_looped(_find_animation_player(self), idle_hints)
 
 
 func play_walk() -> void:
-	_play_hints(walk_hints)
-
-
-func _play_hints(hints: PackedStringArray) -> void:
-	var player := _find_animation_player(self)
-	if player == null:
-		return
-	for hint in hints:
-		for candidate in player.get_animation_list():
-			if candidate != hint and not candidate.ends_with("|%s" % hint):
-				continue
-			var animation := player.get_animation(candidate)
-			if animation:
-				animation.loop_mode = Animation.LOOP_LINEAR
-			player.play(candidate)
-			return
+	_locomotion.play_looped(_find_animation_player(self), walk_hints)
 
 
 func _refresh_model_references() -> void:

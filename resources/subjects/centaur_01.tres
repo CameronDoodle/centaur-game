@@ -12,7 +12,6 @@ true_type = 2
 approach_kind = 1
 subject_scene = ExtResource("4")
 questions = Array[ExtResource("3_cce3k")]([ExtResource("2"), ExtResource("3")])
-reveal_text = "Centaur."
 peephole_position = Vector3(0, -0.06, -0.09)
 peephole_rotation_degrees = Vector3(4, 0, 0)
 peephole_scale = 0.7
