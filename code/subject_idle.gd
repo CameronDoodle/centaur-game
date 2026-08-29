@@ -1,8 +1,8 @@
 extends Node3D
 
 @export var model_key: StringName = ModelCatalog.HUMAN_KEY
-@export var idle_hints: PackedStringArray = ["Idle"]
-@export var walk_hints: PackedStringArray = ["Walk"]
+@export var idle_hints: PackedStringArray = ["Man_Idle", "Idle"]
+@export var walk_hints: PackedStringArray = ["Man_Walk", "Walk"]
 
 @onready var _model_slot: Node3D = $ModelSlot
 @onready var _face: Marker3D = $Face

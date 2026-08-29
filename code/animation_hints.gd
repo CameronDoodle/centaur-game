@@ -2,12 +2,18 @@ class_name AnimationHints
 extends RefCounted
 
 ## Matches locomotion clip names by last path segment (`Walk`, `Armature|Walk`,
-## `Armature/Walk`) and keeps the chosen clip looping while that intent lasts.
-## Trailing rest holds (Kenney Walk pads a stride out to 2.67s) are wrapped in
-## software via seek so exported builds never mutate imported AnimationLibrary
-## resources.
+## `Man_Walk` when the hint is `Walk`) and keeps the chosen clip looping while
+## that intent lasts. Trailing rest holds (Kenney Walk pads a stride out to 2.67s)
+## are wrapped in software via seek so exported builds never mutate imported
+## AnimationLibrary resources.
+## Web `play()` may reject the list string (`HumanArmature|Man_Walk`); resolve a
+## key `has_animation()` accepts, retry if a first tick had an empty list, and
+## only then host a duplicate on a sibling `LocomotionPlayer`.
+
+const SIBLING_NAME := "LocomotionPlayer"
 
 var _player: AnimationPlayer
+var _imported: AnimationPlayer
 var _hints: PackedStringArray = PackedStringArray()
 var _loop_end: float = 0.0
 
@@ -22,7 +28,10 @@ static func clip_leaf(clip_name: String) -> String:
 
 
 static func matches(clip_name: String, hint: String) -> bool:
-	return clip_leaf(clip_name) == hint
+	var leaf := clip_leaf(clip_name)
+	if leaf == hint:
+		return true
+	return not hint.is_empty() and leaf == "Man_" + hint
 
 
 static func find_clip(player: AnimationPlayer, hints: PackedStringArray) -> String:
@@ -33,6 +42,17 @@ static func find_clip(player: AnimationPlayer, hints: PackedStringArray) -> Stri
 			if matches(candidate, hint):
 				return candidate
 	return ""
+
+
+static func playable_key(player: AnimationPlayer, clip: String) -> String:
+	if player == null or clip.is_empty():
+		return ""
+	var slash := clip.replace("|", "/")
+	var leaf := clip_leaf(clip)
+	for candidate in [clip, slash, leaf]:
+		if player.has_animation(candidate):
+			return candidate
+	return clip
 
 
 static func trailing_hold_start(animation: Animation) -> float:
@@ -69,15 +89,21 @@ static func trailing_hold_start(animation: Animation) -> float:
 
 
 func play_looped(player: AnimationPlayer, hints: PackedStringArray) -> String:
+	_imported = player
 	_bind(player)
 	_hints = PackedStringArray(hints)
 	return _restart()
 
 
 func tick() -> void:
+	if _hints.is_empty():
+		return
 	if _player == null or not is_instance_valid(_player):
 		return
-	if not _player.is_playing() or _loop_end <= 0.0:
+	if not _player.is_playing():
+		_restart()
+		return
+	if _loop_end <= 0.0:
 		return
 	if _player.current_animation_position >= _loop_end:
 		_player.seek(0.0, true)
@@ -102,11 +128,11 @@ func _unbind_player() -> void:
 	_loop_end = 0.0
 
 
-func _record_loop_end(clip: String) -> void:
+func _record_loop_end(player: AnimationPlayer, clip: String) -> void:
 	_loop_end = 0.0
-	if _player == null or clip.is_empty():
+	if player == null or clip.is_empty():
 		return
-	var animation := _player.get_animation(clip)
+	var animation := _animation_named(player, clip)
 	if animation == null:
 		return
 	var hold_start := trailing_hold_start(animation)
@@ -119,14 +145,83 @@ func _record_loop_end(clip: String) -> void:
 
 
 func _restart() -> String:
-	if _player == null or not is_instance_valid(_player):
+	var source := _imported if _imported and is_instance_valid(_imported) else _player
+	if source == null or not is_instance_valid(source):
 		return ""
-	var clip := find_clip(_player, _hints)
+	var clip := find_clip(source, _hints)
 	if clip.is_empty():
 		return ""
-	_record_loop_end(clip)
-	_player.play(clip)
-	return clip
+	var key := playable_key(source, clip)
+	if source.active:
+		_bind(source)
+		_record_loop_end(source, key)
+		source.play(key)
+		if source.is_playing():
+			return key
+	return _play_on_sibling(source, clip, key)
+
+
+func _play_on_sibling(imported: AnimationPlayer, clip: String, key: String) -> String:
+	var sibling := _ensure_sibling(imported)
+	if sibling == null:
+		return ""
+	var leaf := clip_leaf(clip)
+	if leaf.is_empty():
+		return ""
+	if not _install_sibling_clip(imported, sibling, clip, key, leaf):
+		return ""
+	imported.active = false
+	_bind(sibling)
+	_record_loop_end(sibling, leaf)
+	sibling.play(leaf)
+	return leaf if sibling.is_playing() else ""
+
+
+func _ensure_sibling(imported: AnimationPlayer) -> AnimationPlayer:
+	var parent := imported.get_parent()
+	if parent == null:
+		return null
+	var existing := parent.get_node_or_null(SIBLING_NAME) as AnimationPlayer
+	if existing:
+		return existing
+	var sibling := AnimationPlayer.new()
+	sibling.name = SIBLING_NAME
+	sibling.root_node = imported.root_node
+	sibling.callback_mode_process = imported.callback_mode_process
+	parent.add_child(sibling)
+	return sibling
+
+
+func _install_sibling_clip(
+	imported: AnimationPlayer,
+	sibling: AnimationPlayer,
+	clip: String,
+	key: String,
+	leaf: String
+) -> bool:
+	if sibling.has_animation(leaf):
+		return true
+	var animation := _animation_named(imported, key)
+	if animation == null:
+		animation = _animation_named(imported, clip)
+	if animation == null:
+		return false
+	var library: AnimationLibrary
+	if sibling.has_animation_library(""):
+		library = sibling.get_animation_library("")
+	else:
+		library = AnimationLibrary.new()
+		sibling.add_animation_library("", library)
+	library.add_animation(leaf, animation.duplicate())
+	return sibling.has_animation(leaf)
+
+
+func _animation_named(player: AnimationPlayer, clip: String) -> Animation:
+	if player == null or clip.is_empty():
+		return null
+	if player.has_animation(clip):
+		return player.get_animation(clip)
+	return null
 
 
 func _on_animation_finished(_anim_name: StringName) -> void:
