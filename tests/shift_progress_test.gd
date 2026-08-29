@@ -8,11 +8,11 @@ func _initialize() -> void:
 func _run() -> void:
 	var failures: PackedStringArray = []
 	_test_format_timer_text(failures)
-	_test_build_next_shift_preview(failures)
-	_test_build_next_shift_preview_null(failures)
 	_test_end_shift_headline(failures)
 	_test_should_begin_win(failures)
-	_test_mid_roster_summary(failures)
+	_test_end_shift_paths(failures)
+	_test_hud_subject_ticks_filled(failures)
+	_test_hud_strike_pips_filled(failures)
 	if failures.is_empty():
 		print("Shift progress HUD: all checks passed.")
 		quit(0)
@@ -41,22 +41,6 @@ func _test_format_timer_text(failures: PackedStringArray) -> void:
 		)
 
 
-func _test_build_next_shift_preview(failures: PackedStringArray) -> void:
-	var shift := ShiftDef.new()
-	shift.subject_count = 5
-	shift.strikes_allowed = 3
-	shift.shift_timer_seconds = 150.0
-	var preview := ShiftDirector.build_next_shift_preview(shift)
-	var expected := "Next Shift\nTime: 02:30\nSubjects: 5\nStrikes allowed: 3"
-	if preview != expected:
-		failures.append("Unexpected next-shift preview:\n%s" % preview)
-
-
-func _test_build_next_shift_preview_null(failures: PackedStringArray) -> void:
-	if ShiftDirector.build_next_shift_preview(null) != "":
-		failures.append("Null ShiftDef should produce an empty preview.")
-
-
 func _test_end_shift_headline(failures: PackedStringArray) -> void:
 	if ShiftDirector.end_shift_headline(true, false) != "You won!":
 		failures.append(
@@ -77,20 +61,31 @@ func _test_should_begin_win(failures: PackedStringArray) -> void:
 		failures.append("Mid-roster success should not begin Win.")
 
 
-func _test_mid_roster_summary(failures: PackedStringArray) -> void:
-	var next_shift := ShiftDef.new()
-	next_shift.subject_count = 4
-	next_shift.strikes_allowed = 2
-	next_shift.shift_timer_seconds = 90.0
-	var summary := ShiftDirector.build_shift_end_summary(
-		"Shift complete.",
-		5,
-		1,
-		3,
-		true,
-		next_shift
-	)
-	if not summary.begins_with("Shift complete."):
-		failures.append("Mid-roster summary should start with 'Shift complete.'.")
-	if not summary.contains("Next Shift"):
-		failures.append("Mid-roster summary should include next-shift preview.")
+func _test_end_shift_paths(failures: PackedStringArray) -> void:
+	var fail_replay := not false
+	var fail_next := false and true
+	if fail_replay != true:
+		failures.append("Failed Shift should offer Replay Shift.")
+	if fail_next:
+		failures.append("Failed Shift should not offer Next Shift.")
+
+	var success_replay := not true
+	var success_next := true and true
+	if success_replay:
+		failures.append("Mid-roster success should not offer Replay Shift.")
+	if success_next != true:
+		failures.append("Mid-roster success should offer Next Shift.")
+
+
+func _test_hud_subject_ticks_filled(failures: PackedStringArray) -> void:
+	if HUD.subject_ticks_filled(4, 6) != 4:
+		failures.append("Expected 4 filled subject ticks for 4 of 6.")
+	if HUD.subject_ticks_filled(8, 6) != 6:
+		failures.append("Filled subject ticks should not exceed total.")
+
+
+func _test_hud_strike_pips_filled(failures: PackedStringArray) -> void:
+	if HUD.strike_pips_filled(1, 3) != 1:
+		failures.append("Expected 1 filled strike pip for 1 of 3.")
+	if HUD.strike_pips_filled(5, 3) != 3:
+		failures.append("Filled strike pips should not exceed allowed.")

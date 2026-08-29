@@ -15,20 +15,33 @@ signal skip_pressed
 
 const BLACKOUT_DURATION := 0.75
 const ICON_TINT := Color(0.95, 0.9, 0.82, 1)
+const TICK_SIZE := Vector2(10, 10)
+const TICK_GAP := 3
+const STRIKE_GAP := 4
+const SYMBOL_FONT_SIZE := 14
+const STRIKE_SYMBOL := "×"
+const TICK_FILLED := Color(0.95, 0.9, 0.82, 1)
+const TICK_EMPTY := Color(0.95, 0.9, 0.82, 0.25)
+const STRIKE_FILLED := Color(0.9, 0.35, 0.35, 1)
+const STRIKE_EMPTY := Color(0.95, 0.9, 0.82, 0.35)
 
 @onready var top_bar: HBoxContainer = %TopBar
 @onready var shift_label: Label = %ShiftLabel
-@onready var subjects_label: Label = %SubjectsLabel
 @onready var timer_label: Label = %TimerLabel
-@onready var score_label: Label = %ScoreLabel
-@onready var strikes_label: Label = %StrikesLabel
+@onready var right_cluster: VBoxContainer = %RightCluster
 @onready var reveal_panel: PanelContainer = %RevealPanel
 @onready var reveal_label: Label = %RevealLabel
 @onready var summary_panel: PanelContainer = %SummaryPanel
+@onready var summary_stack: VBoxContainer = %SummaryStack
 @onready var summary_label: Label = %SummaryLabel
+@onready var next_shift_facts: HBoxContainer = %NextShiftFacts
+@onready var next_shift_time_value: Label = %TimeValue
+@onready var next_shift_subjects_value: Label = %SubjectsValue
+@onready var next_shift_strikes_value: Label = %StrikesValue
 @onready var win_label: Label = %WinLabel
 @onready var gate_actions: VBoxContainer = %GateActions
 @onready var peephole_actions: VBoxContainer = %PeepholeActions
+@onready var decision_row: HBoxContainer = %DecisionRow
 @onready var skip_button: Button = %SkipButton
 @onready var accept_button: Button = %AcceptButton
 @onready var reject_button: Button = %RejectButton
@@ -73,6 +86,16 @@ var _approach_marker: Marker3D
 var _gate_camera: Camera3D
 var _audio_approach: AudioStreamPlayer
 var _audio_knock: AudioStreamPlayer
+var _subject_ticks_row: HBoxContainer
+var _strike_pips_row: HBoxContainer
+
+
+static func subject_ticks_filled(current: int, total: int) -> int:
+	return clampi(current, 0, total)
+
+
+static func strike_pips_filled(strikes_used: int, strikes_allowed: int) -> int:
+	return clampi(strikes_used, 0, strikes_allowed)
 
 
 func _ready() -> void:
@@ -105,6 +128,7 @@ func _ready() -> void:
 	hide_reveal()
 	hide_summary()
 	hide_win()
+	_build_right_cluster()
 	_configure_mouse_passthrough()
 	_raise_door_overlay()
 	set_peephole_mode(false)
@@ -129,6 +153,14 @@ func _configure_mouse_passthrough() -> void:
 			var child := layout.get_node_or_null(child_name) as Control
 			if child:
 				child.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if right_cluster:
+		right_cluster.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		for row in right_cluster.get_children():
+			if row is Control:
+				(row as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for row in [_subject_ticks_row, _strike_pips_row]:
+		if row:
+			row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	for hotspot in [peephole_hotspot, knock_hotspot, approach_hotspot]:
 		hotspot.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
@@ -223,24 +255,58 @@ func show_session_chrome() -> void:
 	top_bar.visible = true
 
 
+func _build_right_cluster() -> void:
+	_subject_ticks_row = HBoxContainer.new()
+	_subject_ticks_row.add_theme_constant_override("separation", TICK_GAP)
+	_subject_ticks_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_strike_pips_row = HBoxContainer.new()
+	_strike_pips_row.add_theme_constant_override("separation", STRIKE_GAP)
+	_strike_pips_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	right_cluster.add_child(_subject_ticks_row)
+	right_cluster.add_child(_strike_pips_row)
+
+
+func _make_strike_symbol(filled: bool) -> Label:
+	var symbol := Label.new()
+	symbol.text = STRIKE_SYMBOL
+	symbol.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	symbol.add_theme_font_size_override("font_size", SYMBOL_FONT_SIZE)
+	symbol.add_theme_color_override("font_color", STRIKE_FILLED if filled else STRIKE_EMPTY)
+	return symbol
+
+
+func _rebuild_subject_ticks(total: int, filled: int) -> void:
+	for child in _subject_ticks_row.get_children():
+		child.queue_free()
+	for i in total:
+		var tick := ColorRect.new()
+		tick.custom_minimum_size = TICK_SIZE
+		tick.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		tick.color = TICK_FILLED if i < filled else TICK_EMPTY
+		_subject_ticks_row.add_child(tick)
+
+
+func _rebuild_strike_pips(total: int, filled: int) -> void:
+	for child in _strike_pips_row.get_children():
+		child.queue_free()
+	for i in total:
+		_strike_pips_row.add_child(_make_strike_symbol(i < filled))
+
+
 func set_shift_progress(current: int, total: int) -> void:
-	shift_label.text = "Shift %d / %d" % [current, total]
+	shift_label.text = "Shift %d of %d" % [current, total]
 
 
 func set_subject_progress(current: int, total: int) -> void:
-	subjects_label.text = "Subjects: %d / %d" % [current, total]
+	_rebuild_subject_ticks(total, subject_ticks_filled(current, total))
 
 
 func set_timer_text(text: String) -> void:
 	timer_label.text = text
 
 
-func set_score(score: int) -> void:
-	score_label.text = "Score: %d" % score
-
-
 func set_strikes(strikes_used: int, strikes_allowed: int) -> void:
-	strikes_label.text = "Strikes: %d / %d" % [strikes_used, strikes_allowed]
+	_rebuild_strike_pips(strikes_allowed, strike_pips_filled(strikes_used, strikes_allowed))
 
 
 func set_skip_visible(visible: bool, label: String = "") -> void:
@@ -334,6 +400,7 @@ func _reset_knock_playback_fill() -> void:
 
 func set_gate_actions_enabled(enabled: bool) -> void:
 	_gate_actions_enabled = enabled
+	decision_row.visible = enabled
 	peephole_icon.disabled = not enabled
 	accept_button.disabled = not enabled
 	reject_button.disabled = not enabled
@@ -393,15 +460,31 @@ func hide_reveal() -> void:
 	reveal_panel.visible = false
 
 
-func show_summary(text: String, show_replay: bool = false, show_next: bool = false) -> void:
+func show_summary(
+	headline: String,
+	show_replay: bool = false,
+	show_next: bool = false,
+	next_shift: ShiftDef = null
+) -> void:
 	hide_reveal()
-	summary_label.text = text
+	summary_label.text = headline
+	_set_next_shift_facts(next_shift if show_next else null)
 	replay_button.visible = show_replay
 	next_button.visible = show_next
 	summary_panel.visible = true
 	set_gate_actions_enabled(false)
 	set_peephole_mode(false)
 	hide_investigation()
+
+
+func _set_next_shift_facts(shift: ShiftDef) -> void:
+	if shift == null:
+		next_shift_facts.visible = false
+		return
+	next_shift_facts.visible = true
+	next_shift_time_value.text = ShiftDirector.format_timer_text(shift.shift_timer_seconds)
+	next_shift_subjects_value.text = str(shift.subject_count)
+	next_shift_strikes_value.text = str(shift.strikes_allowed)
 
 
 func hide_summary() -> void:

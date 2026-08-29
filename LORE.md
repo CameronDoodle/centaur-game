@@ -60,7 +60,7 @@ After the knock, the player chooses **Accept** or **Reject**. They never label t
 - **Accept** — let them in (correct for Human or Horse).
 - **Reject** — turn them away (correct for Centaur, Human Centaur, or Horse Centaur).
 
-Score +1 for a correct Accept or Reject. A strike is Accepting a banned centaur kind or Rejecting a Human/Horse.
+A strike is Accepting a banned centaur kind or Rejecting a Human/Horse.
 
 Each shift runs on **one timer** for the whole list of attendants; it does not reset between subjects.
 

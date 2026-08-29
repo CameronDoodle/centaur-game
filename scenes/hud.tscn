@@ -10,6 +10,46 @@
 shader = ExtResource("2_fisheye")
 shader_parameter/strength = 0.85
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_overlay"]
+bg_color = Color(0.07, 0.06, 0.05, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.95, 0.9, 0.82, 0.28)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+content_margin_left = 28
+content_margin_top = 24
+content_margin_right = 28
+content_margin_bottom = 24
+shadow_color = Color(0, 0, 0, 0.55)
+shadow_size = 12
+shadow_offset = Vector2(0, 4)
+anti_aliasing = true
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_verdict"]
+bg_color = Color(0.07, 0.06, 0.05, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.95, 0.9, 0.82, 0.28)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+content_margin_left = 20
+content_margin_top = 14
+content_margin_right = 20
+content_margin_bottom = 14
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 10
+shadow_offset = Vector2(0, 3)
+anti_aliasing = true
+
 [node name="HUD" type="CanvasLayer" unique_id=594433590]
 script = ExtResource("1_hud")
 
@@ -158,28 +198,53 @@ layout_mode = 2
 [node name="ShiftLabel" type="Label" parent="Margin/Layout/TopBar" unique_id=2067000046]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Shift 1 / 1"
+theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+text = "Shift 1 of 1"
 
-[node name="SubjectsLabel" type="Label" parent="Margin/Layout/TopBar" unique_id=2067000047]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Subjects: 0 / 0"
-
-[node name="TimerLabel" type="Label" parent="Margin/Layout/TopBar" unique_id=2067000045]
-unique_name_in_owner = true
+[node name="TimerColumn" type="VBoxContainer" parent="Margin/Layout/TopBar"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="TimerLabel" type="Label" parent="Margin/Layout/TopBar/TimerColumn" unique_id=2067000045]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 36
 text = "00:00"
+horizontal_alignment = 1
 
-[node name="ScoreLabel" type="Label" parent="Margin/Layout/TopBar" unique_id=2070153815]
+[node name="RevealPanel" type="PanelContainer" parent="Margin/Layout/TopBar/TimerColumn" unique_id=2107919900]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_verdict")
+
+[node name="RevealLabel" type="Label" parent="Margin/Layout/TopBar/TimerColumn/RevealPanel" unique_id=2048619452]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Score: 0"
+theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 22
+text = "Reveal"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="StrikesLabel" type="Label" parent="Margin/Layout/TopBar" unique_id=1405823829]
+[node name="RightCluster" type="VBoxContainer" parent="Margin/Layout/TopBar" unique_id=2067000048]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Strikes: 0 / 3"
+theme_override_constants/separation = 4
+alignment = 2
 
 [node name="Spacer" type="Control" parent="Margin/Layout" unique_id=2058075052]
 layout_mode = 2
@@ -198,6 +263,8 @@ layout_mode = 2
 text = "Skip"
 
 [node name="DecisionRow" type="HBoxContainer" parent="Margin/Layout/GateActions" unique_id=1978335062]
+unique_name_in_owner = true
+visible = false
 layout_mode = 2
 theme_override_constants/separation = 8
 
@@ -223,28 +290,6 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Back"
 
-[node name="RevealPanel" type="PanelContainer" parent="." unique_id=2107919900]
-unique_name_in_owner = true
-visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -180.0
-offset_top = -40.0
-offset_right = 180.0
-offset_bottom = 40.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="RevealLabel" type="Label" parent="RevealPanel" unique_id=2048619452]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Reveal"
-horizontal_alignment = 1
-vertical_alignment = 1
-
 [node name="SummaryPanel" type="PanelContainer" parent="." unique_id=923038010]
 unique_name_in_owner = true
 visible = false
@@ -253,12 +298,15 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -240.0
-offset_top = -120.0
-offset_right = 240.0
-offset_bottom = 120.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_overlay")
+
+[node name="SummaryStack" type="VBoxContainer" parent="SummaryPanel" unique_id=1005314974]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
 
 [node name="WinLabel" type="Label" parent="."]
 unique_name_in_owner = true
@@ -279,26 +327,115 @@ theme_override_font_sizes/font_size = 36
 text = "You won!"
 horizontal_alignment = 1
 
-[node name="SummaryVBox" type="VBoxContainer" parent="SummaryPanel" unique_id=1005314973]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="SummaryLabel" type="Label" parent="SummaryPanel/SummaryVBox" unique_id=448417977]
+[node name="SummaryLabel" type="Label" parent="SummaryPanel/SummaryStack" unique_id=448417977]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Summary"
+theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 36
+text = "Shift complete."
 horizontal_alignment = 1
-autowrap_mode = 3
 
-[node name="ReplayButton" type="Button" parent="SummaryPanel/SummaryVBox" unique_id=259067674]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Replay Shift"
-
-[node name="NextButton" type="Button" parent="SummaryPanel/SummaryVBox" unique_id=259067675]
+[node name="NextShiftFacts" type="HBoxContainer" parent="SummaryPanel/SummaryStack" unique_id=1005314973]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="TimeFact" type="VBoxContainer" parent="SummaryPanel/SummaryStack/NextShiftFacts"]
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="TimeCaption" type="Label" parent="SummaryPanel/SummaryStack/NextShiftFacts/TimeFact"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 14
+text = "Time"
+horizontal_alignment = 1
+
+[node name="TimeValue" type="Label" parent="SummaryPanel/SummaryStack/NextShiftFacts/TimeFact"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 18
+text = "00:00"
+horizontal_alignment = 1
+
+[node name="SubjectsFact" type="VBoxContainer" parent="SummaryPanel/SummaryStack/NextShiftFacts"]
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="SubjectsCaption" type="Label" parent="SummaryPanel/SummaryStack/NextShiftFacts/SubjectsFact"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 14
+text = "Subjects"
+horizontal_alignment = 1
+
+[node name="SubjectsValue" type="Label" parent="SummaryPanel/SummaryStack/NextShiftFacts/SubjectsFact"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 18
+text = "0"
+horizontal_alignment = 1
+
+[node name="StrikesFact" type="VBoxContainer" parent="SummaryPanel/SummaryStack/NextShiftFacts"]
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="StrikesCaption" type="Label" parent="SummaryPanel/SummaryStack/NextShiftFacts/StrikesFact"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 14
+text = "Strikes"
+horizontal_alignment = 1
+
+[node name="StrikesValue" type="Label" parent="SummaryPanel/SummaryStack/NextShiftFacts/StrikesFact"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 18
+text = "0"
+horizontal_alignment = 1
+
+[node name="ReplayButton" type="Button" parent="SummaryPanel/SummaryStack" unique_id=259067674]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 48)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Replay Shift"
+
+[node name="NextButton" type="Button" parent="SummaryPanel/SummaryStack" unique_id=259067675]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(160, 48)
+layout_mode = 2
+size_flags_horizontal = 4
 text = "Next Shift"
 
 [node name="PeepholeTuner" type="PanelContainer" parent="."]

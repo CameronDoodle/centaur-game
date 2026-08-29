@@ -19,28 +19,42 @@ static func pool_id(kind: SubjectDef.ClueKind, is_approach: bool) -> StringName:
 	return StringName("%s_%s" % [species, cue])
 
 
-static func pick(kind: SubjectDef.ClueKind, is_approach: bool) -> AudioStream:
+static func pick(
+	kind: SubjectDef.ClueKind,
+	is_approach: bool,
+	used: Array = []
+) -> AudioStream:
 	var id := pool_id(kind, is_approach)
 	var streams := _streams_for(id)
 	if streams.is_empty():
 		push_warning("ClueSfx: no .wav clips in pool '%s'." % id)
 		return null
 	var last_path := str(_last_path_by_pool.get(id, ""))
-	var chosen := _choose_stream(streams, last_path)
+	var chosen := _choose_stream(streams, last_path, used)
 	if chosen != null:
 		_last_path_by_pool[id] = chosen.resource_path
 	return chosen
 
 
-static func choose_path(paths: PackedStringArray, last_path: String) -> String:
+static func choose_path(
+	paths: PackedStringArray,
+	last_path: String = "",
+	used: Array = []
+) -> String:
 	if paths.is_empty():
 		return ""
-	var options: PackedStringArray = []
+	var candidates: PackedStringArray = []
 	for path in paths:
+		if path not in used:
+			candidates.append(path)
+	if candidates.is_empty():
+		candidates = paths.duplicate()
+	var options: PackedStringArray = []
+	for path in candidates:
 		if path != last_path:
 			options.append(path)
 	if options.is_empty():
-		return paths[0]
+		return candidates[0]
 	return options[randi() % options.size()]
 
 
@@ -49,7 +63,11 @@ static func is_pool_wav(file_name: String, prefix: String) -> bool:
 	return lower.ends_with(".wav") and lower.begins_with(prefix)
 
 
-static func _choose_stream(streams: Array[AudioStream], last_path: String) -> AudioStream:
+static func _choose_stream(
+	streams: Array[AudioStream],
+	last_path: String,
+	used: Array = []
+) -> AudioStream:
 	var paths: PackedStringArray = []
 	var by_path: Dictionary = {}
 	for stream in streams:
@@ -57,7 +75,7 @@ static func _choose_stream(streams: Array[AudioStream], last_path: String) -> Au
 			continue
 		paths.append(stream.resource_path)
 		by_path[stream.resource_path] = stream
-	var chosen_path := choose_path(paths, last_path)
+	var chosen_path := choose_path(paths, last_path, used)
 	if chosen_path.is_empty():
 		return null
 	return by_path.get(chosen_path) as AudioStream

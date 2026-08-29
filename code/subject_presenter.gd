@@ -81,6 +81,14 @@ func spawn_subject(subject: SubjectDef) -> void:
 	if _subject_instance.has_method("apply_appearance"):
 		_subject_instance.apply_appearance(appearance)
 	call_deferred("_fit_subject_to_gate")
+	# #region agent log
+	_agent_dbg_log("H1", "subject_presenter.gd:spawn_subject", "spawned subject deferred fit", {
+		"has_subject": _subject_instance != null,
+		"visible": _subject_instance != null and _subject_instance.visible,
+		"delayed_close_armed": _delayed_door_close_armed,
+		"departing": _departing.size(),
+	})
+	# #endregion
 	_peephole_def = _resolve_peephole_def(subject)
 	if peephole_stage and _peephole_def:
 		peephole_stage.present(
@@ -183,6 +191,14 @@ func is_in_peephole() -> bool:
 
 
 func set_door_closed(force: bool = true) -> void:
+	# #region agent log
+	_agent_dbg_log("H5", "subject_presenter.gd:set_door_closed", "set_door_closed", {
+		"force": force,
+		"delayed_close_armed": _delayed_door_close_armed,
+		"skipped": not force and _delayed_door_close_armed,
+		"departing": _departing.size(),
+	})
+	# #endregion
 	if not force and _delayed_door_close_armed:
 		return
 	_cancel_delayed_door_close()
@@ -384,6 +400,12 @@ func play_reject(
 
 
 func _fit_subject_to_gate() -> void:
+	# #region agent log
+	_agent_dbg_log("H1", "subject_presenter.gd:_fit_subject_to_gate", "fit start", {
+		"has_subject": _subject_instance != null and is_instance_valid(_subject_instance),
+		"visible_before": _subject_instance != null and is_instance_valid(_subject_instance) and _subject_instance.visible,
+	})
+	# #endregion
 	if _subject_instance == null or not is_instance_valid(_subject_instance):
 		return
 	var door_height := _door_world_height()
@@ -440,6 +462,13 @@ func _find_mesh_instances(root: Node) -> Array[MeshInstance3D]:
 
 
 func _tween_accept_curve(on_complete: Callable, on_passed_marker: Callable = Callable()) -> void:
+	# #region agent log
+	_agent_dbg_log("H3", "subject_presenter.gd:_tween_accept_curve", "accept walk start", {
+		"has_subject": _subject_instance != null and is_instance_valid(_subject_instance),
+		"visible": _subject_instance != null and is_instance_valid(_subject_instance) and _subject_instance.visible,
+		"null_subject": _subject_instance == null or not is_instance_valid(_subject_instance),
+	})
+	# #endregion
 	if _subject_instance == null or not is_instance_valid(_subject_instance):
 		if on_passed_marker.is_valid():
 			on_passed_marker.call()
@@ -654,3 +683,26 @@ func _clear_departing() -> void:
 	_departing.clear()
 	if side_window:
 		side_window.visible = false
+
+
+func _agent_dbg_log(hypothesis_id: String, location: String, message: String, data: Dictionary) -> void:
+	# #region agent log
+	const PATH := "/Users/connergrey/Documents/GameDev/centaur-game/.cursor/debug-6b6305.log"
+	var fa := FileAccess.open(PATH, FileAccess.READ_WRITE)
+	if fa == null:
+		fa = FileAccess.open(PATH, FileAccess.WRITE)
+	else:
+		fa.seek_end()
+	if fa == null:
+		return
+	var payload := {
+		"sessionId": "6b6305",
+		"hypothesisId": hypothesis_id,
+		"location": location,
+		"message": message,
+		"data": data,
+		"timestamp": int(Time.get_unix_time_from_system() * 1000.0),
+	}
+	fa.store_line(JSON.stringify(payload))
+	fa.close()
+	# #endregion

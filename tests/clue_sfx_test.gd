@@ -4,6 +4,8 @@ extends SceneTree
 func _initialize() -> void:
 	var failures: PackedStringArray = []
 	_test_choose_avoids_last(failures)
+	_test_choose_prefers_unused(failures)
+	_test_choose_reuses_when_used_exhausted(failures)
 	_test_choose_allows_only_clip(failures)
 	_test_pool_ids(failures)
 	_test_wav_filter(failures)
@@ -30,6 +32,33 @@ func _test_choose_avoids_last(failures: PackedStringArray) -> void:
 			return
 		if chosen not in paths:
 			failures.append("choose_path returned unknown path %s." % chosen)
+			return
+
+
+func _test_choose_prefers_unused(failures: PackedStringArray) -> void:
+	var paths: PackedStringArray = [
+		"res://sfx/human_approach_1.wav",
+		"res://sfx/human_approach_2.wav",
+		"res://sfx/human_approach_3.wav",
+	]
+	var used := ["res://sfx/human_approach_1.wav"]
+	for _i in 20:
+		var chosen := ClueSfx.choose_path(paths, "", used)
+		if chosen == used[0]:
+			failures.append("choose_path should skip used clips when alternatives exist.")
+			return
+
+
+func _test_choose_reuses_when_used_exhausted(failures: PackedStringArray) -> void:
+	var paths: PackedStringArray = [
+		"res://sfx/human_knock_1.wav",
+		"res://sfx/human_knock_2.wav",
+	]
+	var used := [paths[0], paths[1]]
+	for _i in 20:
+		var chosen := ClueSfx.choose_path(paths, paths[0], used)
+		if chosen == paths[0]:
+			failures.append("choose_path should avoid last clip when reusing exhausted pool.")
 			return
 
 

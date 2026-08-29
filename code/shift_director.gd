@@ -14,10 +14,9 @@ const CHEAT_TIMEOUT := 2.0
 var encounter_director: EncounterDirector
 var hud: HUD
 
-var score: int = 0
 var strikes_used: int = 0
 var _shift_index: int = 0
-var _queue: Array[SubjectDef] = []
+var _queue: Array[EncounterPlan] = []
 var _subject_index: int = 0
 var _time_remaining: float = 0.0
 var _shift_active: bool = false
@@ -31,32 +30,168 @@ var _title_path: TitlePath
 var _title: Node
 
 
-static func roll_queue(shift: ShiftDef, catalog: SubjectCatalog) -> Array[SubjectDef]:
-	var queue: Array[SubjectDef] = []
+static func roll_queue(shift: ShiftDef, catalog: SubjectCatalog) -> Array[EncounterPlan]:
+	var plans: Array[EncounterPlan] = []
 	if shift == null or catalog == null:
-		return queue
+		return plans
 	var pool := shift.enabled_types()
 	if pool.is_empty() or shift.subject_count <= 0:
-		return queue
-	var previous_type: SubjectDef.TrueType
-	var has_previous := false
-	for _i in shift.subject_count:
-		var pick_pool := pool
-		if has_previous and pool.size() > 1:
-			pick_pool = pool.duplicate()
-			pick_pool.erase(previous_type)
-		var picked: SubjectDef.TrueType = pick_pool.pick_random()
-		var subject := catalog.subject_for(picked)
+		return plans
+	var type_sequence := _build_type_sequence(shift, pool)
+	var used_lines: Dictionary = {}
+	var used_sfx: Dictionary = {}
+	for true_type in type_sequence:
+		var subject := catalog.subject_for(true_type)
 		if subject == null:
 			push_warning(
 				"ShiftDirector: SubjectCatalog has no SubjectDef for %s."
-				% SubjectDef.TrueType.keys()[picked]
+				% SubjectDef.TrueType.keys()[true_type]
 			)
 			continue
-		queue.append(subject)
-		previous_type = picked
-		has_previous = true
-	return queue
+		plans.append(_build_encounter_plan(subject, used_lines, used_sfx))
+	return plans
+
+
+static func _build_type_sequence(
+	shift: ShiftDef,
+	pool: Array[SubjectDef.TrueType]
+) -> Array[SubjectDef.TrueType]:
+	if pool.size() == 1:
+		var single: Array[SubjectDef.TrueType] = []
+		for _i in shift.subject_count:
+			single.append(pool[0])
+		return single
+	if shift.subject_count < pool.size():
+		push_warning(
+			"ShiftDirector: subject_count (%d) is less than enabled types (%d)."
+			% [shift.subject_count, pool.size()]
+		)
+		var trimmed := pool.duplicate()
+		trimmed.shuffle()
+		trimmed.resize(shift.subject_count)
+		return _shuffle_no_adjacent(trimmed)
+	var counts: Dictionary = {}
+	for true_type in pool:
+		counts[true_type] = 0
+	var sequence: Array[SubjectDef.TrueType] = []
+	for true_type in pool:
+		sequence.append(true_type)
+		counts[true_type] = 1
+	var remaining := shift.subject_count - pool.size()
+	for _i in remaining:
+		var min_count: int = counts[pool[0]]
+		for true_type in pool:
+			min_count = mini(min_count, counts[true_type])
+		var candidates: Array[SubjectDef.TrueType] = []
+		for true_type in pool:
+			if counts[true_type] == min_count:
+				candidates.append(true_type)
+		var picked: SubjectDef.TrueType = candidates.pick_random()
+		sequence.append(picked)
+		counts[picked] += 1
+	return _shuffle_no_adjacent(sequence)
+
+
+static func _shuffle_no_adjacent(
+	types: Array[SubjectDef.TrueType]
+) -> Array[SubjectDef.TrueType]:
+	if types.size() <= 1:
+		return types
+	var distinct := {}
+	for true_type in types:
+		distinct[true_type] = true
+	if distinct.size() <= 1:
+		return types
+	var shuffled := types.duplicate()
+	for _attempt in 64:
+		shuffled.shuffle()
+		_repair_adjacent_duplicates(shuffled)
+		if not _has_adjacent_duplicates(shuffled):
+			return shuffled
+	push_warning("ShiftDirector: could not eliminate all adjacent duplicate types.")
+	return shuffled
+
+
+static func _has_adjacent_duplicates(types: Array[SubjectDef.TrueType]) -> bool:
+	for i in range(1, types.size()):
+		if types[i] == types[i - 1]:
+			return true
+	return false
+
+
+static func _repair_adjacent_duplicates(types: Array[SubjectDef.TrueType]) -> void:
+	for i in range(1, types.size()):
+		if types[i] != types[i - 1]:
+			continue
+		for j in range(i + 1, types.size()):
+			if types[j] == types[i]:
+				continue
+			if types[j] == types[i - 1]:
+				continue
+			if j < types.size() - 1 and types[j + 1] == types[i]:
+				continue
+			var tmp := types[i]
+			types[i] = types[j]
+			types[j] = tmp
+			break
+
+
+static func _build_encounter_plan(
+	subject: SubjectDef,
+	used_lines: Dictionary,
+	used_sfx: Dictionary
+) -> EncounterPlan:
+	var plan := EncounterPlan.new()
+	plan.subject = subject
+	for question in subject.questions:
+		var line_key := "%s|%d" % [question.prompt_key, subject.true_type as int]
+		if not used_lines.has(line_key):
+			used_lines[line_key] = []
+		var exclude: Array = used_lines[line_key]
+		var line := DialoguePools.pick(question.prompt_key, subject.true_type, exclude)
+		if line.is_empty():
+			line = question.subtitle
+		plan.question_subtitles.append(line)
+		if not line.is_empty():
+			exclude.append(line)
+	var approach_id := ClueSfx.pool_id(subject.approach_kind, true)
+	if not used_sfx.has(approach_id):
+		used_sfx[approach_id] = []
+	plan.approach_stream = ClueSfx.pick(
+		subject.approach_kind,
+		true,
+		used_sfx[approach_id]
+	)
+	_track_sfx_path(used_sfx, approach_id, plan.approach_stream)
+	var knock_kind := subject.knock_kind
+	if subject.true_type == SubjectDef.TrueType.CENTAUR:
+		knock_kind = (
+			SubjectDef.ClueKind.HUMAN
+			if randi() % 2 == 0
+			else SubjectDef.ClueKind.HORSE
+		)
+	var knock_id := ClueSfx.pool_id(knock_kind, false)
+	if not used_sfx.has(knock_id):
+		used_sfx[knock_id] = []
+	plan.knock_stream = ClueSfx.pick(knock_kind, false, used_sfx[knock_id])
+	_track_sfx_path(used_sfx, knock_id, plan.knock_stream)
+	return plan
+
+
+static func _track_sfx_path(
+	used_sfx: Dictionary,
+	pool_id: StringName,
+	stream: AudioStream
+) -> void:
+	if stream == null:
+		return
+	var path := stream.resource_path
+	if path.is_empty():
+		return
+	var used: Array = used_sfx.get(pool_id, [])
+	if path not in used:
+		used.append(path)
+	used_sfx[pool_id] = used
 
 
 static func format_timer_text(seconds: float) -> String:
@@ -64,46 +199,6 @@ static func format_timer_text(seconds: float) -> String:
 	var minutes := total_seconds / 60
 	var secs := total_seconds % 60
 	return "%02d:%02d" % [minutes, secs]
-
-
-static func build_next_shift_preview(shift: ShiftDef) -> String:
-	if shift == null:
-		return ""
-	return "Next Shift\nTime: %s\nSubjects: %d\nStrikes allowed: %d" % [
-		format_timer_text(shift.shift_timer_seconds),
-		shift.subject_count,
-		shift.strikes_allowed
-	]
-
-
-static func build_shift_summary(
-	reason: String,
-	score: int,
-	strikes_used: int,
-	strikes_allowed: int
-) -> String:
-	return "%s\n\nScore: %d\nStrikes: %d / %d" % [
-		reason,
-		score,
-		strikes_used,
-		strikes_allowed
-	]
-
-
-static func build_shift_end_summary(
-	reason: String,
-	score: int,
-	strikes_used: int,
-	strikes_allowed: int,
-	has_next_shift: bool,
-	next_shift: ShiftDef
-) -> String:
-	var summary := build_shift_summary(reason, score, strikes_used, strikes_allowed)
-	if has_next_shift and next_shift != null:
-		var preview := build_next_shift_preview(next_shift)
-		if not preview.is_empty():
-			summary += "\n\n" + preview
-	return summary
 
 
 static func end_shift_headline(succeeded: bool, has_next_shift: bool) -> String:
@@ -212,7 +307,6 @@ func _start_shift() -> void:
 	if _queue.is_empty():
 		push_warning("ShiftDirector: rolled an empty Subject queue.")
 		return
-	score = 0
 	strikes_used = 0
 	_subject_index = 0
 	_time_remaining = shift.shift_timer_seconds
@@ -249,7 +343,7 @@ func _start_next_encounter() -> void:
 	if _time_remaining <= 0.0:
 		_end_shift("Time is up.", false)
 		return
-	var subject := _queue[_subject_index]
+	var plan := _queue[_subject_index]
 	_subject_index += 1
 	_update_hud_subject_progress()
 	_waiting_on_encounter = true
@@ -257,18 +351,16 @@ func _start_next_encounter() -> void:
 		"[ShiftDirector] Shift %d / %d — subject %d / %d"
 		% [_shift_index + 1, roster.shifts.size(), _subject_index, _queue.size()]
 	)
-	encounter_director.start_encounter(subject)
+	encounter_director.start_encounter(plan)
 
 
-func _on_encounter_finished(scored: bool, strike: bool, skip_handoff_delay: bool = false) -> void:
+func _on_encounter_finished(strike: bool, skip_handoff_delay: bool = false) -> void:
 	if not _shift_active:
 		return
 	var shift := _current_shift()
 	if shift == null:
 		return
 	_waiting_on_encounter = false
-	if scored:
-		score += 1
 	if strike:
 		strikes_used += 1
 	_update_hud_stats()
@@ -335,26 +427,21 @@ func _begin_win() -> void:
 func _end_shift(reason: String, succeeded: bool) -> void:
 	_shift_active = false
 	_waiting_on_encounter = false
-	var shift := _current_shift()
-	var strikes_allowed := 0
-	if shift != null:
-		strikes_allowed = shift.strikes_allowed
 	var has_next := succeeded and _has_next_shift()
 	var next_shift: ShiftDef = null
 	if has_next:
 		next_shift = roster.shifts[_shift_index + 1]
-	var summary := build_shift_end_summary(
-		reason,
-		score,
-		strikes_used,
-		strikes_allowed,
-		has_next,
-		next_shift
-	)
-	print("[ShiftDirector] %s" % summary.replace("\n", " | "))
+	var log_parts: PackedStringArray = [reason]
+	if has_next and next_shift != null:
+		log_parts.append(
+			"Time: %s" % format_timer_text(next_shift.shift_timer_seconds)
+		)
+		log_parts.append("Subjects: %d" % next_shift.subject_count)
+		log_parts.append("Strikes: %d" % next_shift.strikes_allowed)
+	print("[ShiftDirector] %s" % " | ".join(log_parts))
 	var show_replay := not succeeded
 	var show_next := has_next
-	hud.show_summary(summary, show_replay, show_next)
+	hud.show_summary(reason, show_replay, show_next, next_shift)
 
 
 func _update_hud_stats() -> void:
@@ -362,7 +449,6 @@ func _update_hud_stats() -> void:
 	var strikes_allowed := 0
 	if shift != null:
 		strikes_allowed = shift.strikes_allowed
-	hud.set_score(score)
 	hud.set_strikes(strikes_used, strikes_allowed)
 
 

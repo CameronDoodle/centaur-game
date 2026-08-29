@@ -48,6 +48,14 @@ _Avoid_: Zoom, close-up camera
 One timed session at the Gate, defined by which Subject types may appear, how many attendants approach, and how many strikes are allowed.
 _Avoid_: Level, round, campaign
 
+**Shift End**:
+The overlay at the Gate after a Shift ends, before Replay Shift or Next Shift. Session chrome stays up; a headline, optional next-Shift facts, and one action button are shown. Last-Shift success is Win, not Shift End.
+_Avoid_: summary, results screen, game over
+
+**Encounter**:
+One Subject visit at the Gate during a Shift.
+_Avoid_: Round, spawn
+
 **Shift Roster**:
 The ordered list of Shifts the player works through.
 _Avoid_: Level, round, campaign

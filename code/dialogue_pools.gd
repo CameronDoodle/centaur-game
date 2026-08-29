@@ -7,7 +7,23 @@ static var _lines: Dictionary = {}
 static var _loaded := false
 
 
-static func pick(prompt_key: String, true_type: SubjectDef.TrueType) -> String:
+static func choose_line(pool: Array, exclude: Array = []) -> String:
+	if pool.is_empty():
+		return ""
+	var available: Array = []
+	for line in pool:
+		if line not in exclude:
+			available.append(line)
+	if available.is_empty():
+		return pool[randi() % pool.size()] as String
+	return available[randi() % available.size()] as String
+
+
+static func pick(
+	prompt_key: String,
+	true_type: SubjectDef.TrueType,
+	exclude: Array = []
+) -> String:
 	_ensure_loaded()
 	if prompt_key.is_empty():
 		return ""
@@ -16,7 +32,7 @@ static func pick(prompt_key: String, true_type: SubjectDef.TrueType) -> String:
 	var pool: Array = prompt.get(type_key, [])
 	if pool.is_empty():
 		return ""
-	return pool[randi() % pool.size()] as String
+	return choose_line(pool, exclude)
 
 
 static func has_line(prompt_key: String, true_type: SubjectDef.TrueType) -> bool:
