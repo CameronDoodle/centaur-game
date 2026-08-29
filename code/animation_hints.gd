@@ -3,14 +3,13 @@ extends RefCounted
 
 ## Matches locomotion clip names by last path segment (`Walk`, `Armature|Walk`,
 ## `Armature/Walk`) and keeps the chosen clip looping while that intent lasts.
-## Trailing rest holds (Kenney Walk pads a stride out to 2.67s) are trimmed so
-## a loop does not freeze mid-path. Trimmed copies live in a writable local
-## library so exported builds never mutate imported AnimationLibrary resources.
-
-const LOCAL_LIB := &"locomotion"
+## Trailing rest holds (Kenney Walk pads a stride out to 2.67s) are wrapped in
+## software via seek so exported builds never mutate imported AnimationLibrary
+## resources.
 
 var _player: AnimationPlayer
 var _hints: PackedStringArray = PackedStringArray()
+var _loop_end: float = 0.0
 
 
 static func clip_leaf(clip_name: String) -> String:
@@ -29,12 +28,6 @@ static func matches(clip_name: String, hint: String) -> bool:
 static func find_clip(player: AnimationPlayer, hints: PackedStringArray) -> String:
 	if player == null:
 		return ""
-	if player.has_animation_library(LOCAL_LIB):
-		var local := player.get_animation_library(LOCAL_LIB)
-		for hint in hints:
-			for anim_name in local.get_animation_list():
-				if matches(anim_name, hint):
-					return "%s/%s" % [LOCAL_LIB, anim_name]
 	for hint in hints:
 		for candidate in player.get_animation_list():
 			if matches(candidate, hint):
@@ -75,35 +68,19 @@ static func trailing_hold_start(animation: Animation) -> float:
 	return hold_start
 
 
-static func ensure_looped(player: AnimationPlayer, clip: String) -> String:
-	if player == null or clip.is_empty():
-		return clip
-	var animation := player.get_animation(clip)
-	if animation == null:
-		return clip
-	var loop_end := trailing_hold_start(animation)
-	var needs_trim := (
-		loop_end >= 0.2
-		and loop_end + 0.05 < animation.length
-		and loop_end <= animation.length * 0.9
-	)
-	var needs_loop := animation.loop_mode != Animation.LOOP_LINEAR
-	if not needs_loop and not needs_trim:
-		return clip
-	var local := animation.duplicate() as Animation
-	if local == null:
-		return clip
-	local.loop_mode = Animation.LOOP_LINEAR
-	local.resource_local_to_scene = true
-	if needs_trim:
-		local.length = loop_end
-	return _install_local_animation(player, clip_leaf(clip), local)
-
-
 func play_looped(player: AnimationPlayer, hints: PackedStringArray) -> String:
 	_bind(player)
 	_hints = PackedStringArray(hints)
 	return _restart()
+
+
+func tick() -> void:
+	if _player == null or not is_instance_valid(_player):
+		return
+	if not _player.is_playing() or _loop_end <= 0.0:
+		return
+	if _player.current_animation_position >= _loop_end:
+		_player.seek(0.0, true)
 
 
 func _bind(player: AnimationPlayer) -> void:
@@ -122,6 +99,23 @@ func _unbind_player() -> void:
 	if _player and is_instance_valid(_player) and _player.animation_finished.is_connected(_on_animation_finished):
 		_player.animation_finished.disconnect(_on_animation_finished)
 	_player = null
+	_loop_end = 0.0
+
+
+func _record_loop_end(clip: String) -> void:
+	_loop_end = 0.0
+	if _player == null or clip.is_empty():
+		return
+	var animation := _player.get_animation(clip)
+	if animation == null:
+		return
+	var hold_start := trailing_hold_start(animation)
+	var needs_trim := (
+		hold_start >= 0.2
+		and hold_start + 0.05 < animation.length
+		and hold_start <= animation.length * 0.9
+	)
+	_loop_end = hold_start if needs_trim else animation.length
 
 
 func _restart() -> String:
@@ -130,9 +124,9 @@ func _restart() -> String:
 	var clip := find_clip(_player, _hints)
 	if clip.is_empty():
 		return ""
-	var play_clip := ensure_looped(_player, clip)
-	_player.play(play_clip)
-	return play_clip
+	_record_loop_end(clip)
+	_player.play(clip)
+	return clip
 
 
 func _on_animation_finished(_anim_name: StringName) -> void:
@@ -165,13 +159,3 @@ static func _values_match(a, b) -> bool:
 	if typeof(a) == TYPE_FLOAT:
 		return is_equal_approx(a, b)
 	return false
-
-
-static func _install_local_animation(player: AnimationPlayer, leaf: String, animation: Animation) -> String:
-	if not player.has_animation_library(LOCAL_LIB):
-		player.add_animation_library(LOCAL_LIB, AnimationLibrary.new())
-	var library := player.get_animation_library(LOCAL_LIB)
-	if library.has_animation(leaf):
-		library.remove_animation(leaf)
-	library.add_animation(leaf, animation)
-	return "%s/%s" % [LOCAL_LIB, leaf]

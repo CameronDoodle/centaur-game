@@ -22,6 +22,7 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
+	_locomotion.tick()
 	_update_face()
 
 

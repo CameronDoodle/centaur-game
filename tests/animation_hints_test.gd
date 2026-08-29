@@ -14,8 +14,8 @@ func _initialize() -> void:
 func _run() -> void:
 	var failures: PackedStringArray = []
 	_test_matcher(failures)
-	await _test_walk_keeps_playing(KENNEY_HORSE, "Horse.glb", failures, true)
-	await _test_walk_keeps_playing(QUATERNIUS_HORSE, "Quaternius Horse", failures, false)
+	await _test_walk_keeps_playing(KENNEY_HORSE, "Horse.glb", failures)
+	await _test_walk_keeps_playing(QUATERNIUS_HORSE, "Quaternius Horse", failures)
 	await _test_human_walk_keeps_playing(KENNEY_MAN, "Man.glb", failures)
 	if failures.is_empty():
 		print("AnimationHints: all checks passed.")
@@ -45,11 +45,19 @@ func _assert_match(clip_name: String, hint: String, expected: bool, failures: Pa
 		)
 
 
+func _advance_with_ticks(player: AnimationPlayer, total: float, step: float = 0.05) -> void:
+	var elapsed := 0.0
+	while elapsed < total:
+		var delta := minf(step, total - elapsed)
+		player.advance(delta)
+		await process_frame
+		elapsed += delta
+
+
 func _test_walk_keeps_playing(
 	horse_look: PackedScene,
 	label: String,
-	failures: PackedStringArray,
-	trim_hold: bool
+	failures: PackedStringArray
 ) -> void:
 	var horse := HORSE_SCENE.instantiate() as Node3D
 	root.add_child(horse)
@@ -75,23 +83,15 @@ func _test_walk_keeps_playing(
 		failures.append("%s missing animation resource for '%s'." % [label, clip])
 		horse.free()
 		return
-	if trim_hold and animation.length > 1.5:
-		failures.append(
-			"%s Walk length %.2f still includes the rest hold; expected a trimmed cycle."
-			% [label, animation.length]
-		)
-	if not trim_hold and animation.length < 1.0:
-		failures.append("%s Walk length %.2f was trimmed too far." % [label, animation.length])
 	var skeleton := _find_skeleton(horse)
 	var foot := -1
 	if skeleton:
 		foot = skeleton.find_bone("FrontFoot.L")
-	var first_pose := Vector3.ZERO
 	if foot >= 0:
-		player.advance(1.5)
+		await _advance_with_ticks(player, 1.5)
 		skeleton.force_update_all_bone_transforms()
-		first_pose = skeleton.to_global(skeleton.get_bone_global_pose(foot).origin)
-		player.advance(0.25)
+		var first_pose := skeleton.to_global(skeleton.get_bone_global_pose(foot).origin)
+		await _advance_with_ticks(player, 0.25)
 		skeleton.force_update_all_bone_transforms()
 		var second_pose := skeleton.to_global(skeleton.get_bone_global_pose(foot).origin)
 		if first_pose.distance_to(second_pose) < 0.05:
@@ -100,7 +100,7 @@ func _test_walk_keeps_playing(
 				% [label, first_pose.distance_to(second_pose)]
 			)
 	else:
-		player.advance(animation.length + 0.1)
+		await _advance_with_ticks(player, animation.length + 0.1)
 	await process_frame
 	if not player.is_playing():
 		failures.append("%s stopped after clip length; Walk should still be playing." % label)
@@ -142,20 +142,15 @@ func _test_human_walk_keeps_playing(
 		failures.append("%s missing animation resource for '%s'." % [label, clip])
 		human.free()
 		return
-	if animation.length > 1.5:
-		failures.append(
-			"%s Walk length %.2f still includes the rest hold; expected a trimmed cycle."
-			% [label, animation.length]
-		)
 	var skeleton := _find_skeleton(human)
 	var foot := -1
 	if skeleton:
 		foot = skeleton.find_bone("FrontFoot.L")
 	if foot >= 0:
-		player.advance(1.5)
+		await _advance_with_ticks(player, 1.5)
 		skeleton.force_update_all_bone_transforms()
 		var first_pose := skeleton.to_global(skeleton.get_bone_global_pose(foot).origin)
-		player.advance(0.25)
+		await _advance_with_ticks(player, 0.25)
 		skeleton.force_update_all_bone_transforms()
 		var second_pose := skeleton.to_global(skeleton.get_bone_global_pose(foot).origin)
 		if first_pose.distance_to(second_pose) < 0.05:
@@ -164,7 +159,7 @@ func _test_human_walk_keeps_playing(
 				% [label, first_pose.distance_to(second_pose)]
 			)
 	else:
-		player.advance(animation.length + 0.1)
+		await _advance_with_ticks(player, animation.length + 0.1)
 	await process_frame
 	if not player.is_playing():
 		failures.append("%s stopped after clip length; Walk should still be playing." % label)

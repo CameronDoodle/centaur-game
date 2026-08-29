@@ -157,6 +157,8 @@ func _freeze_mask_pose() -> void:
 func _process(_delta: float) -> void:
 	if _horse_skeleton == null or _man_skeleton == null:
 		return
+	_horse_locomotion.tick()
+	_man_locomotion.tick()
 	_apply_hidden_bone_scales()
 	_glue_torso()
 	_glue_mask()
