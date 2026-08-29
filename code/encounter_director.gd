@@ -20,8 +20,10 @@ var _input_locked: bool = false
 var _approach_stream: AudioStream
 var _knock_stream: AudioStream
 var _question_subtitles: Array[String] = []
+var _encounter_questions: Array[QuestionDef] = []
 var _wrong_accept_join_remaining: int = 0
 var _wrong_accept_join_strike: bool = false
+var _resolve_token: int = 0
 
 
 func _ready() -> void:
@@ -55,18 +57,17 @@ func start_encounter(plan: EncounterPlan) -> void:
 		push_warning("EncounterDirector: start_encounter called with null plan.")
 		return
 	current_subject = plan.subject
+	_resolve_token += 1
 	_input_locked = false
 	subject_presenter.set_door_closed(false)
 	subject_presenter.spawn_subject(plan.subject)
-	# #region agent log
-	_agent_dbg_log("H1,H2,H5", "encounter_director.gd:start_encounter", "start_encounter after spawn", _debug_snapshot())
-	# #endregion
 	hud.hide_reveal()
 	if dialogue_box != null:
 		dialogue_box.clear_reply()
 	_question_subtitles = plan.question_subtitles.duplicate()
+	_encounter_questions = plan.questions.duplicate()
 	if dialogue_box != null:
-		dialogue_box.set_questions(plan.subject.questions)
+		dialogue_box.set_questions(_encounter_questions)
 		dialogue_box.set_questions_enabled(false)
 	hud.set_gate_actions_enabled(false)
 	hud.set_peephole_mode(false)
@@ -135,9 +136,6 @@ func _play_knock() -> void:
 
 
 func _on_knock_finished() -> void:
-	# #region agent log
-	_agent_dbg_log("H1,H4", "encounter_director.gd:_on_knock_finished", "knock finished before phase check", _debug_snapshot())
-	# #endregion
 	if phase != Phase.KNOCK:
 		return
 	hud.set_clue_replay_playing(false, false)
@@ -184,9 +182,6 @@ func _stop_encounter_audio() -> void:
 
 
 func _on_replay_approach_pressed() -> void:
-	# #region agent log
-	_agent_dbg_log("H1,H4", "encounter_director.gd:_on_replay_approach_pressed", "approach icon pressed", _debug_snapshot())
-	# #endregion
 	match phase:
 		Phase.APPROACH:
 			_stop_approach_audio()
@@ -205,9 +200,6 @@ func _on_replay_approach_pressed() -> void:
 
 
 func _on_replay_knock_pressed() -> void:
-	# #region agent log
-	_agent_dbg_log("H1,H4", "encounter_director.gd:_on_replay_knock_pressed", "knock icon pressed", _debug_snapshot())
-	# #endregion
 	match phase:
 		Phase.APPROACH:
 			_stop_approach_audio()
@@ -325,9 +317,9 @@ func _on_peephole_pose_save_pressed() -> void:
 func _on_question_pressed(index: int) -> void:
 	if phase != Phase.OPEN or _input_locked:
 		return
-	if index < 0 or index >= current_subject.questions.size():
+	if index < 0 or index >= _encounter_questions.size():
 		return
-	var question := current_subject.questions[index]
+	var question := _encounter_questions[index]
 	var subtitle := _question_subtitles[index] if index < _question_subtitles.size() else question.subtitle
 	if dialogue_box != null:
 		dialogue_box.set_reply(subtitle)
@@ -342,12 +334,6 @@ func _on_reject_pressed() -> void:
 
 
 func _resolve(accepted: bool) -> void:
-	# #region agent log
-	var snap := _debug_snapshot()
-	snap["accepted"] = accepted
-	snap["blocked"] = phase != Phase.OPEN or _input_locked
-	_agent_dbg_log("H2,H3", "encounter_director.gd:_resolve", "resolve requested", snap)
-	# #endregion
 	if phase != Phase.OPEN or _input_locked:
 		return
 	_input_locked = true
@@ -359,6 +345,7 @@ func _resolve(accepted: bool) -> void:
 	hud.set_peephole_mode(false)
 	subject_presenter.exit_peephole()
 	_set_phase(Phase.RESOLVE)
+	var token := _resolve_token
 	var correct := _is_decision_correct(accepted)
 	var strike := not correct
 	print(
@@ -376,9 +363,8 @@ func _resolve(accepted: bool) -> void:
 			_begin_wrong_accept_resolve(strike)
 		else:
 			var on_passed_marker := func() -> void:
-				# #region agent log
-				_agent_dbg_log("H2,H5", "encounter_director.gd:on_passed_marker", "accept handoff emitting finished", _debug_snapshot())
-				# #endregion
+				if token != _resolve_token:
+					return
 				hud.hide_reveal()
 				_set_phase(Phase.DONE)
 				encounter_finished.emit(strike, true)
@@ -386,13 +372,15 @@ func _resolve(accepted: bool) -> void:
 		return
 	var penalty := not correct
 	var on_walk_done := func() -> void:
-		if penalty:
+		if penalty and token == _resolve_token:
 			_end_reject_camera_follow(func() -> void:
 				_finish_resolve(strike, true)
 			)
 	var on_halfway := Callable()
 	if not penalty:
 		on_halfway = func() -> void:
+			if token != _resolve_token:
+				return
 			_set_phase(Phase.DONE)
 			encounter_finished.emit(strike, true)
 	var walker := subject_presenter.play_reject(on_walk_done, on_halfway)
@@ -521,44 +509,3 @@ func _play_verdict_sfx(path: String) -> void:
 		return
 	audio_voice.stream = stream
 	audio_voice.play()
-
-
-func _debug_snapshot() -> Dictionary:
-	var sub: Node3D = null
-	if subject_presenter:
-		sub = subject_presenter.get_active_subject()
-	var door_y := 0.0
-	if subject_presenter and subject_presenter.door_hinge:
-		door_y = subject_presenter.door_hinge.rotation.y
-	return {
-		"phase": Phase.keys()[phase],
-		"locked": _input_locked,
-		"has_subject": sub != null,
-		"subject_visible": sub != null and sub.visible,
-		"accept_disabled": hud.accept_button.disabled if hud else true,
-		"decision_visible": hud.decision_row.visible if hud else false,
-		"door_rot_y": door_y,
-	}
-
-
-func _agent_dbg_log(hypothesis_id: String, location: String, message: String, data: Dictionary) -> void:
-	# #region agent log
-	const PATH := "/Users/connergrey/Documents/GameDev/centaur-game/.cursor/debug-6b6305.log"
-	var fa := FileAccess.open(PATH, FileAccess.READ_WRITE)
-	if fa == null:
-		fa = FileAccess.open(PATH, FileAccess.WRITE)
-	else:
-		fa.seek_end()
-	if fa == null:
-		return
-	var payload := {
-		"sessionId": "6b6305",
-		"hypothesisId": hypothesis_id,
-		"location": location,
-		"message": message,
-		"data": data,
-		"timestamp": int(Time.get_unix_time_from_system() * 1000.0),
-	}
-	fa.store_line(JSON.stringify(payload))
-	fa.close()
-	# #endregion

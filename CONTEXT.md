@@ -56,6 +56,14 @@ _Avoid_: summary, results screen, game over
 One Subject visit at the Gate during a Shift.
 _Avoid_: Round, spawn
 
+**Question**:
+A player prompt during an Encounter. The offered set comes from the dialogue JSON for that Subject's type; button text is a QuestionDef overlay when one exists, otherwise the JSON key.
+_Avoid_: Prompt, button
+
+**Reply**:
+The spoken or subtitled line a Subject gives for a Question. Each Shift tracks remaining Replies per Question and type so lines do not repeat until the pool is exhausted.
+_Avoid_: Subtitle, voice line, answer text
+
 **Shift Roster**:
 The ordered list of Shifts the player works through.
 _Avoid_: Level, round, campaign

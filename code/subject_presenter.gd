@@ -81,14 +81,6 @@ func spawn_subject(subject: SubjectDef) -> void:
 	if _subject_instance.has_method("apply_appearance"):
 		_subject_instance.apply_appearance(appearance)
 	call_deferred("_fit_subject_to_gate")
-	# #region agent log
-	_agent_dbg_log("H1", "subject_presenter.gd:spawn_subject", "spawned subject deferred fit", {
-		"has_subject": _subject_instance != null,
-		"visible": _subject_instance != null and _subject_instance.visible,
-		"delayed_close_armed": _delayed_door_close_armed,
-		"departing": _departing.size(),
-	})
-	# #endregion
 	_peephole_def = _resolve_peephole_def(subject)
 	if peephole_stage and _peephole_def:
 		peephole_stage.present(
@@ -191,14 +183,6 @@ func is_in_peephole() -> bool:
 
 
 func set_door_closed(force: bool = true) -> void:
-	# #region agent log
-	_agent_dbg_log("H5", "subject_presenter.gd:set_door_closed", "set_door_closed", {
-		"force": force,
-		"delayed_close_armed": _delayed_door_close_armed,
-		"skipped": not force and _delayed_door_close_armed,
-		"departing": _departing.size(),
-	})
-	# #endregion
 	if not force and _delayed_door_close_armed:
 		return
 	_cancel_delayed_door_close()
@@ -304,10 +288,15 @@ func play_accept(
 	_accept_handoff_done = false
 	_accept_entered_room = false
 	_cancel_delayed_door_close()
+	var accepted := _subject_instance
 	var walk_through := func() -> void:
-		if _subject_instance and _subject_instance.has_method("play_walk"):
-			_subject_instance.play_walk()
-		_tween_accept_curve(on_complete, on_passed_marker)
+		if accepted == null or not is_instance_valid(accepted):
+			return
+		if accepted != _subject_instance or _departing.has(accepted):
+			return
+		if accepted.has_method("play_walk"):
+			accepted.play_walk()
+		_tween_accept_curve(accepted, on_complete, on_passed_marker)
 	if door_hinge:
 		door_hinge.open(walk_through)
 	else:
@@ -400,12 +389,6 @@ func play_reject(
 
 
 func _fit_subject_to_gate() -> void:
-	# #region agent log
-	_agent_dbg_log("H1", "subject_presenter.gd:_fit_subject_to_gate", "fit start", {
-		"has_subject": _subject_instance != null and is_instance_valid(_subject_instance),
-		"visible_before": _subject_instance != null and is_instance_valid(_subject_instance) and _subject_instance.visible,
-	})
-	# #endregion
 	if _subject_instance == null or not is_instance_valid(_subject_instance):
 		return
 	var door_height := _door_world_height()
@@ -461,23 +444,20 @@ func _find_mesh_instances(root: Node) -> Array[MeshInstance3D]:
 	return meshes
 
 
-func _tween_accept_curve(on_complete: Callable, on_passed_marker: Callable = Callable()) -> void:
-	# #region agent log
-	_agent_dbg_log("H3", "subject_presenter.gd:_tween_accept_curve", "accept walk start", {
-		"has_subject": _subject_instance != null and is_instance_valid(_subject_instance),
-		"visible": _subject_instance != null and is_instance_valid(_subject_instance) and _subject_instance.visible,
-		"null_subject": _subject_instance == null or not is_instance_valid(_subject_instance),
-	})
-	# #endregion
-	if _subject_instance == null or not is_instance_valid(_subject_instance):
-		if on_passed_marker.is_valid():
-			on_passed_marker.call()
-		if on_complete.is_valid():
-			on_complete.call()
+func _tween_accept_curve(
+	walker: Node3D,
+	on_complete: Callable,
+	on_passed_marker: Callable = Callable()
+) -> void:
+	if walker == null or not is_instance_valid(walker) or walker != _subject_instance:
+		if walker == _subject_instance:
+			if on_passed_marker.is_valid():
+				on_passed_marker.call()
+			if on_complete.is_valid():
+				on_complete.call()
 		return
 	if _move_tween:
 		_move_tween.kill()
-	var walker := _subject_instance
 	var start := walker.global_position
 	var camera_z := gate_camera.global_position.z if gate_camera else start.z
 	var end := accept_path_end(start, camera_z)
@@ -507,7 +487,7 @@ func _tween_accept_curve(on_complete: Callable, on_passed_marker: Callable = Cal
 			var tangent := cubic_bezier_tangent(p0, p1, p2, p3, t)
 			if tangent.length_squared() > 0.0001:
 				walker.look_at(pos + tangent, Vector3.UP, true)
-			_try_schedule_accept_door_close(pos.z)
+			_try_schedule_accept_door_close(walker, pos.z)
 			if t >= pass_t:
 				_try_accept_marker_handoff(walker, on_passed_marker),
 		0.0,
@@ -549,6 +529,8 @@ func _tween_accept_straight(on_complete: Callable) -> void:
 
 
 func _try_accept_marker_handoff(walker: Node3D, on_passed_marker: Callable) -> void:
+	if walker != null and _departing.has(walker):
+		return
 	if _accept_handoff_done or not on_passed_marker.is_valid():
 		return
 	_accept_handoff_done = true
@@ -560,7 +542,9 @@ static func has_entered_room(subject_z: float, door_z: float) -> bool:
 	return subject_z >= door_z
 
 
-func _try_schedule_accept_door_close(subject_z: float) -> void:
+func _try_schedule_accept_door_close(walker: Node3D, subject_z: float) -> void:
+	if walker != _subject_instance:
+		return
 	if _accept_entered_room or door == null:
 		return
 	if not has_entered_room(subject_z, door.global_position.z):
@@ -608,6 +592,11 @@ func _finish_accept_path(
 	on_complete: Callable,
 	on_passed_marker: Callable
 ) -> void:
+	if _departing.has(walker):
+		_finish_departing(walker)
+		if on_complete.is_valid():
+			on_complete.call()
+		return
 	if not _accept_handoff_done and on_passed_marker.is_valid():
 		_try_accept_marker_handoff(walker, on_passed_marker)
 	if _accept_handoff_done:
@@ -683,26 +672,3 @@ func _clear_departing() -> void:
 	_departing.clear()
 	if side_window:
 		side_window.visible = false
-
-
-func _agent_dbg_log(hypothesis_id: String, location: String, message: String, data: Dictionary) -> void:
-	# #region agent log
-	const PATH := "/Users/connergrey/Documents/GameDev/centaur-game/.cursor/debug-6b6305.log"
-	var fa := FileAccess.open(PATH, FileAccess.READ_WRITE)
-	if fa == null:
-		fa = FileAccess.open(PATH, FileAccess.WRITE)
-	else:
-		fa.seek_end()
-	if fa == null:
-		return
-	var payload := {
-		"sessionId": "6b6305",
-		"hypothesisId": hypothesis_id,
-		"location": location,
-		"message": message,
-		"data": data,
-		"timestamp": int(Time.get_unix_time_from_system() * 1000.0),
-	}
-	fa.store_line(JSON.stringify(payload))
-	fa.close()
-	# #endregion

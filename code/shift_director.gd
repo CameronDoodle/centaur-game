@@ -8,6 +8,8 @@ const SHIFT_COMPLETE_HEADLINE := "Shift complete."
 const CHEAT_KEYS := [KEY_W, KEY_I, KEY_N]
 const CHEAT_TIMEOUT := 2.0
 
+const QUESTIONS_PER_ENCOUNTER := 2
+
 @export var roster: ShiftRoster
 @export var subject_catalog: SubjectCatalog
 
@@ -40,6 +42,7 @@ static func roll_queue(shift: ShiftDef, catalog: SubjectCatalog) -> Array[Encoun
 	var type_sequence := _build_type_sequence(shift, pool)
 	var used_lines: Dictionary = {}
 	var used_sfx: Dictionary = {}
+	var used_questions: Dictionary = {}
 	for true_type in type_sequence:
 		var subject := catalog.subject_for(true_type)
 		if subject == null:
@@ -48,7 +51,7 @@ static func roll_queue(shift: ShiftDef, catalog: SubjectCatalog) -> Array[Encoun
 				% SubjectDef.TrueType.keys()[true_type]
 			)
 			continue
-		plans.append(_build_encounter_plan(subject, used_lines, used_sfx))
+		plans.append(_build_encounter_plan(subject, catalog, used_lines, used_sfx, used_questions))
 	return plans
 
 
@@ -138,12 +141,28 @@ static func _repair_adjacent_duplicates(types: Array[SubjectDef.TrueType]) -> vo
 
 static func _build_encounter_plan(
 	subject: SubjectDef,
+	catalog: SubjectCatalog,
 	used_lines: Dictionary,
-	used_sfx: Dictionary
+	used_sfx: Dictionary,
+	used_questions: Dictionary
 ) -> EncounterPlan:
 	var plan := EncounterPlan.new()
 	plan.subject = subject
-	for question in subject.questions:
+	var type_id := subject.true_type as int
+	if not used_questions.has(type_id):
+		used_questions[type_id] = []
+	var applicable_pool := DialoguePools.applicable_keys(subject.true_type)
+	var question_count := mini(QUESTIONS_PER_ENCOUNTER, applicable_pool.size())
+	var picked_keys := DialoguePools.pick_keys(
+		applicable_pool,
+		used_questions[type_id],
+		question_count
+	)
+	for key in picked_keys:
+		used_questions[type_id].append(key)
+	for key in picked_keys:
+		var question := _resolve_question(catalog.questions, key)
+		plan.questions.append(question)
 		var line_key := "%s|%d" % [question.prompt_key, subject.true_type as int]
 		if not used_lines.has(line_key):
 			used_lines[line_key] = []
@@ -176,6 +195,29 @@ static func _build_encounter_plan(
 	plan.knock_stream = ClueSfx.pick(knock_kind, false, used_sfx[knock_id])
 	_track_sfx_path(used_sfx, knock_id, plan.knock_stream)
 	return plan
+
+
+static func _question_for_key(
+	questions: Array[QuestionDef],
+	prompt_key: String
+) -> QuestionDef:
+	for question in questions:
+		if question.prompt_key == prompt_key:
+			return question
+	return null
+
+
+static func _resolve_question(
+	questions: Array[QuestionDef],
+	prompt_key: String
+) -> QuestionDef:
+	var question := _question_for_key(questions, prompt_key)
+	if question != null:
+		return question
+	question = QuestionDef.new()
+	question.prompt_key = prompt_key
+	question.button_label = prompt_key
+	return question
 
 
 static func _track_sfx_path(

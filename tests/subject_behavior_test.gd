@@ -1,6 +1,5 @@
 extends SceneTree
 
-const PROMPT_KEYS := ["are_you_a_horse", "whats_your_name"]
 const BANNED_TYPES := [
 	SubjectDef.TrueType.CENTAUR,
 	SubjectDef.TrueType.HORSE_CENTAUR,
@@ -75,16 +74,24 @@ func _test_presented_face_type(failures: PackedStringArray) -> void:
 
 
 func _test_dialogue_coverage(failures: PackedStringArray) -> void:
-	for prompt_key in PROMPT_KEYS:
-		for true_type in SubjectDef.TrueType.values():
-			if not DialoguePools.has_line(prompt_key, true_type as SubjectDef.TrueType):
-				failures.append(
-					"Missing dialogue for %s / %s."
-					% [prompt_key, SubjectDef.TrueType.keys()[true_type as int]]
-				)
+	for true_type in SubjectDef.TrueType.values():
+		var keys := DialoguePools.applicable_keys(true_type as SubjectDef.TrueType)
+		if keys.is_empty():
+			failures.append(
+				"%s has no applicable prompts."
+				% SubjectDef.TrueType.keys()[true_type as int]
+			)
+		for prompt_key in keys:
 			var line := DialoguePools.pick(prompt_key, true_type as SubjectDef.TrueType)
 			if line.is_empty():
 				failures.append(
 					"Empty dialogue pick for %s / %s."
 					% [prompt_key, SubjectDef.TrueType.keys()[true_type as int]]
 				)
+	var covered_prompts := {}
+	for true_type in SubjectDef.TrueType.values():
+		for prompt_key in DialoguePools.applicable_keys(true_type as SubjectDef.TrueType):
+			covered_prompts[prompt_key] = true
+	for prompt_key in DialoguePools.prompt_keys():
+		if not covered_prompts.has(prompt_key):
+			failures.append("Prompt %s has no applicable Subject type." % prompt_key)

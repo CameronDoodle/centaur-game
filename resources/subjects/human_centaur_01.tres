@@ -1,16 +1,12 @@
 [gd_resource type="Resource" script_class="SubjectDef" format=3 uid="uid://b23sd458b4y1r"]
 
 [ext_resource type="Script" uid="uid://dls1yg3rjh6ps" path="res://resources/subject_def.gd" id="1"]
-[ext_resource type="Resource" path="res://resources/questions/are_you_a_horse.tres" id="2"]
-[ext_resource type="Resource" path="res://resources/questions/whats_your_name.tres" id="3"]
-[ext_resource type="Script" uid="uid://b8h7bdjqop5nh" path="res://resources/question_def.gd" id="4"]
 [ext_resource type="PackedScene" uid="uid://c3x5vtuajwv6t" path="res://scenes/subjects/centaur.tscn" id="5"]
 
 [resource]
 script = ExtResource("1")
 true_type = 4
 subject_scene = ExtResource("5")
-questions = Array[ExtResource("4")]([ExtResource("2"), ExtResource("3")])
 peephole_position = Vector3(0, -0.03, -0.09)
 peephole_rotation_degrees = Vector3(4, 0, 0)
 peephole_scale = 0.7

@@ -6,6 +6,9 @@
 [ext_resource type="Resource" uid="uid://bndri1xrtrlvf" path="res://resources/subjects/centaur_01.tres" id="4"]
 [ext_resource type="Resource" path="res://resources/subjects/human_centaur_01.tres" id="5"]
 [ext_resource type="Resource" path="res://resources/subjects/horse_centaur_01.tres" id="6"]
+[ext_resource type="Resource" uid="uid://question_are_you_a_horse" path="res://resources/questions/are_you_a_horse.tres" id="7"]
+[ext_resource type="Resource" uid="uid://question_whats_your_name" path="res://resources/questions/whats_your_name.tres" id="8"]
+[ext_resource type="Script" uid="uid://b8h7bdjqop5nh" path="res://resources/question_def.gd" id="9"]
 
 [resource]
 script = ExtResource("1")
@@ -14,3 +17,4 @@ horse = ExtResource("3")
 centaur = ExtResource("4")
 human_centaur = ExtResource("5")
 horse_centaur = ExtResource("6")
+questions = Array[ExtResource("9")]([ExtResource("7"), ExtResource("8")])

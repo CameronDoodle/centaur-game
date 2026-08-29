@@ -49,7 +49,7 @@ Before making a decision, the player can gather additional information using a s
 Examples:
 
 - **Peephole** — the gate camera zooms to the door hole, then a fisheye close-up shows the face the attendant is presenting (Human or Horse), using the same rolled Appearance as the gate but a stand-in head scene. The body behind the door is not visible through the hole.
-- **Ask questions** — each subject has authored question buttons; subtitles always show (voice lines optional in future).
+- **Ask questions** — each Encounter usually offers two Questions that the Subject's type can answer (one if only one JSON prompt applies to that type); subtitles show the rolled Reply (voice lines optional in future).
 
 The exact available actions and information can expand as the game develops.
 

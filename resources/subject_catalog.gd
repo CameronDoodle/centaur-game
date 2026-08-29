@@ -6,6 +6,7 @@ extends Resource
 @export var centaur: SubjectDef
 @export var human_centaur: SubjectDef
 @export var horse_centaur: SubjectDef
+@export var questions: Array[QuestionDef] = []
 
 
 func subject_for(true_type: SubjectDef.TrueType) -> SubjectDef:

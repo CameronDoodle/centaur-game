@@ -58,5 +58,15 @@
       "Reginald P. Clipclop.",
       "It's… Jonathan. Yes. Jonathan."
     ]
+  },
+  "what are you wearing?": {
+    "human": [
+      "Uhhh, khakis."
+    ]
+  },
+  "I'm blue": {
+    "human": [
+      "da ba dee da ba di."
+    ]
   }
 }
