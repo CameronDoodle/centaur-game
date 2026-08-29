@@ -53,6 +53,25 @@ anti_aliasing = true
 [node name="HUD" type="CanvasLayer" unique_id=594433590]
 script = ExtResource("1_hud")
 
+[node name="RevealPanel" type="PanelContainer" parent="." unique_id=2107919900]
+unique_name_in_owner = true
+visible = false
+offset_right = 120.0
+offset_bottom = 44.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_verdict")
+
+[node name="RevealLabel" type="Label" parent="RevealPanel" unique_id=2048619452]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 22
+text = "Reveal"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="FisheyeOverlay" type="ColorRect" parent="." unique_id=1234559070]
 unique_name_in_owner = true
 visible = false
@@ -204,15 +223,10 @@ theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 text = "Shift 1 of 1"
 
-[node name="TimerColumn" type="VBoxContainer" parent="Margin/Layout/TopBar"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 8
-alignment = 1
-
-[node name="TimerLabel" type="Label" parent="Margin/Layout/TopBar/TimerColumn" unique_id=2067000045]
+[node name="TimerLabel" type="Label" parent="Margin/Layout/TopBar" unique_id=2067000045]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
 theme_override_constants/shadow_offset_x = 2
@@ -220,25 +234,6 @@ theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 36
 text = "00:00"
 horizontal_alignment = 1
-
-[node name="RevealPanel" type="PanelContainer" parent="Margin/Layout/TopBar/TimerColumn" unique_id=2107919900]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-size_flags_horizontal = 4
-theme_override_styles/panel = SubResource("StyleBoxFlat_verdict")
-
-[node name="RevealLabel" type="Label" parent="Margin/Layout/TopBar/TimerColumn/RevealPanel" unique_id=2048619452]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
-theme_override_constants/shadow_offset_x = 2
-theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 22
-text = "Reveal"
-horizontal_alignment = 1
-vertical_alignment = 1
 
 [node name="RightCluster" type="VBoxContainer" parent="Margin/Layout/TopBar" unique_id=2067000048]
 unique_name_in_owner = true

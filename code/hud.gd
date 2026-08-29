@@ -25,6 +25,8 @@ const TICK_EMPTY := Color(0.95, 0.9, 0.82, 0.25)
 const STRIKE_FILLED := Color(0.9, 0.35, 0.35, 1)
 const STRIKE_EMPTY := Color(0.95, 0.9, 0.82, 0.35)
 
+const REVEAL_TIMER_GAP := 8
+
 @onready var top_bar: HBoxContainer = %TopBar
 @onready var shift_label: Label = %ShiftLabel
 @onready var timer_label: Label = %TimerLabel
@@ -140,6 +142,7 @@ func _ready() -> void:
 	set_tuner_open(false)
 	_reset_approach_playback_fill()
 	_reset_knock_playback_fill()
+	get_viewport().size_changed.connect(_on_viewport_size_changed)
 
 
 func _configure_mouse_passthrough() -> void:
@@ -454,10 +457,29 @@ func show_reveal(text: String) -> void:
 	reveal_label.text = text
 	reveal_panel.visible = true
 	hide_investigation()
+	call_deferred("_position_reveal_panel")
 
 
 func hide_reveal() -> void:
 	reveal_panel.visible = false
+
+
+func _on_viewport_size_changed() -> void:
+	if reveal_panel.visible:
+		_position_reveal_panel()
+
+
+func _position_reveal_panel() -> void:
+	if not reveal_panel.visible:
+		return
+	reveal_panel.reset_size()
+	var panel_size := reveal_panel.get_combined_minimum_size()
+	reveal_panel.size = panel_size
+	var timer_rect := timer_label.get_global_rect()
+	reveal_panel.global_position = Vector2(
+		timer_rect.position.x + (timer_rect.size.x - panel_size.x) * 0.5,
+		timer_rect.end.y + REVEAL_TIMER_GAP
+	)
 
 
 func show_summary(
