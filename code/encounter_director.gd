@@ -69,6 +69,7 @@ func start_encounter(plan: EncounterPlan) -> void:
 	if dialogue_box != null:
 		dialogue_box.set_questions(_encounter_questions)
 		dialogue_box.set_questions_enabled(false)
+	hud.set_decision_row_visible(true)
 	hud.set_gate_actions_enabled(false)
 	hud.set_peephole_mode(false)
 	hud.set_skip_visible(false)
@@ -89,6 +90,7 @@ func force_miss() -> void:
 	_input_locked = true
 	_stop_encounter_audio()
 	hud.set_skip_visible(false)
+	hud.set_decision_row_visible(false)
 	hud.set_gate_actions_enabled(false)
 	hud.hide_investigation()
 	if dialogue_box != null:
@@ -338,6 +340,7 @@ func _resolve(accepted: bool) -> void:
 		return
 	_input_locked = true
 	_stop_encounter_audio()
+	hud.set_decision_row_visible(false)
 	hud.set_gate_actions_enabled(false)
 	hud.hide_investigation()
 	if dialogue_box != null:

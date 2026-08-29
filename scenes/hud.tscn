@@ -28,6 +28,101 @@ shadow_offset = Vector2(0, 3)
 shader = ExtResource("2_fisheye")
 shader_parameter/strength = 0.85
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_normal"]
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+bg_color = Color(0.07, 0.06, 0.05, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.95, 0.9, 0.82, 0.28)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 10
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_pressed"]
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+bg_color = Color(0.035498653, 0.028021477, 0.02360012, 0.98039216)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.95, 0.9, 0.82, 0.28)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 10
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_hover"]
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+bg_color = Color(0.15594566, 0.13633174, 0.12325791, 0.98039216)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.95, 0.9, 0.82, 0.28)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 10
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_disabled"]
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+bg_color = Color(0.07, 0.06, 0.05, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.95, 0.9, 0.82, 0.28)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 10
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_focus"]
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+bg_color = Color(0.07, 0.06, 0.05, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.95, 0.9, 0.82, 0.28)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 10
+shadow_offset = Vector2(0, 3)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_overlay"]
 content_margin_left = 28.0
 content_margin_top = 24.0
@@ -198,6 +293,44 @@ theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 16
 
+[node name="HBoxContainer2" type="HBoxContainer" parent="Margin" unique_id=2051671187]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Margin/HBoxContainer2" unique_id=1236426285]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="ShiftLabel" type="Label" parent="Margin/HBoxContainer2/VBoxContainer" unique_id=2067000046]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 27
+text = "Shift 1 of 1"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Margin" unique_id=1552375881]
+layout_mode = 2
+mouse_filter = 2
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Margin/HBoxContainer" unique_id=1945061957]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="TimerLabel" type="Label" parent="Margin/HBoxContainer/VBoxContainer" unique_id=2067000045]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 36
+text = "00:00"
+horizontal_alignment = 1
+
 [node name="Layout" type="VBoxContainer" parent="Margin" unique_id=682748020]
 layout_mode = 2
 mouse_filter = 2
@@ -206,27 +339,7 @@ theme_override_constants/separation = 8
 [node name="TopBar" type="HBoxContainer" parent="Margin/Layout" unique_id=840947305]
 unique_name_in_owner = true
 layout_mode = 2
-
-[node name="ShiftLabel" type="Label" parent="Margin/Layout/TopBar" unique_id=2067000046]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-text = "Shift 1 of 1"
-
-[node name="TimerLabel" type="Label" parent="Margin/Layout/TopBar" unique_id=2067000045]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
-theme_override_constants/shadow_offset_x = 2
-theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 36
-text = "00:00"
-horizontal_alignment = 1
+alignment = 2
 
 [node name="RightCluster" type="VBoxContainer" parent="Margin/Layout/TopBar" unique_id=2067000048]
 unique_name_in_owner = true
@@ -253,18 +366,41 @@ text = "Skip"
 [node name="DecisionRow" type="HBoxContainer" parent="Margin/Layout/GateActions" unique_id=1978335062]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 80
+alignment = 1
 
 [node name="AcceptButton" type="Button" parent="Margin/Layout/GateActions/DecisionRow" unique_id=1292173328]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(180, 48)
 layout_mode = 2
-size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.42, 0.78, 0.4, 1)
+theme_override_colors/font_focus_color = Color(0.42, 0.78, 0.4, 1)
+theme_override_colors/font_pressed_color = Color(0.32, 0.64, 0.32, 1)
+theme_override_colors/font_hover_color = Color(0.55, 0.9, 0.52, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.78, 0.4, 0.4)
+theme_override_font_sizes/font_size = 28
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+theme_override_styles/focus = SubResource("StyleBoxFlat_btn_focus")
 text = "Accept"
 
 [node name="RejectButton" type="Button" parent="Margin/Layout/GateActions/DecisionRow" unique_id=736072719]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(180, 48)
 layout_mode = 2
-size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 0.35, 0.35, 1)
+theme_override_colors/font_focus_color = Color(0.9, 0.35, 0.35, 1)
+theme_override_colors/font_pressed_color = Color(0.75, 0.24, 0.24, 1)
+theme_override_colors/font_hover_color = Color(1, 0.48, 0.48, 1)
+theme_override_colors/font_disabled_color = Color(0.9, 0.35, 0.35, 0.4)
+theme_override_font_sizes/font_size = 28
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+theme_override_styles/focus = SubResource("StyleBoxFlat_btn_focus")
 text = "Reject"
 
 [node name="PeepholeActions" type="VBoxContainer" parent="Margin/Layout" unique_id=1568472910]
@@ -274,7 +410,19 @@ layout_mode = 2
 
 [node name="BackButton" type="Button" parent="Margin/Layout/PeepholeActions" unique_id=1653165517]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(180, 48)
 layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
+theme_override_colors/font_focus_color = Color(0.95, 0.9, 0.82, 1)
+theme_override_colors/font_pressed_color = Color(0.82, 0.78, 0.7, 1)
+theme_override_colors/font_hover_color = Color(1, 0.98, 0.94, 1)
+theme_override_colors/font_disabled_color = Color(0.95, 0.9, 0.82, 0.4)
+theme_override_font_sizes/font_size = 28
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn_disabled")
+theme_override_styles/focus = SubResource("StyleBoxFlat_btn_focus")
 text = "Back"
 
 [node name="SummaryPanel" type="PanelContainer" parent="." unique_id=923038010]

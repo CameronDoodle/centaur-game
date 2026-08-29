@@ -142,6 +142,7 @@ func _ready() -> void:
 	_configure_mouse_passthrough()
 	_raise_door_overlay()
 	set_peephole_mode(false)
+	set_decision_row_visible(false)
 	set_gate_actions_enabled(false)
 	set_skip_visible(false)
 	set_door_overlay_visible(false)
@@ -157,13 +158,8 @@ func _configure_mouse_passthrough() -> void:
 	var margin := get_node_or_null("Margin") as Control
 	if margin:
 		margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var layout := get_node_or_null("Margin/Layout") as Control
-	if layout:
-		layout.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		for child_name in ["TopBar", "Spacer", "GateActions", "PeepholeActions"]:
-			var child := layout.get_node_or_null(child_name) as Control
-			if child:
-				child.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		for child in margin.get_children():
+			_ignore_mouse_tree(child as Control)
 	if right_cluster:
 		right_cluster.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		for row in right_cluster.get_children():
@@ -174,6 +170,16 @@ func _configure_mouse_passthrough() -> void:
 			row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	for hotspot in [peephole_hotspot, knock_hotspot, approach_hotspot]:
 		hotspot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+
+func _ignore_mouse_tree(node: Control) -> void:
+	if node == null:
+		return
+	if node is BaseButton:
+		return
+	node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for child in node.get_children():
+		_ignore_mouse_tree(child as Control)
 
 
 func _raise_door_overlay() -> void:
@@ -260,10 +266,14 @@ func play_fade_from_black(
 
 func hide_session_chrome() -> void:
 	top_bar.visible = false
+	shift_label.visible = false
+	timer_label.visible = false
 
 
 func show_session_chrome() -> void:
 	top_bar.visible = true
+	shift_label.visible = true
+	timer_label.visible = true
 
 
 func _build_right_cluster() -> void:
@@ -419,9 +429,12 @@ func _reset_knock_playback_fill() -> void:
 	knock_playback_fill.offset_right = 0.0
 
 
+func set_decision_row_visible(visible: bool) -> void:
+	decision_row.visible = visible
+
+
 func set_gate_actions_enabled(enabled: bool) -> void:
 	_gate_actions_enabled = enabled
-	decision_row.visible = enabled
 	peephole_icon.disabled = not enabled
 	accept_button.disabled = not enabled
 	reject_button.disabled = not enabled
@@ -512,6 +525,7 @@ func show_summary(
 	replay_button.visible = show_replay
 	next_button.visible = show_next
 	summary_panel.visible = true
+	set_decision_row_visible(false)
 	set_gate_actions_enabled(false)
 	set_peephole_mode(false)
 	hide_investigation()
@@ -536,6 +550,7 @@ func show_win() -> void:
 	hide_summary()
 	hide_investigation()
 	hide_session_chrome()
+	set_decision_row_visible(false)
 	set_gate_actions_enabled(false)
 	set_peephole_mode(false)
 	win_label.visible = true

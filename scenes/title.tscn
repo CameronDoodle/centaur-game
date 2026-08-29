@@ -185,7 +185,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Panel" type="PanelContainer" parent="Instructions/Center" unique_id=1888888891]
-custom_minimum_size = Vector2(520, 0)
+custom_minimum_size = Vector2(820, 0)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_overlay")
 
@@ -201,7 +201,7 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 36
-text = "Your shift"
+text = "Your Job"
 horizontal_alignment = 1
 
 [node name="BodyLabel" type="Label" parent="Instructions/Center/Panel/Stack" unique_id=1888888894]

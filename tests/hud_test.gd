@@ -9,6 +9,8 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var failures: PackedStringArray = []
+	await _test_unique_nodes(failures)
+	await _test_session_chrome(failures)
 	await _test_decision_row_visibility(failures)
 	await _test_shift_end_fail(failures)
 	await _test_shift_end_success_with_next(failures)
@@ -23,6 +25,53 @@ func _run() -> void:
 		quit(1)
 
 
+func _test_unique_nodes(failures: PackedStringArray) -> void:
+	var hud := HUD_SCENE.instantiate() as HUD
+	root.add_child(hud)
+	await process_frame
+	var unique_names := [
+		"TopBar", "ShiftLabel", "TimerLabel", "RightCluster",
+		"RevealPanel", "RevealLabel", "SummaryPanel", "SummaryStack",
+		"SummaryLabel", "NextShiftFacts", "TimeValue", "SubjectsValue",
+		"StrikesValue", "WinLabel", "GateActions", "PeepholeActions",
+		"DecisionRow", "SkipButton", "AcceptButton", "RejectButton",
+		"BackButton", "ReplayButton", "NextButton", "FisheyeOverlay",
+		"FadeRect", "DoorOverlay", "PeepholeHotspot", "KnockHotspot",
+		"ApproachHotspot", "PeepholeIcon", "KnockIcon", "KnockPlaybackFill",
+		"ApproachIcon", "ApproachPlaybackFill", "PeepholeTuner",
+		"TunerPosX", "TunerPosY", "TunerPosZ", "TunerRotX", "TunerRotY",
+		"TunerRotZ", "TunerScale", "TunerStatus", "TunerSaveButton",
+	]
+	for unique_name in unique_names:
+		if hud.get_node_or_null("%" + unique_name) == null:
+			failures.append("Missing unique HUD node %%%s." % unique_name)
+	var margin := hud.get_node_or_null("Margin") as Control
+	if margin == null:
+		failures.append("HUD should still have a Margin root for session chrome.")
+	else:
+		for child in margin.get_children():
+			var control := child as Control
+			if control and control.mouse_filter != Control.MOUSE_FILTER_IGNORE:
+				failures.append(
+					"Margin child %s should ignore mouse so stacked overlays do not block the world."
+					% control.name
+				)
+	hud.free()
+
+
+func _test_session_chrome(failures: PackedStringArray) -> void:
+	var hud := HUD_SCENE.instantiate() as HUD
+	root.add_child(hud)
+	await process_frame
+	hud.hide_session_chrome()
+	if hud.top_bar.visible or hud.shift_label.visible or hud.timer_label.visible:
+		failures.append("hide_session_chrome should hide TopBar, ShiftLabel, and TimerLabel.")
+	hud.show_session_chrome()
+	if not hud.top_bar.visible or not hud.shift_label.visible or not hud.timer_label.visible:
+		failures.append("show_session_chrome should show TopBar, ShiftLabel, and TimerLabel.")
+	hud.free()
+
+
 func _test_decision_row_visibility(failures: PackedStringArray) -> void:
 	var hud := HUD_SCENE.instantiate() as HUD
 	root.add_child(hud)
@@ -30,14 +79,18 @@ func _test_decision_row_visibility(failures: PackedStringArray) -> void:
 	var decision_row := hud.get_node("%DecisionRow") as Control
 	if decision_row.visible:
 		failures.append("Decision row should start hidden.")
-	hud.set_gate_actions_enabled(true)
+	hud.set_decision_row_visible(true)
+	hud.set_gate_actions_enabled(false)
 	if not decision_row.visible:
-		failures.append("Decision row should be visible when gate actions are enabled.")
+		failures.append("Decision row should stay visible while gate actions are disabled.")
+	if not hud.accept_button.disabled or not hud.reject_button.disabled:
+		failures.append("Accept/Reject should be disabled during approach and knock.")
+	hud.set_gate_actions_enabled(true)
 	if hud.accept_button.disabled or hud.reject_button.disabled:
 		failures.append("Accept/Reject should be enabled when gate actions are enabled.")
-	hud.set_gate_actions_enabled(false)
+	hud.set_decision_row_visible(false)
 	if decision_row.visible:
-		failures.append("Decision row should hide when gate actions are disabled.")
+		failures.append("Decision row should hide when explicitly hidden.")
 	hud.free()
 
 
