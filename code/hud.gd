@@ -90,6 +90,14 @@ var _audio_approach: AudioStreamPlayer
 var _audio_knock: AudioStreamPlayer
 var _subject_ticks_row: HBoxContainer
 var _strike_pips_row: HBoxContainer
+var _approach_playback_start_msec: int = -1
+var _knock_playback_start_msec: int = -1
+
+
+static func playback_progress(elapsed_sec: float, length_sec: float, latency_sec: float = 0.0) -> float:
+	if length_sec <= 0.0:
+		return 0.0
+	return clampf((elapsed_sec - latency_sec) / length_sec, 0.0, 1.0)
 
 
 static func subject_ticks_filled(current: int, total: int) -> int:
@@ -336,19 +344,27 @@ func set_clue_replay_visible(approach: bool, knock: bool) -> void:
 
 
 func set_clue_replay_playing(approach_playing: bool, knock_playing: bool) -> void:
+	if approach_playing:
+		if _approach_playback_start_msec < 0:
+			_approach_playback_start_msec = Time.get_ticks_msec()
+	else:
+		_approach_playback_start_msec = -1
+		_reset_approach_playback_fill()
+	if knock_playing:
+		if _knock_playback_start_msec < 0:
+			_knock_playback_start_msec = Time.get_ticks_msec()
+	else:
+		_knock_playback_start_msec = -1
+		_reset_knock_playback_fill()
 	_approach_replay_disabled = approach_playing
 	_knock_replay_disabled = knock_playing
 	_apply_clue_button_states()
-	if not approach_playing:
-		_reset_approach_playback_fill()
-	if not knock_playing:
-		_reset_knock_playback_fill()
 
 
 func _update_approach_playback_fill() -> void:
-	if not _approach_replay_disabled:
+	if not _approach_replay_disabled or _approach_playback_start_msec < 0:
 		return
-	if _audio_approach == null or not _audio_approach.playing:
+	if _audio_approach == null:
 		_reset_approach_playback_fill()
 		return
 	var stream := _audio_approach.stream
@@ -359,7 +375,8 @@ func _update_approach_playback_fill() -> void:
 	if length <= 0.0:
 		_reset_approach_playback_fill()
 		return
-	var progress := clampf(_audio_approach.get_playback_position() / length, 0.0, 1.0)
+	var elapsed := (Time.get_ticks_msec() - _approach_playback_start_msec) / 1000.0
+	var progress := playback_progress(elapsed, length, AudioServer.get_output_latency())
 	var icon_width := approach_icon.size.x
 	approach_playback_fill.visible = true
 	approach_playback_fill.offset_left = 0.0
@@ -374,9 +391,9 @@ func _reset_approach_playback_fill() -> void:
 
 
 func _update_knock_playback_fill() -> void:
-	if not _knock_replay_disabled:
+	if not _knock_replay_disabled or _knock_playback_start_msec < 0:
 		return
-	if _audio_knock == null or not _audio_knock.playing:
+	if _audio_knock == null:
 		_reset_knock_playback_fill()
 		return
 	var stream := _audio_knock.stream
@@ -387,7 +404,8 @@ func _update_knock_playback_fill() -> void:
 	if length <= 0.0:
 		_reset_knock_playback_fill()
 		return
-	var progress := clampf(_audio_knock.get_playback_position() / length, 0.0, 1.0)
+	var elapsed := (Time.get_ticks_msec() - _knock_playback_start_msec) / 1000.0
+	var progress := playback_progress(elapsed, length, AudioServer.get_output_latency())
 	var icon_width := knock_icon.size.x
 	knock_playback_fill.visible = true
 	knock_playback_fill.offset_left = 0.0
