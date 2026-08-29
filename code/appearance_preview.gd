@@ -4,6 +4,7 @@ const HUMAN_SCENE := preload("res://scenes/subjects/human.tscn")
 const HORSE_SCENE := preload("res://scenes/subjects/horse.tscn")
 const CENTAUR_SCENE := preload("res://scenes/subjects/centaur.tscn")
 const HORSE_CENTAUR_SCENE := preload("res://scenes/subjects/horse_centaur.tscn")
+const CLUB_FONT := preload("res://fonts/ClubFont.ttf")
 
 @export var door_height := 2.0
 @export var door_fill := 0.9
@@ -85,6 +86,7 @@ func _add_label(subject: Node3D, text: String) -> void:
 	)
 	var label := Label3D.new()
 	label.text = text
+	label.font = CLUB_FONT
 	label.font_size = 48
 	label.pixel_size = 0.004
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED

@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="SubjectDef" format=3 uid="uid://horse_centaur_subject_01"]
+[gd_resource type="Resource" script_class="SubjectDef" format=3 uid="uid://bavrtn44th75"]
 
 [ext_resource type="Script" uid="uid://dls1yg3rjh6ps" path="res://resources/subject_def.gd" id="1"]
-[ext_resource type="PackedScene" uid="uid://horse_centaur_01" path="res://scenes/subjects/horse_centaur.tscn" id="5"]
+[ext_resource type="Script" uid="uid://b8h7bdjqop5nh" path="res://resources/question_def.gd" id="4"]
+[ext_resource type="PackedScene" uid="uid://ey504o0fkb7m" path="res://scenes/subjects/horse_centaur.tscn" id="5"]
 
 [resource]
 script = ExtResource("1")

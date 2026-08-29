@@ -5,30 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://d0xpyjkxemm1" path="res://art/2d_art/video-svgrepo-com.svg" id="3_video"]
 [ext_resource type="Texture2D" uid="uid://d0rkbk8mj8duh" path="res://art/2d_art/hand-tap-svgrepo-com.svg" id="4_hand_tap"]
 [ext_resource type="Texture2D" uid="uid://capu25ux6l2m0" path="res://art/2d_art/audio-svgrepo-com.svg" id="5_audio"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_fisheye"]
-shader = ExtResource("2_fisheye")
-shader_parameter/strength = 0.85
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_overlay"]
-bg_color = Color(0.07, 0.06, 0.05, 0.98)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.95, 0.9, 0.82, 0.28)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
-content_margin_left = 28
-content_margin_top = 24
-content_margin_right = 28
-content_margin_bottom = 24
-shadow_color = Color(0, 0, 0, 0.55)
-shadow_size = 12
-shadow_offset = Vector2(0, 4)
-anti_aliasing = true
+[ext_resource type="FontFile" uid="uid://bq3maovf2tbyd" path="res://fonts/MegazinePosterDEMO-Regular.ttf" id="6_047uy"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_verdict"]
 bg_color = Color(0.07, 0.06, 0.05, 0.98)
@@ -41,14 +18,34 @@ corner_radius_top_left = 10
 corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
-content_margin_left = 20
-content_margin_top = 14
-content_margin_right = 20
-content_margin_bottom = 14
+expand_margin_left = 12.0
+expand_margin_right = 12.0
 shadow_color = Color(0, 0, 0, 0.5)
 shadow_size = 10
 shadow_offset = Vector2(0, 3)
-anti_aliasing = true
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fisheye"]
+shader = ExtResource("2_fisheye")
+shader_parameter/strength = 0.85
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_overlay"]
+content_margin_left = 28.0
+content_margin_top = 24.0
+content_margin_right = 28.0
+content_margin_bottom = 24.0
+bg_color = Color(0.07, 0.06, 0.05, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.95, 0.9, 0.82, 0.28)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.55)
+shadow_size = 12
+shadow_offset = Vector2(0, 4)
 
 [node name="HUD" type="CanvasLayer" unique_id=594433590]
 script = ExtResource("1_hud")
@@ -68,7 +65,7 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 22
-text = "Reveal"
+text = "aye yo im a reveal panel"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -83,7 +80,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="DoorOverlay" type="Control" parent="." unique_id=3847291057]
+[node name="DoorOverlay" type="Control" parent="." unique_id=-447676239]
 unique_name_in_owner = true
 visible = false
 layout_mode = 3
@@ -129,8 +126,8 @@ alignment = 1
 
 [node name="KnockIcon" type="TextureButton" parent="DoorOverlay/KnockHotspot" unique_id=564776250]
 unique_name_in_owner = true
-clip_contents = true
 custom_minimum_size = Vector2(48, 48)
+clip_contents = true
 layout_mode = 2
 texture_normal = ExtResource("4_hand_tap")
 ignore_texture_size = true
@@ -140,9 +137,7 @@ stretch_mode = 5
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
-anchor_top = 0.0
 anchor_bottom = 1.0
-offset_right = 0.0
 grow_vertical = 2
 mouse_filter = 2
 color = Color(1, 1, 1, 0.5)
@@ -166,8 +161,8 @@ alignment = 1
 
 [node name="ApproachIcon" type="TextureButton" parent="DoorOverlay/ApproachHotspot" unique_id=564776253]
 unique_name_in_owner = true
-clip_contents = true
 custom_minimum_size = Vector2(48, 48)
+clip_contents = true
 layout_mode = 2
 texture_normal = ExtResource("5_audio")
 ignore_texture_size = true
@@ -177,9 +172,7 @@ stretch_mode = 5
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
-anchor_top = 0.0
 anchor_bottom = 1.0
-offset_right = 0.0
 grow_vertical = 2
 mouse_filter = 2
 color = Color(1, 1, 1, 0.5)
@@ -243,15 +236,15 @@ alignment = 2
 
 [node name="Spacer" type="Control" parent="Margin/Layout" unique_id=2058075052]
 layout_mode = 2
-mouse_filter = 2
 size_flags_vertical = 3
+mouse_filter = 2
 
 [node name="GateActions" type="VBoxContainer" parent="Margin/Layout" unique_id=2136981101]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="SkipButton" type="Button" parent="Margin/Layout/GateActions" unique_id=3847291056]
+[node name="SkipButton" type="Button" parent="Margin/Layout/GateActions" unique_id=-447676240]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
@@ -259,7 +252,6 @@ text = "Skip"
 
 [node name="DecisionRow" type="HBoxContainer" parent="Margin/Layout/GateActions" unique_id=1978335062]
 unique_name_in_owner = true
-visible = false
 layout_mode = 2
 theme_override_constants/separation = 8
 
@@ -303,25 +295,6 @@ layout_mode = 2
 theme_override_constants/separation = 16
 alignment = 1
 
-[node name="WinLabel" type="Label" parent="."]
-unique_name_in_owner = true
-visible = false
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -120.0
-offset_top = 24.0
-offset_right = 120.0
-offset_bottom = 72.0
-grow_horizontal = 2
-theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
-theme_override_constants/shadow_offset_x = 2
-theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 36
-text = "You won!"
-horizontal_alignment = 1
-
 [node name="SummaryLabel" type="Label" parent="SummaryPanel/SummaryStack" unique_id=448417977]
 unique_name_in_owner = true
 layout_mode = 2
@@ -329,23 +302,23 @@ theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("6_047uy")
 theme_override_font_sizes/font_size = 36
-text = "Shift complete."
+text = "SHIFT COMPLETE"
 horizontal_alignment = 1
 
 [node name="NextShiftFacts" type="HBoxContainer" parent="SummaryPanel/SummaryStack" unique_id=1005314973]
 unique_name_in_owner = true
-visible = false
 layout_mode = 2
 theme_override_constants/separation = 24
 alignment = 1
 
-[node name="TimeFact" type="VBoxContainer" parent="SummaryPanel/SummaryStack/NextShiftFacts"]
+[node name="TimeFact" type="VBoxContainer" parent="SummaryPanel/SummaryStack/NextShiftFacts" unique_id=1254113995]
 layout_mode = 2
 theme_override_constants/separation = 2
 alignment = 1
 
-[node name="TimeCaption" type="Label" parent="SummaryPanel/SummaryStack/NextShiftFacts/TimeFact"]
+[node name="TimeCaption" type="Label" parent="SummaryPanel/SummaryStack/NextShiftFacts/TimeFact" unique_id=464688442]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
@@ -355,7 +328,7 @@ theme_override_font_sizes/font_size = 14
 text = "Time"
 horizontal_alignment = 1
 
-[node name="TimeValue" type="Label" parent="SummaryPanel/SummaryStack/NextShiftFacts/TimeFact"]
+[node name="TimeValue" type="Label" parent="SummaryPanel/SummaryStack/NextShiftFacts/TimeFact" unique_id=521669641]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
@@ -366,12 +339,12 @@ theme_override_font_sizes/font_size = 18
 text = "00:00"
 horizontal_alignment = 1
 
-[node name="SubjectsFact" type="VBoxContainer" parent="SummaryPanel/SummaryStack/NextShiftFacts"]
+[node name="SubjectsFact" type="VBoxContainer" parent="SummaryPanel/SummaryStack/NextShiftFacts" unique_id=52739223]
 layout_mode = 2
 theme_override_constants/separation = 2
 alignment = 1
 
-[node name="SubjectsCaption" type="Label" parent="SummaryPanel/SummaryStack/NextShiftFacts/SubjectsFact"]
+[node name="SubjectsCaption" type="Label" parent="SummaryPanel/SummaryStack/NextShiftFacts/SubjectsFact" unique_id=1142499257]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
@@ -381,7 +354,7 @@ theme_override_font_sizes/font_size = 14
 text = "Subjects"
 horizontal_alignment = 1
 
-[node name="SubjectsValue" type="Label" parent="SummaryPanel/SummaryStack/NextShiftFacts/SubjectsFact"]
+[node name="SubjectsValue" type="Label" parent="SummaryPanel/SummaryStack/NextShiftFacts/SubjectsFact" unique_id=1527814961]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
@@ -392,12 +365,12 @@ theme_override_font_sizes/font_size = 18
 text = "0"
 horizontal_alignment = 1
 
-[node name="StrikesFact" type="VBoxContainer" parent="SummaryPanel/SummaryStack/NextShiftFacts"]
+[node name="StrikesFact" type="VBoxContainer" parent="SummaryPanel/SummaryStack/NextShiftFacts" unique_id=860686194]
 layout_mode = 2
 theme_override_constants/separation = 2
 alignment = 1
 
-[node name="StrikesCaption" type="Label" parent="SummaryPanel/SummaryStack/NextShiftFacts/StrikesFact"]
+[node name="StrikesCaption" type="Label" parent="SummaryPanel/SummaryStack/NextShiftFacts/StrikesFact" unique_id=2086456151]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
@@ -407,7 +380,7 @@ theme_override_font_sizes/font_size = 14
 text = "Strikes"
 horizontal_alignment = 1
 
-[node name="StrikesValue" type="Label" parent="SummaryPanel/SummaryStack/NextShiftFacts/StrikesFact"]
+[node name="StrikesValue" type="Label" parent="SummaryPanel/SummaryStack/NextShiftFacts/StrikesFact" unique_id=308975022]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
@@ -433,7 +406,26 @@ layout_mode = 2
 size_flags_horizontal = 4
 text = "Next Shift"
 
-[node name="PeepholeTuner" type="PanelContainer" parent="."]
+[node name="WinLabel" type="Label" parent="." unique_id=2084509598]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -120.0
+offset_top = 24.0
+offset_right = 120.0
+offset_bottom = 72.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 36
+text = "You won!"
+horizontal_alignment = 1
+
+[node name="PeepholeTuner" type="PanelContainer" parent="." unique_id=705989226]
 unique_name_in_owner = true
 visible = false
 anchors_preset = 2
@@ -445,29 +437,29 @@ offset_right = 280.0
 offset_bottom = -16.0
 grow_vertical = 0
 
-[node name="TunerMargin" type="MarginContainer" parent="PeepholeTuner"]
+[node name="TunerMargin" type="MarginContainer" parent="PeepholeTuner" unique_id=1440661168]
 layout_mode = 2
 theme_override_constants/margin_left = 8
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
-[node name="TunerVBox" type="VBoxContainer" parent="PeepholeTuner/TunerMargin"]
+[node name="TunerVBox" type="VBoxContainer" parent="PeepholeTuner/TunerMargin" unique_id=895650445]
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="TunerTitle" type="Label" parent="PeepholeTuner/TunerMargin/TunerVBox"]
+[node name="TunerTitle" type="Label" parent="PeepholeTuner/TunerMargin/TunerVBox" unique_id=412042394]
 layout_mode = 2
 text = "Peephole Tune (F8)"
 
-[node name="TunerPosLabel" type="Label" parent="PeepholeTuner/TunerMargin/TunerVBox"]
+[node name="TunerPosLabel" type="Label" parent="PeepholeTuner/TunerMargin/TunerVBox" unique_id=714079821]
 layout_mode = 2
 text = "Position"
 
-[node name="TunerPosRow" type="HBoxContainer" parent="PeepholeTuner/TunerMargin/TunerVBox"]
+[node name="TunerPosRow" type="HBoxContainer" parent="PeepholeTuner/TunerMargin/TunerVBox" unique_id=22067747]
 layout_mode = 2
 
-[node name="TunerPosX" type="SpinBox" parent="PeepholeTuner/TunerMargin/TunerVBox/TunerPosRow"]
+[node name="TunerPosX" type="SpinBox" parent="PeepholeTuner/TunerMargin/TunerVBox/TunerPosRow" unique_id=1900565100]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -478,7 +470,7 @@ allow_greater = true
 allow_lesser = true
 prefix = "X"
 
-[node name="TunerPosY" type="SpinBox" parent="PeepholeTuner/TunerMargin/TunerVBox/TunerPosRow"]
+[node name="TunerPosY" type="SpinBox" parent="PeepholeTuner/TunerMargin/TunerVBox/TunerPosRow" unique_id=1554907127]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -489,7 +481,7 @@ allow_greater = true
 allow_lesser = true
 prefix = "Y"
 
-[node name="TunerPosZ" type="SpinBox" parent="PeepholeTuner/TunerMargin/TunerVBox/TunerPosRow"]
+[node name="TunerPosZ" type="SpinBox" parent="PeepholeTuner/TunerMargin/TunerVBox/TunerPosRow" unique_id=1394250187]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -500,47 +492,44 @@ allow_greater = true
 allow_lesser = true
 prefix = "Z"
 
-[node name="TunerRotLabel" type="Label" parent="PeepholeTuner/TunerMargin/TunerVBox"]
+[node name="TunerRotLabel" type="Label" parent="PeepholeTuner/TunerMargin/TunerVBox" unique_id=1060153669]
 layout_mode = 2
 text = "Rotation"
 
-[node name="TunerRotRow" type="HBoxContainer" parent="PeepholeTuner/TunerMargin/TunerVBox"]
+[node name="TunerRotRow" type="HBoxContainer" parent="PeepholeTuner/TunerMargin/TunerVBox" unique_id=266848739]
 layout_mode = 2
 
-[node name="TunerRotX" type="SpinBox" parent="PeepholeTuner/TunerMargin/TunerVBox/TunerRotRow"]
+[node name="TunerRotX" type="SpinBox" parent="PeepholeTuner/TunerMargin/TunerVBox/TunerRotRow" unique_id=1391045755]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = -180.0
 max_value = 180.0
-step = 1.0
 allow_greater = true
 allow_lesser = true
 prefix = "X"
 
-[node name="TunerRotY" type="SpinBox" parent="PeepholeTuner/TunerMargin/TunerVBox/TunerRotRow"]
+[node name="TunerRotY" type="SpinBox" parent="PeepholeTuner/TunerMargin/TunerVBox/TunerRotRow" unique_id=34254271]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = -180.0
 max_value = 180.0
-step = 1.0
 allow_greater = true
 allow_lesser = true
 prefix = "Y"
 
-[node name="TunerRotZ" type="SpinBox" parent="PeepholeTuner/TunerMargin/TunerVBox/TunerRotRow"]
+[node name="TunerRotZ" type="SpinBox" parent="PeepholeTuner/TunerMargin/TunerVBox/TunerRotRow" unique_id=994338514]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = -180.0
 max_value = 180.0
-step = 1.0
 allow_greater = true
 allow_lesser = true
 prefix = "Z"
 
-[node name="TunerScale" type="SpinBox" parent="PeepholeTuner/TunerMargin/TunerVBox"]
+[node name="TunerScale" type="SpinBox" parent="PeepholeTuner/TunerMargin/TunerVBox" unique_id=258998305]
 unique_name_in_owner = true
 layout_mode = 2
 min_value = 0.1
@@ -550,17 +539,17 @@ value = 2.5
 allow_greater = true
 prefix = "Scale"
 
-[node name="TunerSaveButton" type="Button" parent="PeepholeTuner/TunerMargin/TunerVBox"]
+[node name="TunerSaveButton" type="Button" parent="PeepholeTuner/TunerMargin/TunerVBox" unique_id=201318928]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Save to SubjectDef"
 
-[node name="TunerStatus" type="Label" parent="PeepholeTuner/TunerMargin/TunerVBox"]
+[node name="TunerStatus" type="Label" parent="PeepholeTuner/TunerMargin/TunerVBox" unique_id=1038176292]
 unique_name_in_owner = true
 layout_mode = 2
 autowrap_mode = 3
 
-[node name="FadeRect" type="ColorRect" parent="."]
+[node name="FadeRect" type="ColorRect" parent="." unique_id=1686256616]
 unique_name_in_owner = true
 modulate = Color(1, 1, 1, 0)
 anchors_preset = 15

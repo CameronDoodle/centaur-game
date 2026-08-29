@@ -17,7 +17,8 @@ const CARD_MARGIN := 12
 const CARD_SEPARATION := 8
 const CARD_CORNER_RADIUS := 16
 const CARD_BORDER := 3
-const FONT_SIZE := 28
+const FONT_SIZE := 32
+const QUESTION_FONT := preload("res://fonts/AntipastoPro-DemiBold_trial.ttf")
 
 @onready var _mesh: MeshInstance3D = $MeshInstance3D
 @onready var _viewport: SubViewport = $SubViewport
@@ -232,6 +233,7 @@ func _apply_button_styles(button: Button) -> void:
 	button.add_theme_stylebox_override("pressed", _button_style_pressed)
 	button.add_theme_stylebox_override("disabled", _button_style_disabled)
 	button.add_theme_stylebox_override("focus", _button_style_normal)
+	button.add_theme_font_override("font", QUESTION_FONT)
 	button.add_theme_font_size_override("font_size", FONT_SIZE)
 	button.add_theme_color_override("font_color", Color.BLACK)
 	button.add_theme_color_override("font_hover_color", Color.BLACK)

@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="SubjectDef" format=3 uid="uid://bndri1xrtrlvf"]
 
 [ext_resource type="Script" uid="uid://dls1yg3rjh6ps" path="res://resources/subject_def.gd" id="1"]
+[ext_resource type="Script" uid="uid://b8h7bdjqop5nh" path="res://resources/question_def.gd" id="3_cce3k"]
 [ext_resource type="PackedScene" uid="uid://c3x5vtuajwv6t" path="res://scenes/subjects/centaur.tscn" id="4"]
 
 [resource]

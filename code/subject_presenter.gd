@@ -373,7 +373,7 @@ func play_reject(
 		)
 		return walker
 	var mid := outside_window_marker.global_position
-	var start := mid + Vector3(0.0, 0.0, -6.0)
+	var start := mid + Vector3(0.0, 0.0, -8.0)
 	var end := mid + Vector3(0.0, 0.0, 6.0)
 	start.y = walker.global_position.y
 	walker.global_position = start

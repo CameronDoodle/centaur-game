@@ -1,12 +1,116 @@
 [gd_scene format=3 uid="uid://c34cksjhykjfc"]
 
-[ext_resource type="Script" uid="uid://dq8m3title0v01" path="res://code/title.gd" id="1_title"]
+[ext_resource type="Script" uid="uid://dbey4s81gxna3" path="res://code/title.gd" id="1_title"]
 
-[node name="Title" type="CanvasLayer"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_verdict"]
+bg_color = Color(0.07, 0.06, 0.05, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.95, 0.9, 0.82, 0.28)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+expand_margin_left = 12.0
+expand_margin_right = 12.0
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 10
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4ignj"]
+bg_color = Color(0.035498653, 0.028021477, 0.02360012, 0.98039216)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.95, 0.9, 0.82, 0.28)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+expand_margin_left = 12.0
+expand_margin_right = 12.0
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 10
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wosw1"]
+bg_color = Color(0.15594566, 0.13633174, 0.12325791, 0.98039216)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.95, 0.9, 0.82, 0.28)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+expand_margin_left = 12.0
+expand_margin_right = 12.0
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 10
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p6dhs"]
+bg_color = Color(0.07, 0.06, 0.05, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.95, 0.9, 0.82, 0.28)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+expand_margin_left = 12.0
+expand_margin_right = 12.0
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 10
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pyl7j"]
+bg_color = Color(0.07, 0.06, 0.05, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.95, 0.9, 0.82, 0.28)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+expand_margin_left = 12.0
+expand_margin_right = 12.0
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 10
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_overlay"]
+content_margin_left = 28.0
+content_margin_top = 24.0
+content_margin_right = 28.0
+content_margin_bottom = 24.0
+bg_color = Color(0.07, 0.06, 0.05, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.95, 0.9, 0.82, 0.28)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.55)
+shadow_size = 12
+shadow_offset = Vector2(0, 4)
+
+[node name="Title" type="CanvasLayer" unique_id=399288357]
 layer = 3
 script = ExtResource("1_title")
 
-[node name="Chrome" type="Control" parent="."]
+[node name="Chrome" type="Control" parent="." unique_id=58865604]
 unique_name_in_owner = true
 layout_mode = 3
 anchors_preset = 15
@@ -14,9 +118,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 0
 
-[node name="Center" type="CenterContainer" parent="Chrome"]
+[node name="Center" type="CenterContainer" parent="Chrome" unique_id=1150084956]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -24,24 +127,106 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBox" type="VBoxContainer" parent="Chrome/Center"]
+[node name="VBox" type="VBoxContainer" parent="Chrome/Center" unique_id=1115035515]
 layout_mode = 2
 theme_override_constants/separation = 24
 alignment = 1
 
-[node name="TitleLabel" type="Label" parent="Chrome/Center/VBox"]
+[node name="TitleLabel" type="Label" parent="Chrome/Center/VBox" unique_id=291114231]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 2
+theme_override_constants/outline_size = 6
 theme_override_font_sizes/font_size = 48
-text = "no im not a centaur"
+text = "No, I'm not a centaur"
 horizontal_alignment = 1
 
-[node name="StartButton" type="Button" parent="Chrome/Center/VBox"]
+[node name="StartButton" type="Button" parent="Chrome/Center/VBox" unique_id=22579231]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(160, 48)
 layout_mode = 2
 size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 32
+theme_override_styles/normal = SubResource("StyleBoxFlat_verdict")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_4ignj")
+theme_override_styles/hover = SubResource("StyleBoxFlat_wosw1")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_p6dhs")
+theme_override_styles/focus = SubResource("StyleBoxFlat_pyl7j")
 text = "Start"
+
+[node name="Instructions" type="Control" parent="." unique_id=1888888888]
+unique_name_in_owner = true
+visible = false
+modulate = Color(1, 1, 1, 0)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dim" type="ColorRect" parent="Instructions" unique_id=1888888889]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.5)
+
+[node name="Center" type="CenterContainer" parent="Instructions" unique_id=1888888890]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Instructions/Center" unique_id=1888888891]
+custom_minimum_size = Vector2(520, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_overlay")
+
+[node name="Stack" type="VBoxContainer" parent="Instructions/Center/Panel" unique_id=1888888892]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="HeadlineLabel" type="Label" parent="Instructions/Center/Panel/Stack" unique_id=1888888893]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 36
+text = "Your shift"
+horizontal_alignment = 1
+
+[node name="BodyLabel" type="Label" parent="Instructions/Center/Panel/Stack" unique_id=1888888894]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.82, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 20
+text = "The rodeo's in town and you're the bouncer at the local bar. All the cowboys and their horses are coming by to party but word spread. Centaurs heard about this event and are trying to sneak in to get free booze. Don't let them in.
+
+Listen to how they walk up and the way they knock. Use the peephole and ask questions if you need more info.
+
+Only accept horses and their riders. Reject the centaurs. Wrong calls cost you a strike, get through all guests before the clock runs out."
+autowrap_mode = 3
+
+[node name="OkayButton" type="Button" parent="Instructions/Center/Panel/Stack" unique_id=1888888895]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 48)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 32
+theme_override_styles/normal = SubResource("StyleBoxFlat_verdict")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_4ignj")
+theme_override_styles/hover = SubResource("StyleBoxFlat_wosw1")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_p6dhs")
+theme_override_styles/focus = SubResource("StyleBoxFlat_pyl7j")
+text = "Okay"

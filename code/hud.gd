@@ -15,11 +15,11 @@ signal skip_pressed
 
 const BLACKOUT_DURATION := 0.75
 const ICON_TINT := Color(0.95, 0.9, 0.82, 1)
-const TICK_SIZE := Vector2(10, 10)
+const TICK_SIZE := Vector2(20, 20)
 const TICK_GAP := 3
 const STRIKE_GAP := 4
-const SYMBOL_FONT_SIZE := 14
-const STRIKE_SYMBOL := "×"
+const SYMBOL_FONT_SIZE := 24
+const STRIKE_SYMBOL := "X"
 const TICK_FILLED := Color(0.95, 0.9, 0.82, 1)
 const TICK_EMPTY := Color(0.95, 0.9, 0.82, 0.25)
 const STRIKE_FILLED := Color(0.9, 0.35, 0.35, 1)

@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://ctq1a6q7p0myt" path="res://code/dialogue_box.gd" id="1_dialogue"]
 [ext_resource type="Script" uid="uid://bm2b2ukexifkg" path="res://code/speech_bubble_tail.gd" id="2_tail"]
+[ext_resource type="FontFile" uid="uid://b5accri2ttene" path="res://fonts/AntipastoPro-DemiBold_trial.ttf" id="3_tm68y"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_panel"]
 size = Vector2(2.2, 3.3)
@@ -65,7 +66,8 @@ size_flags_horizontal = 3
 [node name="ReplyLabel" type="Label" parent="SubViewport/Root/Layout/ReplyBubble/ReplyPanel" unique_id=1058872211]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_color = Color(0.080783345, 0.080783345, 0.080783345, 1)
+theme_override_fonts/font = ExtResource("3_tm68y")
 text = "Reply"
 autowrap_mode = 3
 
