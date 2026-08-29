@@ -41,7 +41,7 @@ The launch-only overlay shown before the first Shift, with the project name and 
 _Avoid_: Home screen, main menu, start game screen, hub
 
 **Peephole**:
-A close-up fisheye view through the door hole, using a separate stage and per-subject pose tuning.
+A close-up fisheye view through the door hole. It shows the presented Human or Horse face from the rolled Appearance, not the full body behind the door. Uses a separate stand-in scene (Human or Horse) with pose tuning from the matching SubjectDef.
 _Avoid_: Zoom, close-up camera
 
 **Shift**:

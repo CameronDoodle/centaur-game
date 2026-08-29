@@ -20,6 +20,8 @@ const ACCEPT_DOOR_CLOSE_DELAY := 1.0
 @export_group("Wrong Accept")
 @export_range(1.0, 40.0, 0.1) var penalty_walk_distance: float = WINDOW_WALK_DISTANCE
 
+@export var subject_catalog: SubjectCatalog
+
 var subject_anchor: Marker3D
 var gate_camera: Camera3D
 var door: Node3D
@@ -34,6 +36,7 @@ var peephole_stage: PeepholeStage
 
 var _subject_instance: Node3D
 var _current_def: SubjectDef
+var _peephole_def: SubjectDef
 var _move_tween: Tween
 var _in_peephole: bool = false
 var _departing: Array[Node3D] = []
@@ -78,12 +81,13 @@ func spawn_subject(subject: SubjectDef) -> void:
 	if _subject_instance.has_method("apply_appearance"):
 		_subject_instance.apply_appearance(appearance)
 	call_deferred("_fit_subject_to_gate")
-	if peephole_stage:
+	_peephole_def = _resolve_peephole_def(subject)
+	if peephole_stage and _peephole_def:
 		peephole_stage.present(
-			subject.subject_scene,
-			subject.peephole_position,
-			subject.peephole_rotation_degrees,
-			subject.peephole_scale,
+			_peephole_def.subject_scene,
+			_peephole_def.peephole_position,
+			_peephole_def.peephole_rotation_degrees,
+			_peephole_def.peephole_scale,
 			appearance
 		)
 
@@ -93,10 +97,10 @@ func apply_peephole_pose(
 	pose_rotation_degrees: Vector3,
 	pose_scale: float
 ) -> void:
-	if _current_def:
-		_current_def.peephole_position = pose_position
-		_current_def.peephole_rotation_degrees = pose_rotation_degrees
-		_current_def.peephole_scale = pose_scale
+	if _peephole_def:
+		_peephole_def.peephole_position = pose_position
+		_peephole_def.peephole_rotation_degrees = pose_rotation_degrees
+		_peephole_def.peephole_scale = pose_scale
 	if peephole_stage:
 		peephole_stage.apply_pose(pose_position, pose_rotation_degrees, pose_scale)
 
@@ -104,26 +108,32 @@ func apply_peephole_pose(
 func save_peephole_pose() -> String:
 	if not OS.has_feature("editor"):
 		return "Save only works when playing from the Godot editor."
-	if _current_def == null or _current_def.resource_path.is_empty():
+	if _peephole_def == null or _peephole_def.resource_path.is_empty():
 		return "No SubjectDef path to save."
-	var err := ResourceSaver.save(_current_def, _current_def.resource_path)
+	var err := ResourceSaver.save(_peephole_def, _peephole_def.resource_path)
 	if err != OK:
 		return "Save failed (%s)." % error_string(err)
-	return "Saved %s" % _current_def.resource_path
+	return "Saved %s" % _peephole_def.resource_path
 
 
 func get_peephole_pose() -> Dictionary:
-	if _current_def == null:
+	if _peephole_def == null:
 		return {
 			"position": Vector3.ZERO,
 			"rotation_degrees": Vector3.ZERO,
 			"scale": 2.5,
 		}
 	return {
-		"position": _current_def.peephole_position,
-		"rotation_degrees": _current_def.peephole_rotation_degrees,
-		"scale": _current_def.peephole_scale,
+		"position": _peephole_def.peephole_position,
+		"rotation_degrees": _peephole_def.peephole_rotation_degrees,
+		"scale": _peephole_def.peephole_scale,
 	}
+
+
+func _resolve_peephole_def(subject: SubjectDef) -> SubjectDef:
+	if subject == null or subject_catalog == null:
+		return null
+	return subject_catalog.subject_for(SubjectDef.presented_face_type(subject.true_type))
 
 
 func clear_subject() -> void:
@@ -134,6 +144,7 @@ func clear_subject() -> void:
 		_subject_instance.queue_free()
 	_subject_instance = null
 	_current_def = null
+	_peephole_def = null
 	if peephole_stage:
 		peephole_stage.clear()
 

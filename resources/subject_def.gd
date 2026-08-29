@@ -21,3 +21,11 @@ static func is_banned(true_type: TrueType) -> bool:
 		or true_type == TrueType.HORSE_CENTAUR
 		or true_type == TrueType.HUMAN_CENTAUR
 	)
+
+
+static func presented_face_type(true_type: TrueType) -> TrueType:
+	match true_type:
+		TrueType.HORSE, TrueType.HORSE_CENTAUR:
+			return TrueType.HORSE
+		_:
+			return TrueType.HUMAN
