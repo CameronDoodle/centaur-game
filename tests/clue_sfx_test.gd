@@ -9,6 +9,7 @@ func _initialize() -> void:
 	_test_choose_allows_only_clip(failures)
 	_test_pool_ids(failures)
 	_test_wav_filter(failures)
+	_test_pool_loads(failures)
 	if failures.is_empty():
 		print("ClueSfx: all checks passed.")
 		quit(0)
@@ -83,3 +84,17 @@ func _test_wav_filter(failures: PackedStringArray) -> void:
 		failures.append("should ignore mp3 files.")
 	if ClueSfx.is_pool_wav("human_knock_1.wav", "human_approach_"):
 		failures.append("should ignore wavs from other pools.")
+
+
+func _test_pool_loads(failures: PackedStringArray) -> void:
+	for is_approach in [true, false]:
+		for kind in [SubjectDef.ClueKind.HUMAN, SubjectDef.ClueKind.HORSE]:
+			var stream := ClueSfx.pick(kind, is_approach)
+			if stream == null:
+				failures.append("pick(%s, %s) returned null." % [kind, is_approach])
+				continue
+			if not stream.resource_path.ends_with(".wav"):
+				failures.append(
+					"pick(%s, %s) path '%s' is not a .wav."
+					% [kind, is_approach, stream.resource_path]
+				)

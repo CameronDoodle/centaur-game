@@ -89,14 +89,18 @@ static func _streams_for(id: StringName) -> Array[AudioStream]:
 	if prefix.is_empty():
 		_streams_by_pool[id] = loaded
 		return loaded
-	var dir := DirAccess.open(SFX_DIR)
-	if dir == null:
-		push_warning("ClueSfx: could not open %s." % SFX_DIR)
+	var names := ResourceLoader.list_directory(SFX_DIR)
+	if names.is_empty():
+		push_warning("ClueSfx: could not list %s." % SFX_DIR)
 		_streams_by_pool[id] = loaded
 		return loaded
-	var names := dir.get_files()
 	names.sort()
-	for file_name in names:
+	for name in names:
+		if name.ends_with("/"):
+			continue
+		var file_name := name.get_file()
+		if file_name.ends_with(".remap"):
+			file_name = file_name.trim_suffix(".remap")
 		if not is_pool_wav(file_name, prefix):
 			continue
 		var stream := load("%s/%s" % [SFX_DIR, file_name]) as AudioStream
