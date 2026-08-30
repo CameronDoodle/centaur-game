@@ -407,10 +407,6 @@ func _start_next_encounter() -> void:
 	_subject_index += 1
 	_update_hud_subject_progress()
 	_waiting_on_encounter = true
-	print(
-		"[ShiftDirector] Shift %d / %d — subject %d / %d"
-		% [_shift_index + 1, roster.shifts.size(), _subject_index, _queue.size()]
-	)
 	encounter_director.start_encounter(plan)
 
 
@@ -481,7 +477,6 @@ func _begin_win() -> void:
 			SubjectDef.TrueType.HUMAN_CENTAUR,
 			SubjectDef.TrueType.HORSE_CENTAUR,
 		])
-	print("[ShiftDirector] Win — %s" % WIN_HEADLINE)
 
 
 func _end_shift(reason: String, succeeded: bool) -> void:
@@ -491,14 +486,6 @@ func _end_shift(reason: String, succeeded: bool) -> void:
 	var next_shift: ShiftDef = null
 	if has_next:
 		next_shift = roster.shifts[_shift_index + 1]
-	var log_parts: PackedStringArray = [reason]
-	if has_next and next_shift != null:
-		log_parts.append(
-			"Time: %s" % format_timer_text(next_shift.shift_timer_seconds)
-		)
-		log_parts.append("Subjects: %d" % next_shift.subject_count)
-		log_parts.append("Strikes: %d" % next_shift.strikes_allowed)
-	print("[ShiftDirector] %s" % " | ".join(log_parts))
 	var show_replay := not succeeded
 	var show_next := has_next
 	hud.show_summary(reason, show_replay, show_next, next_shift)

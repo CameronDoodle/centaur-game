@@ -92,44 +92,6 @@ func spawn_subject(subject: SubjectDef) -> void:
 		)
 
 
-func apply_peephole_pose(
-	pose_position: Vector3,
-	pose_rotation_degrees: Vector3,
-	pose_scale: float
-) -> void:
-	if _peephole_def:
-		_peephole_def.peephole_position = pose_position
-		_peephole_def.peephole_rotation_degrees = pose_rotation_degrees
-		_peephole_def.peephole_scale = pose_scale
-	if peephole_stage:
-		peephole_stage.apply_pose(pose_position, pose_rotation_degrees, pose_scale)
-
-
-func save_peephole_pose() -> String:
-	if not OS.has_feature("editor"):
-		return "Save only works when playing from the Godot editor."
-	if _peephole_def == null or _peephole_def.resource_path.is_empty():
-		return "No SubjectDef path to save."
-	var err := ResourceSaver.save(_peephole_def, _peephole_def.resource_path)
-	if err != OK:
-		return "Save failed (%s)." % error_string(err)
-	return "Saved %s" % _peephole_def.resource_path
-
-
-func get_peephole_pose() -> Dictionary:
-	if _peephole_def == null:
-		return {
-			"position": Vector3.ZERO,
-			"rotation_degrees": Vector3.ZERO,
-			"scale": 2.5,
-		}
-	return {
-		"position": _peephole_def.peephole_position,
-		"rotation_degrees": _peephole_def.peephole_rotation_degrees,
-		"scale": _peephole_def.peephole_scale,
-	}
-
-
 func _resolve_peephole_def(subject: SubjectDef) -> SubjectDef:
 	if subject == null or subject_catalog == null:
 		return null

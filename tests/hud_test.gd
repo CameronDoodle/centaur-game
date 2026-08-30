@@ -34,13 +34,11 @@ func _test_unique_nodes(failures: PackedStringArray) -> void:
 		"RevealPanel", "RevealLabel", "SummaryPanel", "SummaryStack",
 		"SummaryLabel", "NextShiftFacts", "TimeValue", "SubjectsValue",
 		"StrikesValue", "WinLabel", "GateActions", "PeepholeActions",
-		"DecisionRow", "SkipButton", "AcceptButton", "RejectButton",
+		"DecisionRow", "AcceptButton", "RejectButton",
 		"BackButton", "ReplayButton", "NextButton", "FisheyeOverlay",
 		"FadeRect", "DoorOverlay", "PeepholeHotspot", "KnockHotspot",
 		"ApproachHotspot", "PeepholeIcon", "KnockIcon", "KnockPlaybackFill",
-		"ApproachIcon", "ApproachPlaybackFill", "PeepholeTuner",
-		"TunerPosX", "TunerPosY", "TunerPosZ", "TunerRotX", "TunerRotY",
-		"TunerRotZ", "TunerScale", "TunerStatus", "TunerSaveButton",
+		"ApproachIcon", "ApproachPlaybackFill",
 	]
 	for unique_name in unique_names:
 		if hud.get_node_or_null("%" + unique_name) == null:

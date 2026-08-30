@@ -9,9 +9,6 @@ signal accept_pressed
 signal reject_pressed
 signal summary_replay_pressed
 signal summary_next_pressed
-signal peephole_pose_changed(position: Vector3, rotation_degrees: Vector3, pose_scale: float)
-signal peephole_pose_save_pressed
-signal skip_pressed
 
 const BLACKOUT_DURATION := 0.75
 const ICON_TINT := Color(0.95, 0.9, 0.82, 1)
@@ -44,7 +41,6 @@ const REVEAL_TIMER_GAP := 8
 @onready var gate_actions: VBoxContainer = %GateActions
 @onready var peephole_actions: VBoxContainer = %PeepholeActions
 @onready var decision_row: HBoxContainer = %DecisionRow
-@onready var skip_button: Button = %SkipButton
 @onready var accept_button: Button = %AcceptButton
 @onready var reject_button: Button = %RejectButton
 @onready var back_button: Button = %BackButton
@@ -61,20 +57,8 @@ const REVEAL_TIMER_GAP := 8
 @onready var knock_playback_fill: ColorRect = %KnockPlaybackFill
 @onready var approach_icon: TextureButton = %ApproachIcon
 @onready var approach_playback_fill: ColorRect = %ApproachPlaybackFill
-@onready var tuner_panel: PanelContainer = %PeepholeTuner
-@onready var tuner_pos_x: SpinBox = %TunerPosX
-@onready var tuner_pos_y: SpinBox = %TunerPosY
-@onready var tuner_pos_z: SpinBox = %TunerPosZ
-@onready var tuner_rot_x: SpinBox = %TunerRotX
-@onready var tuner_rot_y: SpinBox = %TunerRotY
-@onready var tuner_rot_z: SpinBox = %TunerRotZ
-@onready var tuner_scale: SpinBox = %TunerScale
-@onready var tuner_status: Label = %TunerStatus
-@onready var tuner_save_button: Button = %TunerSaveButton
 
 var _fade_tween: Tween
-var _tuner_open: bool = false
-var _syncing_tuner: bool = false
 var _door_overlay_visible: bool = false
 var _gate_actions_enabled: bool = false
 var _investigation_active: bool = false
@@ -109,7 +93,6 @@ static func strike_pips_filled(strikes_used: int, strikes_allowed: int) -> int:
 
 
 func _ready() -> void:
-	skip_button.pressed.connect(func() -> void: skip_pressed.emit())
 	peephole_icon.pressed.connect(func() -> void: peephole_pressed.emit())
 	knock_icon.pressed.connect(func() -> void: replay_knock_pressed.emit())
 	approach_icon.pressed.connect(func() -> void: replay_approach_pressed.emit())
@@ -118,13 +101,6 @@ func _ready() -> void:
 	reject_button.pressed.connect(func() -> void: reject_pressed.emit())
 	replay_button.pressed.connect(func() -> void: summary_replay_pressed.emit())
 	next_button.pressed.connect(func() -> void: summary_next_pressed.emit())
-	tuner_save_button.pressed.connect(func() -> void: peephole_pose_save_pressed.emit())
-	for spin in [
-		tuner_pos_x, tuner_pos_y, tuner_pos_z,
-		tuner_rot_x, tuner_rot_y, tuner_rot_z,
-		tuner_scale,
-	]:
-		spin.value_changed.connect(_on_tuner_value_changed)
 	for icon in [peephole_icon, knock_icon, approach_icon]:
 		icon.modulate = ICON_TINT
 	var main := get_parent()
@@ -144,11 +120,9 @@ func _ready() -> void:
 	set_peephole_mode(false)
 	set_decision_row_visible(false)
 	set_gate_actions_enabled(false)
-	set_skip_visible(false)
 	set_door_overlay_visible(false)
 	set_clue_replay_visible(false, false)
 	fade_rect.modulate.a = 0.0
-	set_tuner_open(false)
 	_reset_approach_playback_fill()
 	_reset_knock_playback_fill()
 	get_viewport().size_changed.connect(_on_viewport_size_changed)
@@ -194,13 +168,6 @@ func _process(_delta: float) -> void:
 	_update_door_hotspot(peephole_hotspot, _peephole_marker)
 	_update_door_hotspot(knock_hotspot, _knock_marker)
 	_update_door_hotspot(approach_hotspot, _approach_marker)
-
-
-func _input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_1:
-		if peephole_actions.visible:
-			set_tuner_open(not _tuner_open)
-			get_viewport().set_input_as_handled()
 
 
 func _update_door_hotspot(hotspot: VBoxContainer, marker: Marker3D) -> void:
@@ -330,12 +297,6 @@ func set_strikes(strikes_used: int, strikes_allowed: int) -> void:
 	_rebuild_strike_pips(strikes_allowed, strike_pips_filled(strikes_used, strikes_allowed))
 
 
-func set_skip_visible(visible: bool, label: String = "") -> void:
-	skip_button.visible = visible
-	if not label.is_empty():
-		skip_button.text = label
-
-
 func set_door_overlay_visible(visible: bool) -> void:
 	_door_overlay_visible = visible
 	door_overlay.visible = visible
@@ -456,32 +417,10 @@ func set_peephole_mode(active: bool) -> void:
 	set_fisheye_enabled(active)
 	if active:
 		set_door_overlay_visible(false)
-		set_tuner_open(false)
 	elif _investigation_active:
 		set_door_overlay_visible(true)
 		set_clue_replay_visible(_clue_approach_visible, _clue_knock_visible)
 		peephole_hotspot.visible = true
-
-
-func set_tuner_open(open: bool) -> void:
-	_tuner_open = open
-	tuner_panel.visible = open
-
-
-func load_tuner_pose(position: Vector3, rotation_degrees: Vector3, pose_scale: float) -> void:
-	_syncing_tuner = true
-	tuner_pos_x.value = position.x
-	tuner_pos_y.value = position.y
-	tuner_pos_z.value = position.z
-	tuner_rot_x.value = rotation_degrees.x
-	tuner_rot_y.value = rotation_degrees.y
-	tuner_rot_z.value = rotation_degrees.z
-	tuner_scale.value = pose_scale
-	_syncing_tuner = false
-
-
-func set_tuner_status(text: String) -> void:
-	tuner_status.text = text
 
 
 func show_reveal(text: String) -> void:
@@ -570,13 +509,3 @@ func show_investigation(has_approach: bool, has_knock: bool) -> void:
 func hide_investigation() -> void:
 	_investigation_active = false
 	set_door_overlay_visible(false)
-
-
-func _on_tuner_value_changed(_value: float) -> void:
-	if _syncing_tuner:
-		return
-	peephole_pose_changed.emit(
-		Vector3(tuner_pos_x.value, tuner_pos_y.value, tuner_pos_z.value),
-		Vector3(tuner_rot_x.value, tuner_rot_y.value, tuner_rot_z.value),
-		tuner_scale.value
-	)

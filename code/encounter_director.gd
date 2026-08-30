@@ -47,9 +47,6 @@ func _bind_hud() -> void:
 		dialogue_box.question_pressed.connect(_on_question_pressed)
 	hud.accept_pressed.connect(_on_accept_pressed)
 	hud.reject_pressed.connect(_on_reject_pressed)
-	hud.peephole_pose_changed.connect(_on_peephole_pose_changed)
-	hud.peephole_pose_save_pressed.connect(_on_peephole_pose_save_pressed)
-	hud.skip_pressed.connect(_on_skip_pressed)
 
 
 func start_encounter(plan: EncounterPlan) -> void:
@@ -72,7 +69,6 @@ func start_encounter(plan: EncounterPlan) -> void:
 	hud.set_decision_row_visible(true)
 	hud.set_gate_actions_enabled(false)
 	hud.set_peephole_mode(false)
-	hud.set_skip_visible(false)
 	_approach_stream = plan.approach_stream
 	_knock_stream = plan.knock_stream
 	var has_approach := _approach_stream != null
@@ -89,7 +85,6 @@ func force_miss() -> void:
 		return
 	_input_locked = true
 	_stop_encounter_audio()
-	hud.set_skip_visible(false)
 	hud.set_decision_row_visible(false)
 	hud.set_gate_actions_enabled(false)
 	hud.hide_investigation()
@@ -105,7 +100,6 @@ func force_miss() -> void:
 
 func _set_phase(new_phase: Phase) -> void:
 	phase = new_phase
-	print("[EncounterDirector] phase -> %s" % Phase.keys()[new_phase])
 
 
 func _play_approach() -> void:
@@ -145,16 +139,6 @@ func _on_knock_finished() -> void:
 	hud.set_gate_actions_enabled(true)
 	if dialogue_box != null:
 		dialogue_box.set_questions_enabled(true)
-
-
-func _on_skip_pressed() -> void:
-	match phase:
-		Phase.APPROACH:
-			_stop_approach_audio()
-			_on_approach_finished()
-		Phase.KNOCK:
-			_stop_knock_audio()
-			_on_knock_finished()
 
 
 func _stop_approach_audio() -> void:
@@ -274,10 +258,7 @@ func _on_peephole_pressed() -> void:
 	hud.play_blackout(
 		func() -> void:
 			subject_presenter.enter_peephole()
-			hud.set_peephole_mode(true)
-			var pose := subject_presenter.get_peephole_pose()
-			hud.load_tuner_pose(pose.position, pose.rotation_degrees, pose.scale)
-			hud.set_tuner_status("F8 toggles this panel."),
+			hud.set_peephole_mode(true),
 		func() -> void:
 			_input_locked = false,
 		_camera_move_duration()
@@ -302,18 +283,6 @@ func _on_peephole_back_pressed() -> void:
 			_input_locked = false,
 		_camera_move_duration()
 	)
-
-
-func _on_peephole_pose_changed(
-	pose_position: Vector3,
-	pose_rotation_degrees: Vector3,
-	pose_scale: float
-) -> void:
-	subject_presenter.apply_peephole_pose(pose_position, pose_rotation_degrees, pose_scale)
-
-
-func _on_peephole_pose_save_pressed() -> void:
-	hud.set_tuner_status(subject_presenter.save_peephole_pose())
 
 
 func _on_question_pressed(index: int) -> void:
@@ -351,12 +320,6 @@ func _resolve(accepted: bool) -> void:
 	var token := _resolve_token
 	var correct := _is_decision_correct(accepted)
 	var strike := not correct
-	print(
-		"[EncounterDirector] %s | correct=%s" % [
-			"Accept" if accepted else "Reject",
-			str(correct)
-		]
-	)
 	var verdict := VerdictPools.pick(accepted, correct, current_subject.true_type)
 	hud.show_reveal(verdict.get("text", ""))
 	_play_verdict_sfx(str(verdict.get("sfx", "")))
