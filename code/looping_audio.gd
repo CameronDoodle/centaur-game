@@ -2,11 +2,14 @@ extends AudioStreamPlayer
 
 
 func _ready() -> void:
-	_begin.call_deferred()
+	if stream == null:
+		return
+	if OS.has_feature("web") and not AudioServer.is_stream_registered_as_sample(stream):
+		AudioServer.register_stream_as_sample(stream)
+	begin_loop.call_deferred()
 
 
-func _begin() -> void:
-	await get_tree().process_frame
-	if stream == null or not is_inside_tree():
+func begin_loop() -> void:
+	if stream == null or not is_inside_tree() or playing:
 		return
 	play()

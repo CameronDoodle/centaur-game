@@ -37,6 +37,7 @@ func _on_start_pressed() -> void:
 	if _started:
 		return
 	_started = true
+	_begin_background_audio()
 	start_button.disabled = true
 	var tween := create_tween()
 	tween.tween_property(chrome, "modulate:a", 0.0, FADE_DURATION)
@@ -73,8 +74,17 @@ func _on_fly_complete() -> void:
 		_shift_director._start_shift()
 
 
+func _begin_background_audio() -> void:
+	var main := get_parent()
+	for node_name in ["AudioAmbient", "AudioMusic"]:
+		var player := main.get_node_or_null(node_name)
+		if player != null and player.has_method("begin_loop"):
+			player.begin_loop()
+
+
 func dismiss() -> void:
 	_started = true
+	_begin_background_audio()
 	chrome.visible = false
 	chrome.modulate.a = 0.0
 	instructions.visible = false

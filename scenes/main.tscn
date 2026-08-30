@@ -198,12 +198,10 @@ render_target_update_mode = 0
 
 [node name="AudioAmbient" type="AudioStreamPlayer" parent="." unique_id=2000440927]
 stream = ExtResource("13_ambient")
-playback_type = 1
 script = ExtResource("15_loop_audio")
 
 [node name="AudioMusic" type="AudioStreamPlayer" parent="." unique_id=2034253023]
 stream = ExtResource("14_music")
-playback_type = 1
 script = ExtResource("15_loop_audio")
 
 [node name="HUD" parent="." unique_id=1716120783 instance=ExtResource("4_hud")]
