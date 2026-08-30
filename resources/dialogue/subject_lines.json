@@ -1,72 +1,67 @@
 {
   "are_you_a_horse": {
 	"human": [
-	  "Ummm no.",
+	  "I'm no horse.",
 	  "No.",
 	  "What? No.",
-      "I'm a person."
+    "I'm a person.",
+    "Last I checked, no."
 	],
 	"horse": [
 	  "*Neighs.*",
 	  "*A loud, confident neigh.*",
-      "*Whinnies, as if the question were stupid.*"
+    "*Whinnies, as if the question were stupid.*",
+    "*Snorts.*",
+    "*Huffs.*"
 	],
 	"centaur": [
 	  "I would not defile myself to your whim.",
-	  "I am no beast of burden.",
-	  "Ask that of a pony.",
-      "The audacity."
+	  "Of course not.",
+    "The audacity.",
+    "I am no beast."
 	],
 	"horse_centaur": [
-	  "*A very practiced neigh.*",
-	  "*Neigh. (A little too even).*",
-      "*A neigh that almost has diction.*"
+	  "*Hoarse neigh.*",
+	  "*Yeeeeigh.*",
+    "*Neiiigh?*",
+    "*Neigh. Neigh? Neigh.*"
 	],
 	"human_centaur": [
-	  "Definitely not.",
 	  "Ha. No. Why would you ask that?",
 	  "I'm just a guy. A normal guy.",
-      "Of course not."
+	  "No way, do I look like a horse to you?",
+    "I'm 100% human. Both halves."
 	]
   },
   "whats_your_name": {
 	"human": [
-	  "Steve.",
-	  "Mike.",
+	  "Steve 'Stevie' McGee.",
+	  "Michael Spur.",
 	  "It's Dave.",
-      "John. Why?"
+    "Johnny boy. Why?"
 	],
 	"horse": [
 	  "*A small huff.*",
 	  "*Soft nose-blow.*",
-      "*A short snort.*"
+    "*A short snort.*",
+    "*Huffs.*"
 	],
 	"centaur": [
 	  "I am Lord Wendall the Great.",
 	  "Sir Gallant of the High Meadow.",
 	  "You may address me as Duke Oatwright.",
-      "Wendall. Lord Wendall."
+    "Wendall. Lord Wendall."
 	],
 	"horse_centaur": [
 	  "*An awkward snort.*",
 	  "*A throat-clear that becomes a neigh.*",
-      "*…n-neigh?*"
+    "*…n-neigh?*"
 	],
 	"human_centaur": [
-	  "Harrold Toust.",
-	  "Bartholomew Finch.",
+	  "John Foal.",
+	  "Chad Person.",
 	  "Reginald P. Clipclop.",
-      "It's… Jonathan. Yes. Jonathan."
-	]
-  },
-  "what are you wearing?": {
-	"human": [
-      "Uhhh, khakis."
-	]
-  },
-  "I'm blue": {
-	"human": [
-      "da ba dee da ba di."
+    "It's… Jonathan."
 	]
   }
 }
