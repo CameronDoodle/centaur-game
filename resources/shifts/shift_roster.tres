@@ -6,7 +6,8 @@
 [ext_resource type="Resource" uid="uid://b1c3d5e7gag2h" path="res://resources/shifts/shift_02.tres" id="4"]
 [ext_resource type="Resource" uid="uid://c6d8e0f2g4h5i" path="res://resources/shifts/shift_03.tres" id="5"]
 [ext_resource type="Resource" uid="uid://c0etyjtwxnfr" path="res://resources/shifts/shift_04.tres" id="6"]
+[ext_resource type="Resource" uid="uid://bodova36x4uqq" path="res://resources/shifts/shift_05.tres" id="7_by2ha"]
 
 [resource]
 script = ExtResource("1")
-shifts = Array[ExtResource("2")]([ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6")])
+shifts = Array[ExtResource("2")]([ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6"), ExtResource("7_by2ha")])

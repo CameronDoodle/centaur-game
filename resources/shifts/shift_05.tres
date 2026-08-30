@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ShiftDef" format=3 uid="uid://bodova36x4uqq"]
+
+[ext_resource type="Script" uid="uid://br88kjyyxdfu3" path="res://resources/shift_def.gd" id="1_gpidh"]
+
+[resource]
+script = ExtResource("1_gpidh")
+subject_count = 8
+strikes_allowed = 2
+shift_timer_seconds = 100.0
+human_centaur_can_lie = true
+human_centaur_lie_chance = 1.0
+horse_centaur_can_lie = true
+horse_centaur_lie_chance = 1.0

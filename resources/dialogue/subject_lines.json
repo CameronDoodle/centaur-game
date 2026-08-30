@@ -4,26 +4,26 @@
 	  "I'm no horse.",
 	  "No.",
 	  "What? No.",
-    "I'm a person.",
+	"I'm a person.",
     "Last I checked, no."
 	],
 	"horse": [
 	  "*Neighs.*",
 	  "*A loud, confident neigh.*",
-    "*Whinnies, as if the question were stupid.*",
-    "*Snorts.*",
+	"*Whinnies, as if the question were stupid.*",
+	"*Snorts.*",
     "*Huffs.*"
 	],
 	"centaur": [
 	  "I would not defile myself to your whim.",
 	  "Of course not.",
-    "The audacity.",
+	"The audacity.",
     "I am no beast."
 	],
 	"horse_centaur": [
 	  "*Hoarse neigh.*",
 	  "*Yeeeeigh.*",
-    "*Neiiigh?*",
+	"*Neiiigh?*",
     "*Neigh. Neigh? Neigh.*"
 	],
 	"human_centaur": [
@@ -43,7 +43,7 @@
 	"horse": [
 	  "*A small huff.*",
 	  "*Soft nose-blow.*",
-    "*A short snort.*",
+	"*A short snort.*",
     "*Huffs.*"
 	],
 	"centaur": [

@@ -139,6 +139,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.801748, -4.909031, -28.95
 [node name="despawn" type="Marker3D" parent="world" unique_id=365200888]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.801748, -4.909031, -54.560513)
 
+[node name="OmniLight3D" type="OmniLight3D" parent="world" unique_id=181025398]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5024056, 7.164141, 22.89175)
+light_energy = 6.345
+omni_range = 69.808
+
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1098747847]
 transform = Transform3D(0.8660253, -0.35355335, 0.35355338, 0, 0.70710677, 0.7071067, -0.49999997, -0.61237234, 0.6123724, 0, 4.793578, 2)
 light_energy = 0.272

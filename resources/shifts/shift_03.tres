@@ -5,3 +5,5 @@
 [resource]
 script = ExtResource("1")
 subject_count = 6
+human_centaur_can_lie = true
+human_centaur_lie_chance = 0.5

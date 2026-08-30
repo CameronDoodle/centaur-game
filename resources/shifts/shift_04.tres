@@ -6,4 +6,8 @@
 script = ExtResource("1")
 subject_count = 8
 strikes_allowed = 2
-shift_timer_seconds = 90.0
+shift_timer_seconds = 110.0
+human_centaur_can_lie = true
+human_centaur_lie_chance = 0.5
+horse_centaur_can_lie = true
+horse_centaur_lie_chance = 0.5

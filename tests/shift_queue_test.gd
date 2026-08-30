@@ -21,6 +21,11 @@ func _run() -> void:
 	_test_four_key_uniqueness(failures)
 	_test_reply_uniqueness(failures)
 	_test_sfx_uniqueness(failures)
+	_test_human_centaur_no_lie_when_disabled(failures)
+	_test_human_centaur_lies_with_full_chance(failures)
+	_test_horse_centaur_lies_independently(failures)
+	_test_horse_centaur_lies_with_full_chance(failures)
+	_test_non_disguise_types_never_lie(failures)
 	if failures.is_empty():
 		print("Shift queue generation: all checks passed.")
 		quit(0)
@@ -418,6 +423,205 @@ func _test_sfx_uniqueness(failures: PackedStringArray) -> void:
 				)
 				return
 			approach_paths.append(path)
+
+
+const LIE_TEST_LINES := {
+	"are_you_a_horse": {
+		"human": ["HUMAN_AH"],
+		"horse": ["HORSE_AH"],
+		"human_centaur": ["HC_AH"],
+		"horse_centaur": ["HORSEC_AH"],
+	},
+	"whats_your_name": {
+		"human": ["HUMAN_NAME"],
+		"horse": ["HORSE_NAME"],
+		"human_centaur": ["HC_NAME"],
+		"horse_centaur": ["HORSEC_NAME"],
+	},
+}
+
+
+func _load_lie_test_lines() -> void:
+	DialoguePools.load_lines(LIE_TEST_LINES.duplicate(true))
+
+
+func _human_centaur_lie_shift() -> ShiftDef:
+	var shift := ShiftDef.new()
+	shift.include_human = false
+	shift.include_horse = false
+	shift.include_centaur = false
+	shift.include_human_centaur = true
+	shift.include_horse_centaur = false
+	shift.subject_count = 1
+	return shift
+
+
+func _horse_centaur_lie_shift() -> ShiftDef:
+	var shift := ShiftDef.new()
+	shift.include_human = false
+	shift.include_horse = false
+	shift.include_centaur = false
+	shift.include_human_centaur = false
+	shift.include_horse_centaur = true
+	shift.subject_count = 1
+	return shift
+
+
+func _line_from_pool(prompt_key: String, true_type: SubjectDef.TrueType) -> Array:
+	var prompt := LIE_TEST_LINES.get(prompt_key, {}) as Dictionary
+	match true_type:
+		SubjectDef.TrueType.HUMAN:
+			return prompt.get("human", []) as Array
+		SubjectDef.TrueType.HORSE:
+			return prompt.get("horse", []) as Array
+		SubjectDef.TrueType.HUMAN_CENTAUR:
+			return prompt.get("human_centaur", []) as Array
+		SubjectDef.TrueType.HORSE_CENTAUR:
+			return prompt.get("horse_centaur", []) as Array
+		_:
+			return []
+
+
+func _test_human_centaur_no_lie_when_disabled(failures: PackedStringArray) -> void:
+	_load_lie_test_lines()
+	var shift := _human_centaur_lie_shift()
+	var plan := ShiftDirector.roll_queue(shift, _make_catalog())[0]
+	if plan.is_lying:
+		failures.append("Human Centaur with can-lie off should not lie.")
+	if plan.lie_slot != -1:
+		failures.append("Human Centaur with can-lie off should not set lie_slot.")
+	for i in plan.question_subtitles.size():
+		var prompt_key := plan.questions[i].prompt_key
+		var line: String = plan.question_subtitles[i]
+		if not _line_from_pool(prompt_key, SubjectDef.TrueType.HUMAN_CENTAUR).has(line):
+			failures.append(
+				"Human Centaur with can-lie off should use human_centaur pool, got '%s'." % line
+			)
+	DialoguePools.reload_production_lines()
+
+
+func _test_human_centaur_lies_with_full_chance(failures: PackedStringArray) -> void:
+	_load_lie_test_lines()
+	var shift := _human_centaur_lie_shift()
+	shift.human_centaur_can_lie = true
+	shift.human_centaur_lie_chance = 1.0
+	var plan := ShiftDirector.roll_queue(shift, _make_catalog())[0]
+	if not plan.is_lying:
+		failures.append("Human Centaur with chance 1 should lie.")
+	if plan.lie_slot < 0 or plan.lie_slot >= plan.questions.size():
+		failures.append("Human Centaur with chance 1 should set a valid lie_slot.")
+	var human_lines := 0
+	var disguise_lines := 0
+	for i in plan.question_subtitles.size():
+		var prompt_key := plan.questions[i].prompt_key
+		var line: String = plan.question_subtitles[i]
+		if _line_from_pool(prompt_key, SubjectDef.TrueType.HUMAN).has(line):
+			human_lines += 1
+		elif _line_from_pool(prompt_key, SubjectDef.TrueType.HUMAN_CENTAUR).has(line):
+			disguise_lines += 1
+		else:
+			failures.append("Human Centaur lie test got unexpected line '%s'." % line)
+	if human_lines != 1 or disguise_lines != 1:
+		failures.append(
+			"Human Centaur with chance 1 should have exactly one Human and one disguise line."
+		)
+	DialoguePools.reload_production_lines()
+
+
+func _test_horse_centaur_lies_independently(failures: PackedStringArray) -> void:
+	_load_lie_test_lines()
+	var shift := ShiftDef.new()
+	shift.include_human = false
+	shift.include_horse = false
+	shift.include_centaur = false
+	shift.include_human_centaur = true
+	shift.include_horse_centaur = true
+	shift.subject_count = 2
+	shift.human_centaur_can_lie = true
+	shift.human_centaur_lie_chance = 1.0
+	shift.horse_centaur_can_lie = false
+	var queue := ShiftDirector.roll_queue(shift, _make_catalog())
+	if queue.size() != 2:
+		failures.append("Independent lie test expected 2 plans, got %d." % queue.size())
+		return
+	var hc_plan: EncounterPlan = null
+	var horse_c_plan: EncounterPlan = null
+	for plan in queue:
+		if plan.subject.true_type == SubjectDef.TrueType.HUMAN_CENTAUR:
+			hc_plan = plan
+		elif plan.subject.true_type == SubjectDef.TrueType.HORSE_CENTAUR:
+			horse_c_plan = plan
+	if hc_plan == null or horse_c_plan == null:
+		failures.append("Independent lie test missing Human Centaur or Horse Centaur plan.")
+		return
+	if not hc_plan.is_lying:
+		failures.append("Human Centaur should lie when enabled at chance 1.")
+	if horse_c_plan.is_lying:
+		failures.append("Horse Centaur should not lie when can-lie is off.")
+	if horse_c_plan.lie_slot != -1:
+		failures.append("Horse Centaur with can-lie off should not set lie_slot.")
+	for i in horse_c_plan.question_subtitles.size():
+		var prompt_key := horse_c_plan.questions[i].prompt_key
+		var line: String = horse_c_plan.question_subtitles[i]
+		if not _line_from_pool(prompt_key, SubjectDef.TrueType.HORSE_CENTAUR).has(line):
+			failures.append(
+				"Horse Centaur with can-lie off should use horse_centaur pool, got '%s'." % line
+			)
+	DialoguePools.reload_production_lines()
+
+
+func _test_horse_centaur_lies_with_full_chance(failures: PackedStringArray) -> void:
+	_load_lie_test_lines()
+	var shift := _horse_centaur_lie_shift()
+	shift.horse_centaur_can_lie = true
+	shift.horse_centaur_lie_chance = 1.0
+	var plan := ShiftDirector.roll_queue(shift, _make_catalog())[0]
+	if not plan.is_lying:
+		failures.append("Horse Centaur with chance 1 should lie.")
+	var horse_lines := 0
+	var disguise_lines := 0
+	for i in plan.question_subtitles.size():
+		var prompt_key := plan.questions[i].prompt_key
+		var line: String = plan.question_subtitles[i]
+		if _line_from_pool(prompt_key, SubjectDef.TrueType.HORSE).has(line):
+			horse_lines += 1
+		elif _line_from_pool(prompt_key, SubjectDef.TrueType.HORSE_CENTAUR).has(line):
+			disguise_lines += 1
+		else:
+			failures.append("Horse Centaur lie test got unexpected line '%s'." % line)
+	if horse_lines != 1 or disguise_lines != 1:
+		failures.append(
+			"Horse Centaur with chance 1 should have exactly one Horse and one disguise line."
+		)
+	DialoguePools.reload_production_lines()
+
+
+func _test_non_disguise_types_never_lie(failures: PackedStringArray) -> void:
+	_load_lie_test_lines()
+	var shift := ShiftDef.new()
+	shift.include_human = true
+	shift.include_horse = true
+	shift.include_centaur = true
+	shift.include_human_centaur = false
+	shift.include_horse_centaur = false
+	shift.subject_count = 3
+	shift.human_centaur_can_lie = true
+	shift.human_centaur_lie_chance = 1.0
+	shift.horse_centaur_can_lie = true
+	shift.horse_centaur_lie_chance = 1.0
+	var queue := ShiftDirector.roll_queue(shift, _make_catalog())
+	for plan in queue:
+		if plan.is_lying:
+			failures.append(
+				"%s should never lie."
+				% SubjectDef.TrueType.keys()[plan.subject.true_type]
+			)
+		if plan.lie_slot != -1:
+			failures.append(
+				"%s should not set lie_slot."
+				% SubjectDef.TrueType.keys()[plan.subject.true_type]
+			)
+	DialoguePools.reload_production_lines()
 
 
 func _make_catalog() -> SubjectCatalog:

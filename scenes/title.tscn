@@ -213,7 +213,7 @@ theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 20
 text = "The rodeo's in town and you're the bouncer at the local bar. All the cowboys and their horses are coming by to party but word spread. Centaurs heard about this event and are trying to sneak in to get free booze. Don't let them in.
 
-Listen to how they walk up and the way they knock. Use the peephole and ask questions if you need more info.
+Listen to how they walk up and the way they knock. Use the peephole and ask questions if you need more info. Be careful, they can be tricky.
 
 Only accept horses and their riders. Reject the centaurs. Wrong calls cost you a strike, get through all guests before the clock runs out."
 autowrap_mode = 3

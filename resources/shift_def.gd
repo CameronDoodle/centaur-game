@@ -13,6 +13,22 @@ extends Resource
 @export var strikes_allowed: int = 3
 @export var shift_timer_seconds: float = 120.0
 
+@export_group("Deception")
+@export var human_centaur_can_lie: bool = false
+@export_range(0.0, 1.0, 0.01) var human_centaur_lie_chance: float = 0.0
+@export var horse_centaur_can_lie: bool = false
+@export_range(0.0, 1.0, 0.01) var horse_centaur_lie_chance: float = 0.0
+
+
+func lie_chance_for(true_type: SubjectDef.TrueType) -> float:
+	match true_type:
+		SubjectDef.TrueType.HUMAN_CENTAUR:
+			return human_centaur_lie_chance if human_centaur_can_lie else 0.0
+		SubjectDef.TrueType.HORSE_CENTAUR:
+			return horse_centaur_lie_chance if horse_centaur_can_lie else 0.0
+		_:
+			return 0.0
+
 
 func enabled_types() -> Array[SubjectDef.TrueType]:
 	var types: Array[SubjectDef.TrueType] = []

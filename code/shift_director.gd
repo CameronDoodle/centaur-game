@@ -51,7 +51,9 @@ static func roll_queue(shift: ShiftDef, catalog: SubjectCatalog) -> Array[Encoun
 				% SubjectDef.TrueType.keys()[true_type]
 			)
 			continue
-		plans.append(_build_encounter_plan(subject, catalog, used_lines, used_sfx, used_questions))
+		plans.append(
+			_build_encounter_plan(shift, subject, catalog, used_lines, used_sfx, used_questions)
+		)
 	return plans
 
 
@@ -140,6 +142,7 @@ static func _repair_adjacent_duplicates(types: Array[SubjectDef.TrueType]) -> vo
 
 
 static func _build_encounter_plan(
+	shift: ShiftDef,
 	subject: SubjectDef,
 	catalog: SubjectCatalog,
 	used_lines: Dictionary,
@@ -160,14 +163,29 @@ static func _build_encounter_plan(
 	)
 	for key in picked_keys:
 		used_questions[type_id].append(key)
-	for key in picked_keys:
+	var lie_chance := shift.lie_chance_for(subject.true_type) if shift != null else 0.0
+	if lie_chance > 0.0 and not picked_keys.is_empty():
+		plan.lie_slot = randi() % picked_keys.size()
+		plan.is_lying = randf() < lie_chance
+	var imitated_type := SubjectDef.imitated_type(subject.true_type)
+	for i in picked_keys.size():
+		var key: String = picked_keys[i]
 		var question := _resolve_question(catalog.questions, key)
 		plan.questions.append(question)
-		var line_key := "%s|%d" % [question.prompt_key, subject.true_type as int]
+		var reply_type := subject.true_type
+		if plan.is_lying and i == plan.lie_slot:
+			reply_type = imitated_type
+		var line_key := "%s|%d" % [question.prompt_key, reply_type as int]
 		if not used_lines.has(line_key):
 			used_lines[line_key] = []
 		var exclude: Array = used_lines[line_key]
-		var line := DialoguePools.pick(question.prompt_key, subject.true_type, exclude)
+		var line := DialoguePools.pick(question.prompt_key, reply_type, exclude)
+		if line.is_empty() and reply_type != subject.true_type:
+			line_key = "%s|%d" % [question.prompt_key, subject.true_type as int]
+			if not used_lines.has(line_key):
+				used_lines[line_key] = []
+			exclude = used_lines[line_key]
+			line = DialoguePools.pick(question.prompt_key, subject.true_type, exclude)
 		if line.is_empty():
 			line = question.subtitle
 		plan.question_subtitles.append(line)

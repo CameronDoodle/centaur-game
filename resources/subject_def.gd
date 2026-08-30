@@ -29,3 +29,13 @@ static func presented_face_type(true_type: TrueType) -> TrueType:
 			return TrueType.HORSE
 		_:
 			return TrueType.HUMAN
+
+
+static func imitated_type(true_type: TrueType) -> TrueType:
+	match true_type:
+		TrueType.HUMAN_CENTAUR:
+			return TrueType.HUMAN
+		TrueType.HORSE_CENTAUR:
+			return TrueType.HORSE
+		_:
+			return true_type
